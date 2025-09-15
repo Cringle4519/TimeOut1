@@ -1,569 +1,417 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
-  />
-  <title>TimeOut</title>
-  <meta name="theme-color" content="#0d1117" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body{font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Inter,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";background:#0d1117;color:#e5e7eb}
-    .tab-btn{padding:.5rem .9rem;border-radius:.6rem}
-    .tab-btn.active{background:#4f46e5;color:#fff}
-    .card{background:#111827;border:1px solid #1f2937;border-radius:1rem}
-    .choice{display:inline-block;padding:.45rem .9rem;border-radius:.6rem;border:1px solid #4b5563;cursor:pointer;user-select:none}
-    .choice.active{background:#4f46e5;border-color:#4338ca;color:#fff}
-    .pill{padding:.25rem .5rem;border-radius:9999px;background:#1f2937;border:1px solid #374151}
-    .btn{padding:.55rem 1rem;border-radius:.7rem;font-weight:600}
-    .btn:disabled{opacity:.5;cursor:not-allowed}
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;background:#4f46e5;color:#fff;padding:.5rem .8rem;border-radius:.6rem;opacity:0;transition:opacity .25s}
-    .toast.show{opacity:1}
-    .lock-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:50}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TimeOut</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0f16;--card:#121826;--muted:#8ea0b8;--text:#e6eefc;--accent:#6ea8ff;--danger:#ff6b6b;--ok:#40c057;--warn:#ffd43b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+  header{position:sticky;top:0;background:linear-gradient(180deg,rgba(11,15,22,.9),rgba(11,15,22,.6) 70%,transparent);backdrop-filter:blur(6px);z-index:3}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+  .brand{font-weight:700;letter-spacing:.3px}
+  .score-badge{font-weight:700;border-radius:999px;padding:6px 12px;background:rgba(110,168,255,.16);border:1px solid rgba(110,168,255,.35)}
+  .tabs{display:flex;gap:8px;padding:0 12px 12px}
+  .tab{flex:1;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--muted);font-weight:600}
+  .tab.active{background:var(--card);color:var(--text);border-color:rgba(255,255,255,.12)}
+  main{flex:1;padding:14px}
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  h2{margin:0 0 10px;font-size:18px}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .btn{appearance:none;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text);padding:12px 14px;border-radius:12px;font-weight:700}
+  .btn.wide{width:100%;text-align:center}
+  .btn.primary{background:var(--accent);border-color:transparent;color:#081120}
+  .btn.danger{background:var(--danger)}
+  .btn.ok{background:var(--ok)}
+  .btn.warn{background:var(--warn);color:#231a00}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:12px}
+  input,textarea{width:100%;background:#0d1422;border:1px solid rgba(255,255,255,.12);color:var(--text);padding:12px;border-radius:12px}
+  textarea{min-height:110px;resize:vertical}
+  .q{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);margin-bottom:8px}
+  .q .label{font-weight:600;font-size:14px;flex:1}
+  .toggle{display:flex;gap:6px}
+  .chip{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0d1422;color:var(--muted);font-weight:700}
+  .chip.active.y{background:rgba(64,192,87,.2);color:#bff3c7;border-color:rgba(64,192,87,.5)}
+  .chip.active.n{background:rgba(255,107,107,.18);color:#ffd6d6;border-color:rgba(255,107,107,.45)}
+  .meter{height:12px;border-radius:999px;background:#0d1422;border:1px solid rgba(255,255,255,.08);overflow:hidden}
+  .meter > span{display:block;height:100%;background:linear-gradient(90deg,#40c057,#ffd43b,#ff6b6b);width:0%}
+  .help{color:var(--muted);font-size:12px;margin-top:6px}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .item{padding:10px;border-radius:12px;background:#0d1422;border:1px solid rgba(255,255,255,.08)}
+  .muted{color:var(--muted)}
+  footer{padding:16px;text-align:center;color:var(--muted);font-size:12px}
+  .hidden{display:none !important}
+</style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-  <!-- PIN LOCK -->
-  <div id="lockScreen" class="lock-backdrop">
-    <div class="card w-80 p-6 space-y-3 text-center">
-      <h2 class="text-xl font-semibold">Enter PIN</h2>
-      <input id="pinInput" type="password" inputmode="numeric" maxlength="4"
-             class="w-full text-center bg-gray-800 border border-gray-700 rounded-lg py-2"
-             placeholder="••••" />
-      <button id="pinSubmit" class="btn w-full bg-indigo-600 hover:bg-indigo-700 text-white">Unlock</button>
-      <p id="pinMsg" class="text-sm text-red-400 h-5"></p>
-      <div class="text-xs text-gray-400">
-        First time? <button id="setPin" class="underline">Set PIN</button>
-      </div>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="topbar">
+      <div class="brand">TimeOut</div>
+      <div class="score-badge">Trust: <span id="scoreText">--</span>%</div>
     </div>
-  </div>
-
-  <!-- HEADER -->
-  <header class="p-4 bg-[#111827] border-b border-[#1f2937] flex items-center justify-between">
-    <div class="font-bold">TimeOut</div>
-    <div class="flex items-center gap-2">
-      <span class="text-xs text-gray-400">Trust</span>
-      <span id="trustScore" class="pill font-mono">0%</span>
+    <div class="tabs">
+      <button class="tab active" data-tab="home">Home</button>
+      <button class="tab" data-tab="questions">8 Questions</button>
+      <button class="tab" data-tab="checkin">Check-In</button>
+      <button class="tab" data-tab="history">History</button>
+      <button class="tab" data-tab="profile">Profile</button>
+      <button class="tab" data-tab="settings">Settings</button>
     </div>
   </header>
 
-  <!-- NAV -->
-  <nav class="p-2 bg-[#0b1220] border-b border-[#1f2937] flex gap-2 overflow-x-auto">
-    <button class="tab-btn active" data-view="timer">Timer</button>
-    <button class="tab-btn" data-view="checkin">Check-In</button>
-    <button class="tab-btn" data-view="journal">Journal</button>
-    <button class="tab-btn" data-view="resources">Resources</button>
-    <button class="tab-btn" data-view="settings">Settings</button>
-  </nav>
-
-  <!-- MAIN -->
-  <main class="flex-1 p-4 space-y-6 overflow-y-auto">
-
-    <!-- TIMER -->
-    <section id="view-timer" class="view">
-      <div class="card p-5 space-y-4">
-        <h2 class="text-lg font-semibold">Timer</h2>
-        <div id="timerDisplay" class="text-5xl font-mono text-center">00:00</div>
-        <div class="flex justify-center gap-2">
-          <button id="startBtn" class="btn bg-green-600 hover:bg-green-700 text-white">Start</button>
-          <button id="stopBtn"  class="btn bg-red-600 hover:bg-red-700 text-white">Stop</button>
-          <button id="resetBtn" class="btn bg-gray-700 hover:bg-gray-600 text-white">Reset</button>
+  <main>
+    <!-- HOME -->
+    <section id="tab-home">
+      <div class="card">
+        <h2>Timer</h2>
+        <div class="row" style="justify-content:space-between">
+          <div class="pill" id="timerText">00:00:00</div>
+          <div class="row">
+            <button class="btn ok" id="startBtn">Start</button>
+            <button class="btn warn" id="pauseBtn">Pause</button>
+            <button class="btn danger" id="resetBtn">Reset</button>
+          </div>
         </div>
+        <div class="help">Use this when you need a focused “time-out” moment.</div>
+      </div>
+
+      <div class="card">
+        <h2>Quick Actions</h2>
+        <div class="grid2">
+          <button class="btn wide" id="quickSafe">I’m Safe</button>
+          <button class="btn wide danger" id="quickUnsafe">Need Help</button>
+          <button class="btn wide" id="quickReset">Quick Reset</button>
+          <button class="btn wide" id="shareBtn">Share App Link</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Trust Score</h2>
+        <div class="meter"><span id="scoreBar"></span></div>
+        <div class="help">Answer the 8 Questions daily. Safer answers raise your score.</div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="tab-questions" class="hidden">
+      <div class="card">
+        <h2>8 Questions (Today)</h2>
+        <div id="qList"></div>
+        <button class="btn primary wide" id="saveAnswers">Save Answers</button>
+        <div class="help">Green = “Yes, I feel ok” where appropriate. Red flags reduce score.</div>
       </div>
     </section>
 
     <!-- CHECK-IN -->
-    <section id="view-checkin" class="view hidden">
-      <div class="card p-5 space-y-4">
-        <h2 class="text-lg font-semibold">Daily Check-In</h2>
-        <p class="text-sm text-gray-400">Answer honestly. Your answers are stored on your device only.</p>
-        <div id="questions" class="space-y-4"></div>
+    <section id="tab-checkin" class="hidden">
+      <div class="card">
+        <h2>Daily Check-In</h2>
+        <div class="row">
+          <select id="moodSel" class="btn" style="flex:1">
+            <option value="calm">Calm</option>
+            <option value="okay">Okay</option>
+            <option value="anxious">Anxious</option>
+            <option value="unsafe">Unsafe</option>
+          </select>
+          <button class="btn primary" id="saveCheckin">Save</button>
+        </div>
+        <textarea id="noteBox" placeholder="Anything you want to note about today…"></textarea>
       </div>
     </section>
 
-    <!-- JOURNAL -->
-    <section id="view-journal" class="view hidden">
-      <div class="card p-5 space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Journal</h2>
-          <span id="journalSavedAt" class="text-xs text-gray-400"></span>
+    <!-- HISTORY -->
+    <section id="tab-history" class="hidden">
+      <div class="card">
+        <h2>History</h2>
+        <div class="list" id="historyList"></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="exportJson">Export JSON</button>
+          <button class="btn danger" id="wipeAll">Erase All Local Data</button>
         </div>
-        <textarea id="journalText" class="w-full h-48 bg-gray-800 border border-gray-700 rounded-lg p-3"
-                  placeholder="Write your thoughts…"></textarea>
-        <div class="flex gap-2">
-          <button id="saveJournal" class="btn bg-indigo-600 hover:bg-indigo-700 text-white">Save</button>
-          <button id="clearJournal" class="btn bg-gray-700 hover:bg-gray-600 text-white">Clear</button>
-        </div>
+        <div class="help">Stored only on your device (LocalStorage). Export before erasing if you want a copy.</div>
       </div>
     </section>
 
-    <!-- RESOURCES -->
-    <section id="view-resources" class="view hidden">
-      <div class="card p-5 space-y-4">
-        <h2 class="text-lg font-semibold">Resources</h2>
-        <ul class="space-y-3 text-sm">
-          <li>
-            <a class="text-indigo-300 underline" href="tel:18007997233">
-              National Domestic Violence Hotline — 1-800-799-SAFE (7233)
-            </a>
-          </li>
-          <li>
-            <a class="text-indigo-300 underline" href="https://www.thehotline.org/" target="_blank" rel="noopener">
-              thehotline.org (24/7 chat & resources)
-            </a>
-          </li>
-          <li>
-            <a class="text-indigo-300 underline" href="https://www.rainn.org/" target="_blank" rel="noopener">
-              RAINN (sexual assault) — rainn.org
-            </a>
-          </li>
-          <li class="text-gray-300">In an emergency, call <strong>911</strong>.</li>
-        </ul>
+    <!-- PROFILE -->
+    <section id="tab-profile" class="hidden">
+      <div class="card">
+        <h2>Profile</h2>
+        <label class="muted">Display Name</label>
+        <input id="nameInput" placeholder="Your name or alias" />
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="saveProfile">Save Profile</button>
+        </div>
       </div>
     </section>
 
     <!-- SETTINGS -->
-    <section id="view-settings" class="view hidden">
-      <div class="card p-5 space-y-4">
-        <h2 class="text-lg font-semibold">Settings</h2>
-        <div class="space-y-2">
-          <button id="quickExit" class="btn w-full bg-red-700 hover:bg-red-800 text-white">Quick Exit</button>
-          <button id="resetAll" class="btn w-full bg-gray-700 hover:bg-gray-600 text-white">Reset All Data</button>
+    <section id="tab-settings" class="hidden">
+      <div class="card">
+        <h2>Settings</h2>
+        <div class="row">
+          <span class="muted">Theme</span>
+          <div class="row">
+            <button class="btn" data-theme="dark">Dark</button>
+            <button class="btn" data-theme="light">Light</button>
+          </div>
         </div>
-        <div class="pt-3 border-t border-gray-700 space-y-2">
-          <div class="text-sm text-gray-400">PIN & Decoy</div>
-          <button id="changePin" class="btn bg-indigo-600 hover:bg-indigo-700 text-white">Change PIN</button>
-          <button id="setDecoy" class="btn bg-gray-700 hover:bg-gray-600 text-white">Set Decoy PIN</button>
-        </div>
+        <div class="help">You can install this as a shortcut on your phone’s home screen from your browser menu.</div>
       </div>
     </section>
-
   </main>
 
-  <!-- FOOTER -->
-  <footer class="p-3 text-center text-xs text-gray-500 border-t border-[#1f2937]">
-    TimeOut · Local-only storage · v1.0
-  </footer>
-
-  <!-- TOAST -->
-  <div id="toast" class="toast">Saved</div>
+  <footer>TimeOut · Local-only demo · v1.0</footer>
+</div>
 
 <script>
-/* ====== Utilities ====== */
-const $ = (sel, root=document)=>root.querySelector(sel);
-const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
-function showToast(msg='Saved'){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1000);}
+/* ---------- Storage Helpers ---------- */
+const store = {
+  get(key, def){ try{ return JSON.parse(localStorage.getItem(key)) ?? def; }catch(e){ return def; } },
+  set(key,val){ localStorage.setItem(key, JSON.stringify(val)); },
+  push(key,val){ const arr = store.get(key,[]); arr.push(val); store.set(key,arr); }
+};
 
-/* ====== Navigation ====== */
-const views = ['timer','checkin','journal','resources','settings'];
-$$('.tab-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const v = btn.dataset.view;
-    views.forEach(id=>{
-      const el = document.getElementById(`view-${id}`);
-      el.classList.toggle('hidden', id!==v);
-    });
-    $$('.tab-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
+/* ---------- State ---------- */
+const state = {
+  profile: store.get('profile', { name:'' }),
+  settings: store.get('settings', { theme:'dark' }),
+  answersByDay: store.get('answersByDay', {}), // yyyy-mm-dd => [true/false/...]
+  checkins: store.get('checkins', []),
+  score: store.get('score', 50),
+  timer: { running:false, startAt:0, elapsed:0 }
+};
 
-/* ====== Timer ====== */
-let timer=null, seconds=0;
-const timerDisplay = $('#timerDisplay');
-function renderTimer(){
-  const m = String(Math.floor(seconds/60)).padStart(2,'0');
-  const s = String(seconds%60).padStart(2,'0');
-  timerDisplay.textContent = `${m}:${s}`;
+/* ---------- UI Bindings ---------- */
+const tabs = document.querySelectorAll('.tab');
+const sections = {
+  home: document.getElementById('tab-home'),
+  questions: document.getElementById('tab-questions'),
+  checkin: document.getElementById('tab-checkin'),
+  history: document.getElementById('tab-history'),
+  profile: document.getElementById('tab-profile'),
+  settings: document.getElementById('tab-settings')
+};
+const scoreText = document.getElementById('scoreText');
+const scoreBar = document.getElementById('scoreBar');
+
+function showTab(name){
+  tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  Object.entries(sections).forEach(([k,el])=>el.classList.toggle('hidden', k!==name));
+  if(name==='history') renderHistory();
+  if(name==='questions') renderQuestions();
+  if(name==='profile') document.getElementById('nameInput').value = state.profile.name || '';
 }
-$('#startBtn').onclick=()=>{ if(!timer) timer=setInterval(()=>{seconds++;renderTimer();},1000); };
-$('#stopBtn').onclick =()=>{ clearInterval(timer); timer=null; };
-$('#resetBtn').onclick=()=>{ seconds=0; renderTimer(); };
 
-/* ====== Check-In (8 questions) & Trust Score ====== */
-const LS_ANS='timeout.answers';
-const SCORE_KEY='timeout.trust';
+/* ---------- Timer ---------- */
+const timerText = document.getElementById('timerText');
+let rafId = null;
+function fmt(ms){
+  const s = Math.floor(ms/1000);
+  const h = String(Math.floor(s/3600)).padStart(2,'0');
+  const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const sec = String(s%60).padStart(2,'0');
+  return `${h}:${m}:${sec}`;
+}
+function tick(){
+  const now = Date.now();
+  const elapsed = state.timer.elapsed + (state.timer.running ? (now - state.timer.startAt) : 0);
+  timerText.textContent = fmt(elapsed);
+  rafId = requestAnimationFrame(tick);
+}
+document.getElementById('startBtn').onclick = ()=>{
+  if(!state.timer.running){ state.timer.running = true; state.timer.startAt = Date.now(); }
+};
+document.getElementById('pauseBtn').onclick = ()=>{
+  if(state.timer.running){
+    state.timer.elapsed += Date.now() - state.timer.startAt;
+    state.timer.running = false;
+  }
+};
+document.getElementById('resetBtn').onclick = ()=>{
+  state.timer.running = false; state.timer.elapsed = 0; state.timer.startAt = 0;
+};
+document.getElementById('quickReset').onclick = ()=>{
+  state.timer.running = false; state.timer.elapsed = 0; state.timer.startAt = 0;
+  alert('Quick reset done.');
+};
+document.getElementById('shareBtn').onclick = ()=>{
+  const url = location.href;
+  if(navigator.share){ navigator.share({ title:'TimeOut', url }); }
+  else { navigator.clipboard?.writeText(url); alert('Link copied.'); }
+};
+document.getElementById('quickSafe').onclick = ()=>{
+  bumpScore(+2); addHistory({type:'flag', level:'ok', note:'User tapped “I’m Safe”.'});
+};
+document.getElementById('quickUnsafe').onclick = ()=>{
+  bumpScore(-8); addHistory({type:'flag', level:'risk', note:'User tapped “Need Help”.'});
+};
+
+/* ---------- 8 Questions ---------- */
 const QUESTIONS = [
-  "Do you feel safe at home?",
-  "Has anyone hurt you recently?",
-  "Do you have someone you trust to talk to?",
-  "Do you feel isolated?",
-  "Do you have access to money if you need it?",
-  "Do you know where your important documents are?",
-  "Do you know who to call in an emergency?",
-  "Do you have a safe place you could go?"
+  { t:'Do you feel physically safe right now?', good:'yes' },
+  { t:'Do you have access to a private, safe space?', good:'yes' },
+  { t:'Has anyone threatened you today?', good:'no' },
+  { t:'Are you able to contact someone you trust?', good:'yes' },
+  { t:'Do you have the essentials (food/meds)?', good:'yes' },
+  { t:'Is anyone monitoring your device?', good:'no' },
+  { t:'Do you have a plan if you feel unsafe?', good:'yes' },
+  { t:'Have boundaries been respected today?', good:'yes' }
 ];
-let answers = JSON.parse(localStorage.getItem(LS_ANS)||'{}');
-
+function todayKey(){ const d=new Date(); return d.toISOString().slice(0,10); }
 function renderQuestions(){
-  const wrap = $('#questions');
-  wrap.innerHTML = '';
-  QUESTIONS.forEach((q, i)=>{
-    const id = 'q'+(i+1);
-    const val = answers[id];
+  const qList = document.getElementById('qList');
+  qList.innerHTML = '';
+  const key = todayKey();
+  const saved = state.answersByDay[key] || Array(QUESTIONS.length).fill(null);
+  QUESTIONS.forEach((q,idx)=>{
     const row = document.createElement('div');
-    row.className = 'space-y-2';
+    row.className = 'q';
     row.innerHTML = `
-      <p class="font-medium">${i+1}) ${q}</p>
-      <div class="flex gap-2" data-q="${id}">
-        <button class="choice ${val==='yes'?'active':''}" data-val="yes">Yes</button>
-        <button class="choice ${val==='no'?'active':''}"  data-val="no">No</button>
-        <button class="choice ${val==='skip'?'active':''}" data-val="skip">Skip</button>
-      </div>
-    `;
-    wrap.appendChild(row);
+      <div class="label">${q.t}</div>
+      <div class="toggle">
+        <button class="chip ${saved[idx]===true?'active y':''}" data-i="${idx}" data-v="yes">Yes</button>
+        <button class="chip ${saved[idx]===false?'active n':''}" data-i="${idx}" data-v="no">No</button>
+      </div>`;
+    qList.appendChild(row);
   });
-
-  // bind
-  $$('[data-q]').forEach(group=>{
-    group.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.choice');
-      if(!btn) return;
-      const qid = group.dataset.q;
-      answers[qid] = btn.dataset.val;
-      group.querySelectorAll('.choice').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      localStorage.setItem(LS_ANS, JSON.stringify(answers));
-      calcTrust();
-      showToast('Saved');
-    });
+  qList.querySelectorAll('.chip').forEach(btn=>{
+    btn.onclick = ()=>{
+      const i = Number(btn.dataset.i);
+      const v = btn.dataset.v === 'yes';
+      const cur = state.answersByDay[key] || Array(QUESTIONS.length).fill(null);
+      cur[i] = v;
+      state.answersByDay[key] = cur;
+      store.set('answersByDay', state.answersByDay);
+      renderQuestions();
+    };
   });
 }
-
-function calcTrust(){
-  // Simple model: yes=12 pts, skip=6 pts, no=0; cap 100
-  let score = 0;
-  Object.values(answers).forEach(v=>{
-    if(v==='yes') score += 12;
-    else if(v==='skip') score += 6;
-  });
-  score = Math.min(100, score);
-  localStorage.setItem(SCORE_KEY, String(score));
-  $('#trustScore').textContent = score + '%';
-}
-function initTrust(){
-  const s = localStorage.getItem(SCORE_KEY);
-  if(s) $('#trustScore').textContent = s + '%';
-  else calcTrust();
-}
-renderQuestions();
-initTrust();
-
-/* ====== Journal ====== */
-const JOURNAL_KEY='timeout.journal';
-const journal = $('#journalText');
-const savedAt = $('#journalSavedAt');
-function loadJournal(){
-  const txt = localStorage.getItem(JOURNAL_KEY) || '';
-  journal.value = txt;
-  const ts = localStorage.getItem(JOURNAL_KEY+'.ts');
-  savedAt.textContent = ts ? ('Saved ' + new Date(Number(ts)).toLocaleString()) : '';
-}
-function saveJournal(){
-  localStorage.setItem(JOURNAL_KEY, journal.value);
-  localStorage.setItem(JOURNAL_KEY+'.ts', String(Date.now()));
-  loadJournal();
-  showToast('Journal saved');
-}
-$('#saveJournal').onclick = saveJournal;
-$('#clearJournal').onclick = ()=>{
-  if(confirm('Clear journal text?')){ localStorage.removeItem(JOURNAL_KEY); localStorage.removeItem(JOURNAL_KEY+'.ts'); loadJournal(); }
-};
-loadJournal();
-
-/* ====== Quick Exit & Reset ====== */
-$('#quickExit').onclick = ()=>{ window.location.href='https://www.weather.com/'; };
-$('#resetAll').onclick  = ()=>{
-  if(confirm('Erase all data (PIN, answers, journal)?')){
-    localStorage.clear();
-    location.reload();
+document.getElementById('saveAnswers').onclick = ()=>{
+  const key = todayKey();
+  const a = state.answersByDay[key] || [];
+  if(a.length !== QUESTIONS.length || a.some(v => v===null)){
+    alert('Please answer all 8 questions.'); return;
   }
+  // scoring
+  let delta = 0;
+  a.forEach((ans,i)=>{
+    const good = QUESTIONS[i].good === 'yes';
+    if(ans === good) delta += 2; else delta -= 4;
+  });
+  bumpScore(delta);
+  addHistory({ type:'answers', date:key, answers:a, delta });
+  alert('Saved. Trust score updated.');
 };
 
-/* ====== PIN & Decoy Lock ====== */
-const PIN_KEY='timeout.pin';
-const DECOY_KEY='timeout.pin.decoy';
-const lockScreen = $('#lockScreen');
-const pinInput = $('#pinInput');
-const pinMsg = $('#pinMsg');
+/* ---------- Check-In ---------- */
+document.getElementById('saveCheckin').onclick = ()=>{
+  const mood = document.getElementById('moodSel').value;
+  const note = document.getElementById('noteBox').value.trim();
+  const entry = { type:'checkin', ts:Date.now(), mood, note };
+  store.push('checkins', entry);
+  state.checkins = store.get('checkins', []);
+  addHistory({ type:'checkin', mood });
+  if(mood==='unsafe') bumpScore(-6);
+  else if(mood==='anxious') bumpScore(-2);
+  else if(mood==='calm') bumpScore(+1);
+  document.getElementById('noteBox').value='';
+  alert('Check-in saved.');
+};
 
-async function sha256(s){
-  const buf = new TextEncoder().encode(s);
-  const hash = await crypto.subtle.digest('SHA-256', buf);
-  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
-async function setPinFlow(){
-  const p = prompt('Set 4-digit PIN');
-  if(!/^\d{4}$/.test(p||'')) return alert('PIN must be 4 digits');
-  const c = prompt('Confirm PIN');
-  if(p!==c) return alert('PINs do not match');
-  localStorage.setItem(PIN_KEY, await sha256(p));
-  alert('PIN set.');
-}
-
-async function setDecoyFlow(){
-  const d = prompt('Set 4-digit Decoy PIN (optional)');
-  if(!d){ localStorage.removeItem(DECOY_KEY); return alert('Decoy cleared.'); }
-  if(!/^\d{4}$/.test(d)) return alert('Decoy must be 4 digits');
-  localStorage.setItem(DECOY_KEY, await sha256(d));
-  alert('Decoy set.');
-}
-
-async function checkPin(p){
-  const h = await sha256(p);
-  if(h === localStorage.getItem(PIN_KEY)) return 'real';
-  if(h === localStorage.getItem(DECOY_KEY)) return 'decoy';
-  return 'bad';
-}
-
-$('#pinSubmit').onclick = async ()=>{
-  const code = pinInput.value;
-  const res = await checkPin(code);
-  if(res==='real'){
-    pinMsg.textContent = '';
-    lockScreen.style.display='none';
-  } else if(res==='decoy'){
-    pinMsg.textContent='';
-    lockScreen.style.display='none';
-    // Replace app with harmless decoy content
-    document.body.innerHTML = `
-      <div class="min-h-screen p-6 text-center bg-gray-900 text-gray-200">
-        <h1 class="text-2xl font-bold mb-2">Wellness Center</h1>
-        <p class="text-gray-400 mb-6">Daily tips and breathing exercises</p>
-        <div class="max-w-md mx-auto card p-5 space-y-3">
-          <div class="text-left">
-            <h3 class="font-semibold">Breathing (4-7-8)</h3>
-            <p class="text-sm text-gray-400">Breathe in 4s, hold 7s, out 8s — repeat 4 cycles.</p>
-          </div>
-          <div class="text-left">
-            <h3 class="font-semibold">Mini Walk</h3>
-            <p class="text-sm text-gray-400">Stand, stretch, take 100 steps.</p>
-          </div>
-          <a href="https://www.weather.com/" class="underline text-indigo-300">More tips</a>
-        </div>
-      </div>
-    `;
-  } else {
-    pinMsg.textContent = 'Wrong PIN';
+/* ---------- Profile / Settings ---------- */
+document.getElementById('saveProfile').onclick = ()=>{
+  state.profile.name = document.getElementById('nameInput').value.trim();
+  store.set('profile', state.profile);
+  alert('Profile saved.');
+};
+document.querySelectorAll('[data-theme]').forEach(b=>{
+  b.onclick = ()=> setTheme(b.dataset.theme);
+});
+function setTheme(t){
+  if(t==='light'){
+    document.documentElement.style.setProperty('--bg','#f6f7fb');
+    document.documentElement.style.setProperty('--card','#ffffff');
+    document.documentElement.style.setProperty('--text','#0b0f16');
+  }else{ // dark default
+    document.documentElement.style.setProperty('--bg','#0b0f16');
+    document.documentElement.style.setProperty('--card','#121826');
+    document.documentElement.style.setProperty('--text','#e6eefc');
   }
+  state.settings.theme = t; store.set('settings', state.settings);
+}
+
+/* ---------- History / Export ---------- */
+function addHistory(entry){
+  const items = store.get('history', []);
+  items.unshift({ ...entry, at:Date.now() });
+  store.set('history', items);
+}
+function renderHistory(){
+  const box = document.getElementById('historyList');
+  const items = store.get('history', []);
+  if(items.length===0){ box.innerHTML = '<div class="muted">No history yet.</div>'; return; }
+  box.innerHTML = '';
+  items.slice(0,200).forEach(it=>{
+    const d = new Date(it.at).toLocaleString();
+    const li = document.createElement('div');
+    li.className = 'item';
+    li.innerHTML = `<div class="row" style="justify-content:space-between">
+        <strong>${it.type}</strong><span class="muted">${d}</span>
+      </div>
+      <div class="muted">${it.note||it.mood||''} ${it.delta!==undefined?('(Δ '+it.delta+')'):''}</div>`;
+    box.appendChild(li);
+  });
+}
+document.getElementById('exportJson').onclick = ()=>{
+  const dump = {
+    profile: state.profile,
+    settings: state.settings,
+    score: state.score,
+    answersByDay: state.answersByDay,
+    checkins: store.get('checkins', []),
+    history: store.get('history', [])
+  };
+  const blob = new Blob([JSON.stringify(dump,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'timeout-data.json'; a.click();
+  URL.revokeObjectURL(url);
+};
+document.getElementById('wipeAll').onclick = ()=>{
+  if(!confirm('Erase ALL local data on this device?')) return;
+  localStorage.clear(); location.reload();
 };
 
-$('#setPin').onclick = setPinFlow;
-$('#changePin').onclick = setPinFlow;
-$('#setDecoy').onclick = setDecoyFlow;
+/* ---------- Score ---------- */
+function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
+function bumpScore(delta){
+  state.score = clamp((state.score||50) + delta, 0, 100);
+  store.set('score', state.score);
+  renderScore();
+}
+function renderScore(){
+  scoreText.textContent = String(state.score);
+  scoreBar.style.width = state.score + '%';
+}
 
-// First-time: no PIN -> ask to set after short delay
-window.addEventListener('load', ()=>{
-  if(!localStorage.getItem(PIN_KEY</div>`;
-          list.appendChild(el);
-        });
+/* ---------- Nav ---------- */
+tabs.forEach(t=> t.onclick = ()=> showTab(t.dataset.tab));
 
-        // Search
-        root.querySelector('#search-meetings').addEventListener('input', (e) => {
-          const q = e.target.value.toLowerCase();
-          const filteredList = this.state.meetings.filter(m => (m.title || '').toLowerCase().includes(q));
-          this.renderMeetings(filteredList, e.target.value);
-        });
-
-        // Save
-        root.querySelector('#save-meeting-btn').addEventListener('click', async () => {
-          const title = root.querySelector('#meeting-title').value.trim();
-          const date = root.querySelector('#meeting-date').value;
-          const time = root.querySelector('#meeting-time').value;
-          if (!title) return this.showMessage('Please enter a meeting title.', true);
-          try {
-            if (this.state.editingMeetingId) {
-              const ref = doc(this.db, `artifacts/${appId}/public/data/meetings`, this.state.editingMeetingId);
-              await updateDoc(ref, { title, date, time, updatedAt: serverTimestamp() });
-              this.state.editingMeetingId = null;
-              this.showMessage('Meeting updated.');
-            } else {
-              await addDoc(collection(this.db, `artifacts/${appId}/public/data/meetings`), {
-                title, date, time, createdBy: this.state.userId, createdAt: serverTimestamp()
-              });
-              this.showMessage('Meeting created.');
-            }
-          } catch (e) { console.error(e); this.showMessage('Failed to save meeting.', true); }
-        });
-
-        // Cancel edit
-        const cancel = root.querySelector('#cancel-edit-btn');
-        if (cancel) cancel.addEventListener('click', () => { this.state.editingMeetingId = null; this.renderMeetings(); });
-
-        // Edit / Delete / Chat buttons
-        list.querySelectorAll('.edit-meeting').forEach(btn => btn.addEventListener('click', () => {
-          this.state.editingMeetingId = btn.dataset.id;
-          this.renderMeetings();
-        }));
-        list.querySelectorAll('.delete-meeting').forEach(btn => btn.addEventListener('click', async () => {
-          const ok = await this.askConfirm('Delete this meeting?');
-          if (!ok) return;
-          try {
-            await deleteDoc(doc(this.db, `artifacts/${appId}/public/data/meetings`, btn.dataset.id));
-            this.showMessage('Meeting deleted.');
-          } catch (e) { console.error(e); this.showMessage('Failed to delete.', true); }
-        }));
-        list.querySelectorAll('.join-meeting').forEach(btn => btn.addEventListener('click', () => {
-          const id = btn.dataset.id;
-          const m = this.state.meetings.find(x => x.id === id);
-          this.openChat('meetings', id, `Meeting: ${m?.title || ''}`);
-        }));
-      }
-
-      // ---------- Groups ----------
-      renderGroups() {
-        const root = document.getElementById('groups-view');
-        root.innerHTML = `
-          <div class="space-y-6">
-            <h2 class="text-2xl font-semibold text-white text-center">Community Groups</h2>
-            <div class="bg-[#1b2530] p-6 rounded-2xl shadow-inner space-y-4">
-              <h3 class="text-xl font-semibold text-gray-200">Create a Group</h3>
-              <input id="group-name" class="form-input" type="text" placeholder="Group Name">
-              <button id="save-group-btn" class="form-button bg-green-600 hover:bg-green-700">Save Group</button>
-            </div>
-            <div id="groups-list" class="space-y-3"></div>
-          </div>
-        `;
-
-        const list = root.querySelector('#groups-list');
-        this.state.groups.forEach(g => {
-          const el = document.createElement('div');
-          el.className = 'bg-[#1b2530] p-4 rounded-xl shadow-lg flex justify-between items-center card-glow';
-          el.innerHTML = `
-            <div>
-              <h3 class="font-bold text-gray-100">${g.name}</h3>
-              <p class="text-xs text-gray-400">Created by ${this.state.allUserProfiles[g.createdBy]?.publicName || g.createdBy}</p>
-            </div>
-            <div class="flex gap-2">
-              <button class="join-group action-button bg-indigo-600 hover:bg-indigo-700" data-id="${g.id}">Chat</button>
-              ${g.createdBy === this.state.userId ? `
-                <button class="delete-group action-button bg-red-600 hover:bg-red-700" data-id="${g.id}">Delete</button>
-              ` : ''}
-            </div>`;
-          list.appendChild(el);
-        });
-
-        // Save group
-        root.querySelector('#save-group-btn').addEventListener('click', async () => {
-          const name = root.querySelector('#group-name').value.trim();
-          if (!name) return this.showMessage('Please enter a group name.', true);
-          try {
-            await addDoc(collection(this.db, `artifacts/${appId}/public/data/groups`), {
-              name, createdBy: this.state.userId, createdAt: serverTimestamp()
-            });
-            this.showMessage('Group created.');
-          } catch (e) { console.error(e); this.showMessage('Failed to save group.', true); }
-        });
-
-        // Delete / Chat
-        list.querySelectorAll('.delete-group').forEach(btn => btn.addEventListener('click', async () => {
-          const ok = await this.askConfirm('Delete this group?');
-          if (!ok) return;
-          try {
-            await deleteDoc(doc(this.db, `artifacts/${appId}/public/data/groups`, btn.dataset.id));
-            this.showMessage('Group deleted.');
-          } catch (e) { console.error(e); this.showMessage('Failed to delete group.', true); }
-        }));
-        list.querySelectorAll('.join-group').forEach(btn => btn.addEventListener('click', () => {
-          const id = btn.dataset.id;
-          const g = this.state.groups.find(x => x.id === id);
-          this.openChat('groups', id, `Group: ${g?.name || ''}`);
-        }));
-      }
-
-      // ---------- Profile ----------
-      renderProfile() {
-        const root = document.getElementById('profile-view');
-        root.innerHTML = `
-          <div class="space-y-6">
-            <h2 class="text-2xl font-semibold text-white text-center">Profile</h2>
-            <div class="bg-[#1b2530] p-6 rounded-2xl shadow-inner space-y-4">
-              <label class="block text-gray-200">Display Name</label>
-              <input id="profile-name" class="form-input" type="text" value="${this.state.userProfile?.publicName || ''}">
-              <label class="block text-gray-200">Trust Score</label>
-              <p class="text-indigo-400 font-bold">${this.state.userProfile?.trustScore || 25}</p>
-              <button id="save-profile-btn" class="form-button bg-green-600 hover:bg-green-700">Save Profile</button>
-            </div>
-          </div>
-        `;
-
-        root.querySelector('#save-profile-btn').addEventListener('click', async () => {
-          const newName = root.querySelector('#profile-name').value.trim();
-          if (!newName) return this.showMessage('Please enter a name.', true);
-          try {
-            this.state.userProfile.publicName = newName;
-            await setDoc(doc(this.db, `artifacts/${appId}/users/${this.state.userId}/profile`, 'my_profile'),
-              this.state.userProfile, { merge: true });
-            await setDoc(doc(this.db, `artifacts/${appId}/public/data/profiles`, this.state.userId),
-              { publicName: newName }, { merge: true });
-            this.showMessage('Profile updated.');
-          } catch (e) { console.error(e); this.showMessage('Failed to update profile.', true); }
-        });
-      }
-
-      // ---------- Chat ----------
-      openChat(type, id, title) {
-        this.state.selectedChatType = type;
-        this.state.selectedChatId = id;
-        this.showView('chat');
-        this.renderChatMessages(title);
-      }
-
-      renderChatMessages(title = '') {
-        const root = document.getElementById('chat-view');
-        const msgs = this.state.messages[this.state.selectedChatId] || [];
-
-        root.innerHTML = `
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-white">${title}</h2>
-            <button id="chat-back-btn" class="action-button bg-gray-600 hover:bg-gray-700">Back</button>
-          </div>
-          <div id="chat-messages" class="chat-scroll h-80 overflow-y-auto space-y-2 mb-4 bg-[#1b2530] p-4 rounded-xl shadow-inner">
-            ${msgs.map(m => `
-              <div class="chat-message ${m.userId === this.state.userId ? 'text-right' : 'text-left'}">
-                <span class="inline-block px-3 py-2 rounded-lg ${m.userId === this.state.userId ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-200'}">
-                  ${m.text}
-                </span>
-              </div>`).join('')}
-          </div>
-          <div class="flex gap-2">
-            <input id="chat-input" class="form-input flex-grow" type="text" placeholder="Type a message...">
-            <button id="chat-send-btn" class="action-button bg-green-600 hover:bg-green-700">Send</button>
-          </div>
-        `;
-
-        document.getElementById('chat-back-btn').addEventListener('click', () => {
-          this.showView(this.state.selectedChatType);
-        });
-
-        document.getElementById('chat-send-btn').addEventListener('click', async () => {
-          const input = document.getElementById('chat-input');
-          const text = input.value.trim();
-          if (!text) return;
-          try {
-            await addDoc(collection(this.db, `artifacts/${appId}/public/data/${this.state.selectedChatType}/${this.state.selectedChatId}/messages`), {
-              text, userId: this.state.userId, createdAt: serverTimestamp()
-            });
-            input.value = '';
-          } catch (e) { console.error(e); this.showMessage('Failed to send message.', true); }
-        });
-
-        // Listen for messages
-        if (this.chatUnsubscribe) this.chatUnsubscribe();
-        const msgsCol = query(collection(this.db, `artifacts/${appId}/public/data/${this.state.selectedChatType}/${this.state.selectedChatId}/messages`), orderBy('createdAt'));
-        this.chatUnsubscribe = onSnapshot(msgsCol, (snapshot) => {
-          this.state.messages[this.state.selectedChatId] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          this.renderChatMessages(title);
-        });
-      }
-    }
-
-    // Boot app
-    new UnbrokenPathApp();
-  </script>
+/* ---------- Boot ---------- */
+(function boot(){
+  setTheme(state.settings.theme || 'dark');
+  renderScore();
+  renderQuestions();
+  renderHistory();
+  cancelAnimationFrame(rafId); tick(); // start timer UI loop
+})();
+</script>
 </body>
-</html>
+</html>             
