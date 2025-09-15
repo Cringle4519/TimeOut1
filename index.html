@@ -1,39 +1,29 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Timeout Demo</title>
-    <style>
-      body{margin:0;background:#111;color:#fff;font-family:system-ui,Arial}
-      .wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
-      button{padding:10px 16px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-weight:600}
-      .hint{opacity:.7;font-size:14px}
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <h1>Timeout Demo</h1>
-      <div class="hint">Don’t touch for 10 seconds to see it fire.</div>
-      <button id="reset">Reset Timer</button>
-      <div class="hint" id="status">Timer running…</div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unbroken-Path</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body{background:#0d1117;color:#e5e7eb;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    .card{background:#131a22;border:1px solid rgba(255,255,255,.06);border-radius:16px;box-shadow:0 0 15px rgba(118,163,224,.08);padding:16px}
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-3xl card space-y-4">
+    <h1 class="text-xl font-semibold text-white text-center">Unbroken-Path (Live Demo)</h1>
+    <p class="text-xs text-center text-gray-400">
+      User ID: <span id="user-id" class="font-mono">…</span>
+    </p>
+    <div id="status" class="text-sm text-center text-gray-300">Initializing…</div>
+    <div>
+      <h2 class="text-lg font-semibold mb-2">Meetings</h2>
+      <div id="meetings" class="space-y-2"></div>
     </div>
-    <script>
-      let t; const DELAY = 10000; // 10s demo
-      const statusEl = document.getElementById('status');
-      const start = () => {
-        clearTimeout(t);
-        statusEl.textContent = 'Timer running…';
-        t = setTimeout(() => {
-          alert('Session timed out — logging out…');
-          statusEl.textContent = 'Timed out.';
-        }, DELAY);
-      };
-      ['click','keydown','touchstart','mousemove'].forEach(ev =>
-        window.addEventListener(ev, start, {passive:true})
-      );
-      document.getElementById('reset').addEventListener('click', start);
-      start();
-    </script>
-  </body>
+  </div>
+
+  <!-- Your app code -->
+  <script type="module" src="/app.js"></script>
+</body>
 </html>
