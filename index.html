@@ -1,454 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>TimeOut — Safety Check</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<meta name="theme-color" content="#111827"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TimeOut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--ok:#10b981;--warn:#f59e0b;--risk:#ef4444}
-  .chip{ @apply px-3 py-2 rounded-full text-sm font-semibold border transition; }
-  .chip-on{ @apply text-white border-transparent; }
-  .chip-off{ @apply bg-transparent text-gray-300 border-gray-600; }
-  .ringish{ width:96px;height:96px;border-radius:9999px;display:grid;place-items:center; }
-  .scroll-snap-y{ scroll-snap-type:y proximity; }
-  .snap{ scroll-snap-align:start; }
-  .tap-hint:active{ transform:scale(.98) }
+  :root{
+    --bg:#0b1220;--card:#121a2b;--ink:#e7eaf6;--muted:#9ca3af;
+    --pri:#6366f1;--pri-2:#4f46e5;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444;
+    --line:#1f2937;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+  header{
+    position:sticky;top:0;z-index:5;background:linear-gradient(0deg,rgba(11,18,32,0),rgba(11,18,32,.9) 30%,rgba(11,18,32,1));
+    backdrop-filter:saturate(1.2) blur(8px);border-bottom:1px solid var(--line);padding:10px 12px 8px;
+  }
+  .topbar{display:flex;align-items:center;gap:8px;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:8px}
+  .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#1f40ff,#7c3aed)}
+  h1{font-size:16px;margin:0}
+  .toolbar{display:flex;gap:6px}
+  button.tap{
+    background:#1f2937;color:var(--ink);border:1px solid #273244;border-radius:10px;padding:.55rem .8rem;font-weight:600;
+  }
+  button.pri{background:var(--pri);border-color:var(--pri-2)}
+  button.danger{background:var(--bad);border-color:#b91c1c}
+  main{flex:1;padding:10px 12px 20px;display:flex;flex-direction:column;gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .muted{color:var(--muted);font-size:.9rem}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0f1729}
+  .qtxt{font-size:.98rem;line-height:1.3}
+  .btns{display:flex;gap:8px;flex-shrink:0}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{background:#111827;border:0;padding:.45rem .75rem;color:var(--muted);font-weight:700}
+  .seg button.active-yes{background:#0b3a2b;color:#34d399}
+  .seg button.active-no{background:#3a1111;color:#f87171}
+  .scorebar{height:10px;background:#0f172a;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .scorebar>div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .list a{
+    display:block;text-decoration:none;color:var(--ink);background:#0f1729;border:1px solid var(--line);
+    padding:12px;border-radius:12px;margin-bottom:8px
+  }
+  .hint{font-size:.85rem;color:var(--muted)}
+  .footer-note{font-size:.8rem;color:#94a3b8;text-align:center;margin-top:10px}
+  .hidden{display:none !important}
+  /* mobile safe area spacing */
+  @supports(padding:max(0px)){ header{padding-top:max(10px, env(safe-area-inset-top))} .wrap{padding-bottom:env(safe-area-inset-bottom)} }
 </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
-  <!-- Sticky Header -->
-  <header class="sticky top-0 z-30 bg-gray-900/90 backdrop-blur border-b border-white/10">
-    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-      <h1 class="text-lg font-bold">TimeOut</h1>
-      <div class="flex items-center gap-2">
-        <button id="quickExit" class="tap-hint px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">Quick Exit</button>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="topbar">
+      <div class="brand" id="panic-dbltap">
+        <div class="logo"></div>
+        <h1>TimeOut</h1>
+      </div>
+      <div class="toolbar">
+        <button id="btn-home" class="tap pri">Home</button>
+        <button id="btn-resources" class="tap">Resources</button>
+        <button id="btn-settings" class="tap">Settings</button>
+        <button id="btn-exit" class="tap danger">Quick&nbsp;Exit</button>
       </div>
     </div>
   </header>
 
-  <!-- Summary Bar -->
-  <section class="max-w-md mx-auto px-4 py-4">
-    <div class="flex items-center gap-4">
-      <div id="scoreRing" class="ringish" aria-label="Trust Score Ring">
-        <div id="scoreNum" class="text-2xl font-black">--</div>
-      </div>
-      <div class="flex-1">
-        <div class="text-sm text-gray-400">Trust Score</div>
-        <div id="scoreText" class="text-base font-semibold">Answer questions to get your score</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tabs -->
-  <nav class="max-w-md mx-auto px-4">
-    <div class="grid grid-cols-4 gap-2 text-sm">
-      <button data-tab="checkin" class="tab-btn bg-indigo-600 text-white rounded-lg py-2 font-semibold">Check-In</button>
-      <button data-tab="journal" class="tab-btn rounded-lg py-2 font-semibold bg-gray-800">Journal</button>
-      <button data-tab="resources" class="tab-btn rounded-lg py-2 font-semibold bg-gray-800">Resources</button>
-      <button data-tab="settings" class="tab-btn rounded-lg py-2 font-semibold bg-gray-800">Settings</button>
-    </div>
-  </nav>
-
-  <!-- Content -->
-  <main class="max-w-md mx-auto px-4 py-4 space-y-6">
-    <!-- CHECK-IN -->
-    <section id="tab-checkin" class="snap space-y-4">
-      <p class="text-sm text-gray-400">Tap each question. Your Trust Score updates automatically.</p>
-      <div id="questions" class="space-y-3"></div>
-
-      <div class="bg-gray-800/60 rounded-xl p-4 border border-white/10">
-        <div class="text-sm text-gray-300 mb-2">Notes (optional)</div>
-        <textarea id="checkinNotes" class="w-full bg-gray-900 rounded-lg p-3 outline-none border border-gray-700 focus:border-indigo-500 text-sm" rows="3" placeholder="Anything you want to remember…"></textarea>
-        <button id="saveCheckin" class="mt-3 w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 font-semibold">Save Check-In</button>
-      </div>
-    </section>
-
-    <!-- JOURNAL -->
-    <section id="tab-journal" class="hidden snap space-y-4">
-      <div class="bg-gray-800/60 rounded-xl p-4 border border-white/10">
-        <div class="text-sm text-gray-300 mb-2">New Entry</div>
-        <textarea id="journalText" class="w-full bg-gray-900 rounded-lg p-3 outline-none border border-gray-700 focus:border-indigo-500 text-sm" rows="4" placeholder="Write your thoughts…"></textarea>
-        <div class="flex gap-2 mt-3">
-          <button id="addEntry" class="flex-1 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 font-semibold">Add</button>
-          <button id="clearEntry" class="px-4 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 font-semibold">Clear</button>
+  <main>
+    <!-- HOME: questions + trust score -->
+    <section id="screen-home" class="card">
+      <div class="title">
+        <div>
+          <div style="font-weight:700">Check-in</div>
+          <div class="muted">Answer 8 quick questions. Your answers stay on this device.</div>
         </div>
+        <button id="btn-reset" class="tap" title="Reset answers">Reset</button>
       </div>
 
-      <div id="journalList" class="space-y-3"></div>
+      <div id="q-list" class="space">
+        <!-- questions rendered here -->
+      </div>
+
+      <div style="margin-top:12px">
+        <div class="title">
+          <div style="font-weight:700">Trust Score</div>
+          <div id="score-label" class="muted">0 / 8</div>
+        </div>
+        <div class="scorebar"><div id="score-fill"></div></div>
+        <div id="score-note" class="hint" style="margin-top:6px"></div>
+      </div>
     </section>
 
     <!-- RESOURCES -->
-    <section id="tab-resources" class="hidden snap space-y-3">
-      <div class="text-sm text-gray-400">Tap to contact. Nothing is saved here.</div>
-      <a class="block bg-gray-800/60 rounded-xl p-4 border border-white/10" href="tel:18007997233">
-        <div class="font-semibold">National DV Hotline</div>
-        <div class="text-sm text-gray-400">Call 1-800-799-SAFE (7233)</div>
-      </a>
-      <a class="block bg-gray-800/60 rounded-xl p-4 border border-white/10" href="sms:88788">
-        <div class="font-semibold">Text “START” to 88788</div>
-        <div class="text-sm text-gray-400">24/7 advocates</div>
-      </a>
-      <a class="block bg-gray-800/60 rounded-xl p-4 border border-white/10" href="https://www.thehotline.org/" target="_blank" rel="noopener">
-        <div class="font-semibold">thehotline.org</div>
-        <div class="text-sm text-gray-400">Live chat, resources, safety planning</div>
-      </a>
+    <section id="screen-resources" class="card hidden">
+      <div class="title">
+        <div>
+          <div style="font-weight:700">Resources</div>
+          <div class="muted">Tap to call, text, or open a site.</div>
+        </div>
+      </div>
+      <div class="list">
+        <a href="tel:18007997233">📞 National DV Hotline — 1-800-799-SAFE (7233)</a>
+        <a href="sms:88788">💬 Text “START” to 88788 (Hotline)</a>
+        <a href="https://www.thehotline.org/" target="_blank" rel="noopener">🌐 thehotline.org (chat, safety planning)</a>
+        <a href="https://www.loveisrespect.org/" target="_blank" rel="noopener">💜 loveisrespect.org (youth & teens)</a>
+        <a href="https://www.womenslaw.org/" target="_blank" rel="noopener">⚖️ WomensLaw.org (legal info)</a>
+      </div>
+      <div class="hint">If you’re in immediate danger, call 911.</div>
     </section>
 
     <!-- SETTINGS -->
-    <section id="tab-settings" class="hidden snap space-y-4">
-      <div class="bg-gray-800/60 rounded-xl p-4 border border-white/10 space-y-2">
-        <div class="font-semibold">Data</div>
-        <button id="backupData" class="w-full py-3 rounded-lg bg-gray-700 hover:bg-gray-600 font-semibold">Export Backup</button>
-        <label class="block">
-          <span class="text-sm text-gray-300">Restore Backup</span>
-          <input id="restoreFile" type="file" accept="application/json" class="mt-1 block w-full text-sm file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-600 file:text-white hover:file:bg-indigo-700"/>
-        </label>
-        <button id="clearAll" class="w-full py-3 rounded-lg bg-red-600 hover:bg-red-700 font-semibold">Erase All Local Data</button>
+    <section id="screen-settings" class="card hidden">
+      <div class="title">
+        <div>
+          <div style="font-weight:700">Settings</div>
+          <div class="muted">Your data is saved locally on this device.</div>
+        </div>
       </div>
 
-      <div class="bg-gray-800/60 rounded-xl p-4 border border-white/10 space-y-2">
-        <div class="font-semibold">Quick Exit</div>
-        <p class="text-sm text-gray-400">Press <span class="font-semibold text-gray-200">Esc</span> or tap Quick Exit to leave and replace history.</p>
+      <div class="grid2">
+        <button id="btn-export" class="tap">Export Backup</button>
+        <label class="tap" style="text-align:center;cursor:pointer">Restore Backup
+          <input id="file-restore" type="file" accept="application/json" style="display:none">
+        </label>
+        <button id="btn-clear" class="tap danger">Erase Local Data</button>
+        <button id="btn-demo-fill" class="tap">Demo Fill (toggle)</button>
+      </div>
+
+      <div class="hint" style="margin-top:10px">
+        Press <b>Esc</b> or tap <b>Quick Exit</b> any time to jump to a safe decoy page.
       </div>
     </section>
+
+    <div class="footer-note">© TimeOut — private on-device check-ins</div>
   </main>
-
-  <!-- Footer Spacer -->
-  <div class="h-6"></div>
+</div>
 
 <script>
-/* -------------------- DATA & STATE -------------------- */
-const STORAGE_KEY = 'timeout.v1';
-const initialState = {
-  answers: {},        // { qid: "yes"|"no" }
-  notes: '',
-  journal: []         // [{id, text, ts}]
-};
-let state = load();
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const STORAGE_KEY = 'timeout.v1';
 
-/* -------------------- QUESTIONS -------------------- */
-const QUESTIONS = [
-  { id:'q1', text:'Has the person threatened you or others recently?', riskYes:2 },
-  { id:'q2', text:'Has physical harm occurred in the last week?', riskYes:3 },
-  { id:'q3', text:'Do you feel unsafe at home today?', riskYes:2 },
-  { id:'q4', text:'Is there stalking/monitoring of your phone or accounts?', riskYes:2 },
-  { id:'q5', text:'Has the person access to weapons?', riskYes:2 },
-  { id:'q6', text:'Are you being isolated from friends/family?', riskYes:1 },
-  { id:'q7', text:'Has the violence escalated recently?', riskYes:2 },
-  { id:'q8', text:'Do you need a safe place in the next 24 hours?', riskYes:3 }
-];
-// Max risk if all “yes”: 17 → we’ll scale to 0–100 trust score.
+  const QUESTIONS = [
+    "Do you feel safe at home right now?",
+    "Has anyone threatened you or controlled where you go?",
+    "Has pushing, hitting, or choking occurred recently?",
+    "Do you fear things might escalate soon?",
+    "Is someone monitoring your phone, texts, or location?",
+    "Has money, IDs, or transportation been taken from you?",
+    "Do you have injuries that worry you?",
+    "Would you like help building a safety plan?"
+  ];
 
-/* -------------------- DOM REFS -------------------- */
-const tabs = document.querySelectorAll('.tab-btn');
-const sections = {
-  checkin: document.getElementById('tab-checkin'),
-  journal: document.getElementById('tab-journal'),
-  resources: document.getElementById('tab-resources'),
-  settings: document.getElementById('tab-settings')
-};
-const qsWrap = document.getElementById('questions');
-const notesEl = document.getElementById('checkinNotes');
-const saveCheckinBtn = document.getElementById('saveCheckin');
-const scoreNum = document.getElementById('scoreNum');
-const scoreText = document.getElementById('scoreText');
-const scoreRing = document.getElementById('scoreRing');
+  let state = load() || { answers: Array(QUESTIONS.length).fill(null) };
 
-const addEntryBtn = document.getElementById('addEntry');
-const clearEntryBtn = document.getElementById('clearEntry');
-const journalText = document.getElementById('journalText');
-const journalList = document.getElementById('journalList');
+  // UI refs
+  const scrHome = $('#screen-home');
+  const scrRes  = $('#screen-resources');
+  const scrSet  = $('#screen-settings');
 
-const backupBtn = document.getElementById('backupData');
-const restoreFile = document.getElementById('restoreFile');
-const clearAllBtn = document.getElementById('clearAll');
-const quickExitBtn = document.getElementById('quickExit');
+  const scoreFill = $('#score-fill');
+  const scoreLabel = $('#score-label');
+  const scoreNote = $('#score-note');
+  const qList = $('#q-list');
 
-/* -------------------- INIT UI -------------------- */
-renderQuestions();
-notesEl.value = state.notes || '';
-renderJournal();
-updateScoreUI();
-
-/* -------------------- EVENTS -------------------- */
-// Tabs
-tabs.forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const t = btn.getAttribute('data-tab');
-    tabs.forEach(b=>b.classList.remove('bg-indigo-600','text-white'));
-    btn.classList.add('bg-indigo-600','text-white');
-    Object.entries(sections).forEach(([k,el])=>{
-      el.classList.toggle('hidden', k!==t);
-    });
-  });
-});
-
-// Notes + Save Check-in
-notesEl.addEventListener('input', debounce(()=>{
-  state.notes = notesEl.value;
-  save();
-}, 300));
-
-saveCheckinBtn.addEventListener('click', ()=>{
-  toast('Check-In saved');
-});
-
-// Journal
-addEntryBtn.addEventListener('click', ()=>{
-  const text = (journalText.value||'').trim();
-  if(!text){ toast('Write something first'); return; }
-  state.journal.unshift({ id: cryptoRandomId(), text, ts: Date.now() });
-  journalText.value = '';
-  save();
-  renderJournal();
-  toast('Entry added');
-});
-
-clearEntryBtn.addEventListener('click', ()=> journalText.value='');
-
-// Backup
-backupBtn.addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(state)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'timeout-backup.json'; a.click();
-  URL.revokeObjectURL(url);
-});
-
-restoreFile.addEventListener('change', async (e)=>{
-  const f = e.target.files?.[0];
-  if(!f) return;
-  const txt = await f.text();
-  try{
-    const data = JSON.parse(txt);
-    state = Object.assign({}, initialState, data);
-    save();
-    // Re-render
-    renderQuestions();
-    notesEl.value = state.notes||'';
-    renderJournal();
-    updateScoreUI();
-    toast('Backup restored');
-  }catch(err){
-    toast('Invalid backup file');
-  } finally {
-    restoreFile.value='';
+  function nav(to){
+    [scrHome,scrRes,scrSet].forEach(el=>el.classList.add('hidden'));
+    (to==='home'?scrHome:to==='resources'?scrRes:scrSet).classList.remove('hidden');
   }
-});
 
-// Clear all
-clearAllBtn.addEventListener('click', ()=>{
-  if(confirm('Erase ALL local data? This cannot be undone.')){
-    state = JSON.parse(JSON.stringify(initialState));
-    save();
-    renderQuestions();
-    notesEl.value='';
-    renderJournal();
-    updateScoreUI();
-    toast('All data erased');
+  // Build question rows
+  function renderQuestions(){
+    qList.innerHTML = '';
+    QUESTIONS.forEach((q, idx) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="qtxt">${q}</div>
+        <div class="btns">
+          <div class="seg" role="group" aria-label="Yes or No">
+            <button data-i="${idx}" data-v="yes">Yes</button>
+            <button data-i="${idx}" data-v="no">No</button>
+          </div>
+        </div>
+      `;
+      qList.appendChild(row);
+    });
+
+    // restore state
+    $$('.seg button').forEach(btn=>{
+      const i = +btn.dataset.i, v = btn.dataset.v;
+      const cur = state.answers[i];
+      btn.classList.toggle('active-yes', cur==='yes' && v==='yes');
+      btn.classList.toggle('active-no',  cur==='no'  && v==='no');
+    });
+
+    // handlers
+    $$('.seg button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = +btn.dataset.i, v = btn.dataset.v;
+        state.answers[i] = v;
+        persist();
+        // update classes for this group
+        const group = btn.parentElement.querySelectorAll('button');
+        group.forEach(b=>{ b.classList.remove('active-yes','active-no'); });
+        btn.classList.add(v==='yes' ? 'active-yes' : 'active-no');
+        calcScore();
+      });
+    });
   }
-});
 
-// Quick Exit
-quickExitBtn.addEventListener('click', quickExit);
-window.addEventListener('keydown', (e)=>{
-  if(e.key==='Escape') quickExit();
-});
-
-/* -------------------- FUNCTIONS -------------------- */
-function renderQuestions(){
-  qsWrap.innerHTML='';
-  QUESTIONS.forEach(q=>{
-    const row = document.createElement('div');
-    row.className='bg-gray-800/60 rounded-xl p-4 border border-white/10';
-
-    const title = document.createElement('div');
-    title.className='text-sm font-semibold mb-3';
-    title.textContent = q.text;
-
-    const btns = document.createElement('div');
-    btns.className='flex gap-2';
-
-    const yes = document.createElement('button');
-    yes.className='chip chip-off';
-    yes.textContent='Yes';
-    const no = document.createElement('button');
-    no.className='chip chip-off';
-    no.textContent='No';
-
-    const apply = ()=>{
-      const ans = state.answers[q.id];
-      yes.className = 'chip ' + (ans==='yes' ? 'chip-on' : 'chip-off');
-      no.className  = 'chip ' + (ans==='no'  ? 'chip-on' : 'chip-off');
-      if(ans==='yes'){ yes.style.backgroundColor='var(--risk)'; no.style.background='transparent'; }
-      else if(ans==='no'){ no.style.backgroundColor='var(--ok)'; yes.style.background='transparent'; }
-      else { yes.style.background='transparent'; no.style.background='transparent'; }
-    };
-
-    yes.addEventListener('click', ()=>{
-      state.answers[q.id]='yes';
-      save(); apply(); updateScoreUI();
+  function calcScore(){
+    // Trust Score idea: count “concern” answers.
+    // For this screening, we’ll treat “yes” as risk on all except Q1.
+    let risk = 0;
+    state.answers.forEach((v, i)=>{
+      if(i===0){ if(v==='no') risk++; } else { if(v==='yes') risk++; }
     });
-    no.addEventListener('click', ()=>{
-      state.answers[q.id]='no';
-      save(); apply(); updateScoreUI();
-    });
+    const total = QUESTIONS.length;
+    scoreLabel.textContent = `${risk} / ${total}`;
+    const pct = Math.round((risk/total)*100);
+    scoreFill.style.width = pct + '%';
 
-    // init
-    apply();
-
-    btns.appendChild(yes);
-    btns.appendChild(no);
-    row.appendChild(title);
-    row.appendChild(btns);
-    qsWrap.appendChild(row);
-  });
-}
-
-function computeTrustScore(){
-  // Risk accumulates on “yes”
-  let risk = 0;
-  QUESTIONS.forEach(q=>{
-    if(state.answers[q.id]==='yes') risk += q.riskYes;
-  });
-  const MAX = QUESTIONS.reduce((s,q)=>s+q.riskYes,0); // 17
-  const trust = Math.max(0, Math.round(100 - (risk/MAX)*100));
-  return { trust, risk };
-}
-
-function updateScoreUI(){
-  const {trust} = computeTrustScore();
-  scoreNum.textContent = isNaN(trust)? '--' : String(trust);
-  let color = 'var(--ok)';
-  if(trust < 70) color='var(--warn)';
-  if(trust < 40) color='var(--risk)';
-  scoreRing.style.boxShadow = `0 0 0 6px ${color} inset, 0 0 18px ${color}55`;
-  scoreText.textContent =
-    isNaN(trust) ? 'Answer questions to get your score' :
-    trust >= 70 ? 'Status: Stable' :
-    trust >= 40 ? 'Caution: Elevated risk' :
-                  'High Risk: Consider contacting help';
-}
-
-function renderJournal(){
-  journalList.innerHTML='';
-  if(!state.journal.length){
-    const empty = document.createElement('p');
-    empty.className='text-sm text-gray-400';
-    empty.textContent='No entries yet.';
-    journalList.appendChild(empty);
-    return;
+    let msg = '';
+    if(risk === 0) msg = 'No immediate red flags reported.';
+    else if(risk <= 2) msg = 'Some concerns. Consider reviewing resources.';
+    else if(risk <= 5) msg = 'Elevated risk. Building a safety plan may help.';
+    else msg = 'High risk. Please consider contacting support now.';
+    scoreNote.textContent = msg;
   }
-  state.journal.forEach(item=>{
-    const card = document.createElement('div');
-    card.className='bg-gray-800/60 rounded-xl p-4 border border-white/10';
-    const meta = document.createElement('div');
-    meta.className='text-xs text-gray-400 mb-2';
-    meta.textContent = new Date(item.ts).toLocaleString();
-    const text = document.createElement('textarea');
-    text.className='w-full bg-gray-900 rounded-lg p-3 outline-none border border-gray-700 focus:border-indigo-500 text-sm';
-    text.rows=3; text.value=item.text;
-    const row = document.createElement('div');
-    row.className='flex gap-2 mt-3';
-    const saveBtn = document.createElement('button');
-    saveBtn.className='px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold';
-    saveBtn.textContent='Save';
-    const delBtn = document.createElement('button');
-    delBtn.className='px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-sm font-semibold';
-    delBtn.textContent='Delete';
 
-    saveBtn.addEventListener('click', ()=>{
-      item.text = text.value;
-      save(); toast('Entry saved');
-    });
-    delBtn.addEventListener('click', ()=>{
-      state.journal = state.journal.filter(x=>x.id!==item.id);
-      save(); renderJournal(); toast('Entry deleted');
-    });
-
-    row.appendChild(saveBtn); row.appendChild(delBtn);
-    card.appendChild(meta); card.appendChild(text); card.appendChild(row);
-    journalList.appendChild(card);
-  });
-}
-
-function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-function load(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return JSON.parse(JSON.stringify(initialState));
-    const parsed = JSON.parse(raw);
-    return Object.assign({}, initialState, parsed);
-  }catch(e){
-    return JSON.parse(JSON.stringify(initialState));
+  function resetAll(){
+    state.answers = Array(QUESTIONS.length).fill(null);
+    persist(); renderQuestions(); calcScore(); toast('Answers cleared');
   }
-}
 
-function debounce(fn, ms){
-  let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); };
-}
+  function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function load(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || ''); }catch(e){ return null; } }
 
-function cryptoRandomId(){
-  if(window.crypto?.randomUUID) return crypto.randomUUID();
-  return 'id-'+Math.random().toString(36).slice(2,9);
-}
+  // Backup/Restore
+  $('#btn-export').addEventListener('click', ()=>{
+    try{
+      const raw = JSON.stringify(state);
+      const blob = new Blob([raw], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'timeout-backup.json'; a.click();
+      URL.revokeObjectURL(url);
+      toast('Backup exported');
+    }catch(e){ toast('Export failed'); }
+  });
+  $('#file-restore').addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    try{
+      const txt = await f.text();
+      const parsed = JSON.parse(txt);
+      if(!Array.isArray(parsed.answers) || parsed.answers.length !== QUESTIONS.length) throw new Error();
+      state = parsed; persist(); renderQuestions(); calcScore(); toast('Backup restored');
+    }catch(e){ toast('Invalid backup'); }
+    e.target.value='';
+  });
+  $('#btn-clear').addEventListener('click', ()=>{
+    if(confirm('Erase ALL local data on this device?')){
+      localStorage.removeItem(STORAGE_KEY);
+      state = { answers: Array(QUESTIONS.length).fill(null) };
+      renderQuestions(); calcScore(); toast('Local data erased');
+    }
+  });
 
-function toast(msg){
-  const d=document.createElement('div');
-  d.className='fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg border border-white/10 shadow';
-  d.textContent=msg;
-  document.body.appendChild(d);
-  setTimeout(()=>{ d.remove(); }, 1700);
-}
+  // Demo fill (toggle)
+  let demoOn = false;
+  $('#btn-demo-fill').addEventListener('click', ()=>{
+    demoOn = !demoOn;
+    state.answers = demoOn
+      ? ['no','yes','yes','no','yes','no','yes','yes'] // an example pattern
+      : Array(QUESTIONS.length).fill(null);
+    persist(); renderQuestions(); calcScore();
+    toast(demoOn ? 'Demo answers filled' : 'Demo cleared');
+  });
 
-function quickExit(){
-  try { history.replaceState(null,'','/'); } catch(_) {}
-  location.replace('decoy.html');
-}
-</script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Daily Productivity Tips</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-<style>
-  body{background:#0b1220;color:#e7eaf6}
-  main{max-width:780px;margin:auto}
-  .muted{color:#9aa3b2}
-  a.return{opacity:.15;position:fixed;bottom:.75rem;right:.75rem}
-  a.return:focus, a.return:hover{opacity:.9}
-</style>
-</head>
-<body>
-<main class="container">
-  <h1>Daily Productivity Tips</h1>
-  <p class="muted">Simple ways to stay organized and focused.</p>
-  <article>
-    <h3>1. Start with a 5-minute plan</h3>
-    <p>Jot the top three outcomes you want by end of day. Keep it visible.</p>
-    <h3>2. Time-box your tasks</h3>
-    <p>Work in short focused blocks with short breaks. Protect your energy.</p>
-    <h3>3. Single-task</h3>
-    <p>Finish one thing before starting the next to reduce context switching.</p>
-    <h3>4. Capture, don’t carry</h3>
-    <p>Write things down so your brain can relax. Review later.</p>
-  </article>
-</main>
+  // Navigation
+  $('#btn-home').addEventListener('click', ()=> nav('home'));
+  $('#btn-resources').addEventListener('click', ()=> nav('resources'));
+  $('#btn-settings').addEventListener('click', ()=> nav('settings'));
 
-<!-- Subtle way back if needed -->
-<a class="return" href="index.html" aria-label="Home">⌂</a>
+  // Reset
+  $('#btn-reset').addEventListener('click', resetAll);
 
-<script>
-// If someone hits back, keep them here (so Quick Exit is safer).
-history.pushState(null, '', location.href);
-window.addEventListener('popstate', ()=> history.pushState(null,'',location.href));
+  // Quick Exit
+  function quickExit(){
+    try{ history.replaceState(null,'','/'); }catch(e){}
+    location.replace('decoy.html');
+  }
+  $('#btn-exit').addEventListener('click', quickExit);
+  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') quickExit(); });
+
+  // Double-tap brand area to exit
+  let lastTap=0;
+  $('#panic-dbltap').addEventListener('touchend', ()=>{
+    const now = Date.now();
+    if(now - lastTap < 300) quickExit();
+    lastTap = now;
+  });
+
+  // UI helpers
+  function toast(msg){
+    const d=document.createElement('div');
+    d.textContent=msg;
+    d.style.cssText='position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:.55rem .8rem;border:1px solid #1f2937;border-radius:10px;z-index:9999';
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(),1500);
+  }
+
+  // First paint
+  renderQuestions();
+  calcScore();
+})();
 </script>
 </body>
 </html>
