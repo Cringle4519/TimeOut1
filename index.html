@@ -1,518 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
   <title>TimeOut</title>
+  <meta name="theme-color" content="#0d1117"/>
+  <link rel="manifest" href='data:application/manifest+json,{"name":"TimeOut","short_name":"TimeOut","start_url":".","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117"}'>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { color-scheme: dark; }
-    html,body { background:#0d1117; }
-    .card { background:#111827; border:1px solid #1f2937; }
-    .ghost-btn { background:transparent; border:1px solid #374151; }
-    .ghost-btn:hover { border-color:#6b7280; }
-    .tab-btn.active { background:#4f46e5; color:white; }
-    .hidden-imp { display:none !important; }
+    :root { --bg:#0d1117; --card:#131a22; --ink:#e5e7eb; --muted:#a3a3a3; --brand:#6366f1; }
+    body { background:var(--bg); color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif; }
+    .card { background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:1rem; box-shadow:0 6px 20px rgba(0,0,0,.25); }
+    .tab-btn { border-radius:9999px; padding:.55rem .9rem; }
+    .tab-btn.active { background:var(--brand); color:white; }
+    .muted { color:var(--muted) }
+    .calc-shell { background:#0b0b0b !important; }
+    .calc-shell .hide-when-disguised { display:none !important; }
+    .calc-shell .calc-grid { display:grid !important; }
+    .calc-grid { display:none; grid-template-columns:repeat(4,1fr); gap:.5rem; }
+    .calc-btn { background:#1a1a1a; border-radius:.75rem; padding:.9rem 0; text-align:center; font-weight:600; }
+    .sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+    button:active { transform: translateY(0.5px); }
   </style>
 </head>
-<body class="text-gray-100 min-h-screen">
-  <div class="max-w-3xl mx-auto p-4 sm:p-6">
+<body class="min-h-screen">
+  <div class="max-w-md mx-auto p-4 sm:p-6">
+
     <!-- Header -->
-    <div class="flex items-center justify-between gap-3 mb-4">
-      <h1 id="appTitle" class="text-2xl font-semibold">TimeOut</h1>
-      <div class="flex items-center gap-2">
-        <button id="quickExitBtn" class="px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold">
-          Quick Exit (Esc)
-        </button>
-        <button id="hideBtn" class="px-3 py-2 rounded-md ghost-btn">Hide UI</button>
+    <header class="flex items-center justify-between mb-4">
+      <div class="hide-when-disguised">
+        <h1 id="app-title" class="text-xl font-bold">TimeOut</h1>
+        <p class="text-xs muted -mt-0.5">Ground. Breathe. Choose safely.</p>
       </div>
-    </div>
+      <div class="flex gap-2">
+        <button id="btn-disguise" class="px-3 py-2 text-xs rounded-full bg-neutral-700 hover:bg-neutral-600" title="Hide app instantly">Disguise</button>
+        <button id="btn-quick-exit" class="px-3 py-2 text-xs rounded-full bg-red-600 hover:bg-red-500" title="Leave page">Quick Exit</button>
+      </div>
+    </header>
 
     <!-- Tabs -->
-    <nav class="flex gap-2 mb-4">
-      <button data-tab="timer" class="tab-btn px-3 py-2 rounded-md ghost-btn active">Timer</button>
-      <button data-tab="journal" class="tab-btn px-3 py-2 rounded-md ghost-btn">Journal</button>
-      <button data-tab="resources" class="tab-btn px-3 py-2 rounded-md ghost-btn">Resources</button>
-      <button data-tab="settings" class="tab-btn px-3 py-2 rounded-md ghost-btn">Settings</button>
+    <nav class="flex flex-wrap gap-2 mb-4 hide-when-disguised">
+      <button class="tab-btn active" data-tab="home">Home</button>
+      <button class="tab-btn" data-tab="checkin">Check-In</button>
+      <button class="tab-btn" data-tab="journal">Journal</button>
+      <button class="tab-btn" data-tab="resources">Resources</button>
+      <button class="tab-btn" data-tab="settings">Settings</button>
     </nav>
 
-    <!-- Panels -->
-    <section id="panel-timer" class="card rounded-xl p-5 space-y-5">
-      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div>
-          <div class="text-sm text-gray-400">Remaining</div>
-          <div id="timeDisplay" class="text-5xl sm:text-6xl font-bold tracking-tight">00:05:00</div>
-        </div>
-        <div class="grid grid-cols-5 gap-2">
-          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="5">5m</button>
-          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="10">10m</button>
-          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="15">15m</button>
-          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="20">20m</button>
-          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="25">25m</button>
-        </div>
+    <!-- HOME / TIMER -->
+    <section id="tab-home" class="card p-4 space-y-4">
+      <div class="text-center hide-when-disguised">
+        <div id="timer-display" class="text-5xl font-extrabold tracking-wider">05:00</div>
+        <p class="muted text-xs mt-1">Tap start and breathe with the timer.</p>
+      </div>
+      <div class="grid grid-cols-3 gap-2 hide-when-disguised">
+        <button class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500" id="timer-start">Start</button>
+        <button class="py-3 rounded-lg bg-neutral-700 hover:bg-neutral-600" id="timer-pause">Pause</button>
+        <button class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700" id="timer-reset">Reset</button>
+      </div>
+      <div class="grid grid-cols-3 gap-2 hide-when-disguised">
+        <button class="py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-preset="300">5m</button>
+        <button class="py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-preset="600">10m</button>
+        <button class="py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-preset="900">15m</button>
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <button id="startBtn" class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Start</button>
-        <button id="pauseBtn" class="px-4 py-2 rounded-md ghost-btn">Pause</button>
-        <button id="resetBtn" class="px-4 py-2 rounded-md ghost-btn">Reset</button>
+      <!-- Disguise calculator face -->
+      <div class="calc-grid mt-2">
+        <div class="col-span-4 bg-black/30 rounded-lg p-3 text-right" id="calc-screen">0</div>
+        <div class="calc-btn">7</div><div class="calc-btn">8</div><div class="calc-btn">9</div><div class="calc-btn">÷</div>
+        <div class="calc-btn">4</div><div class="calc-btn">5</div><div class="calc-btn">6</div><div class="calc-btn">×</div>
+        <div class="calc-btn">1</div><div class="calc-btn">2</div><div class="calc-btn">3</div><div class="calc-btn">−</div>
+        <div class="calc-btn">0</div><div class="calc-btn">.</div><div class="calc-btn">=</div><div class="calc-btn">+</div>
       </div>
 
-      <div>
-        <h3 class="font-semibold mb-2">Recent Sessions</h3>
-        <ul id="sessionList" class="space-y-2 text-sm"></ul>
+      <div class="text-xs muted text-center">Pro tip: hold Quick Exit for 1s to silently disguise without navigating.</div>
+    </section>
+
+    <!-- CHECK-IN -->
+    <section id="tab-checkin" class="card p-4 space-y-4 hidden">
+      <p class="text-sm muted">Answer what you can. Responses stay on this device.</p>
+      <form id="checkin-form" class="space-y-3">
+        <div class="space-y-1">
+          <label class="text-sm">1) Do you feel safe going home today?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q1">
+            <option value="0">Yes, I feel safe</option>
+            <option value="1">Mostly safe</option>
+            <option value="2">Unsure</option>
+            <option value="3">Not really</option>
+            <option value="4">No, I do not feel safe</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm">2) Threats, stalking, or control this week?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q2">
+            <option value="0">None</option>
+            <option value="1">Rare</option>
+            <option value="2">Sometimes</option>
+            <option value="3">Often</option>
+            <option value="4">Constant</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm">3) Any physical harm or property damage?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q3">
+            <option value="0">No</option>
+            <option value="1">Minor</option>
+            <option value="2">Some</option>
+            <option value="3">Serious</option>
+            <option value="4">Severe</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm">4) Are kids, pets, or others at risk?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q4">
+            <option value="0">No</option>
+            <option value="1">Maybe</option>
+            <option value="2">Sometimes</option>
+            <option value="3">Likely</option>
+            <option value="4">Yes</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm">5) Access to money, documents, and a safe place?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q5">
+            <option value="0">Yes, all</option>
+            <option value="1">Most</option>
+            <option value="2">Some</option>
+            <option value="3">Few</option>
+            <option value="4">None</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm">6) Has violence escalated recently?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q6">
+            <option value="0">No</option>
+            <option value="1">Slight</option>
+            <option value="2">Some</option>
+            <option value="3">A lot</option>
+            <option value="4">Extreme</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm">7) Do you have support (friend, advocate, shelter)?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q7">
+            <option value="0">Strong support</option>
+            <option value="1">Some support</option>
+            <option value="2">Limited</option>
+            <option value="3">Very little</option>
+            <option value="4">None</option>
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-sm">8) Do you want help making a safety plan?</label>
+          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q8">
+            <option value="0">No</option>
+            <option value="1">Maybe later</option>
+            <option value="2">Not sure</option>
+            <option value="3">Probably</option>
+            <option value="4">Yes</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button id="checkin-submit" type="submit" class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500">Save Check-In</button>
+          <button id="checkin-clear" type="button" class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Clear</button>
+        </div>
+      </form>
+      <div id="checkin-result" class="hidden bg-neutral-900 rounded-lg p-3">
+        <h3 class="font-semibold mb-1">Summary</h3>
+        <p id="checkin-summary" class="text-sm"></p>
+        <p id="checkin-safety" class="text-xs mt-2 muted"></p>
       </div>
     </section>
 
-    <section id="panel-journal" class="card rounded-xl p-5 space-y-5 hidden">
-      <div id="journalLock" class="space-y-3">
-        <p class="text-gray-300">This section is locked. Enter PIN to unlock.</p>
+    <!-- JOURNAL (PIN) -->
+    <section id="tab-journal" class="card p-4 space-y-3 hidden">
+      <div id="journal-locked" class="space-y-3">
+        <label class="text-sm">Enter PIN (4–8 digits) to unlock your journal</label>
+        <input id="pin-input" inputmode="numeric" class="w-full p-3 rounded-lg bg-neutral-900" placeholder="••••"/>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="pin-unlock" class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500">Unlock</button>
+          <button id="pin-set" class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Set / Change PIN</button>
+        </div>
+        <p class="text-xs muted">PIN & notes are stored on this device only.</p>
+      </div>
+
+      <div id="journal-unlocked" class="hidden space-y-3">
+        <textarea id="journal-text" class="w-full h-40 p-3 rounded-lg bg-neutral-900" placeholder="Write anything you want…"></textarea>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="journal-save" class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500">Save</button>
+          <button id="journal-lock" class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Lock</button>
+        </div>
+        <p class="text-xs muted">Use Settings → “Reset all data” if you need to wipe this device.</p>
+      </div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section id="tab-resources" class="card p-4 space-y-3 hidden">
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-semibold">National DV Hotline (US)</p>
+            <p class="text-xs muted">Call 1-800-799-SAFE (7233) • Text START to 88788 • thehotline.org</p>
+          </div>
+          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-copy="1-800-799-7233">Copy</button>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-semibold">911 / Local Emergency</p>
+            <p class="text-xs muted">If you or someone else is in immediate danger</p>
+          </div>
+          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-copy="911">Copy</button>
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-semibold">RAINN (SA Hotline)</p>
+            <p class="text-xs muted">Call 800-656-HOPE • online.rainn.org</p>
+          </div>
+          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-copy="800-656-4673">Copy</button>
+        </div>
+      </div>
+      <p class="text-xs muted pt-2">Use Settings to rename the app or enable Disguise Mode quickly.</p>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="tab-settings" class="card p-4 space-y-4 hidden">
+      <div class="space-y-2">
+        <label class="text-sm">App display name</label>
+        <input id="setting-appname" class="w-full p-3 rounded-lg bg-neutral-900" placeholder="TimeOut">
+        <button id="setting-save-appname" class="mt-2 py-2 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Save name</button>
+      </div>
+      <div class="space-y-2">
+        <label class="text-sm">Theme</label>
         <div class="flex gap-2">
-          <input id="journalPinInput" type="password" inputmode="numeric" maxlength="8" class="w-36 px-3 py-2 rounded-md bg-gray-800 border border-gray-700" placeholder="PIN" />
-          <button id="journalUnlockBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Unlock</button>
+          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-theme="dark">Dark</button>
+          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-theme="indigo">Indigo</button>
+          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-theme="teal">Teal</button>
         </div>
       </div>
-
-      <div id="journalArea" class="hidden">
-        <div class="space-y-2">
-          <textarea id="noteText" rows="4" class="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700" placeholder="Write a private note (stored only on this device)"></textarea>
-          <div class="flex gap-2">
-            <button id="saveNoteBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Save Note</button>
-            <button id="clearNoteBtn" class="px-3 py-2 rounded-md ghost-btn">Clear</button>
-          </div>
-        </div>
-        <div>
-          <h3 class="font-semibold mt-4 mb-2">Your Notes</h3>
-          <ul id="notesList" class="space-y-2 text-sm"></ul>
-        </div>
+      <div class="space-y-2">
+        <label class="text-sm">Danger zone</label>
+        <button id="reset-all" class="w-full py-3 rounded-lg bg-red-600 hover:bg-red-500">Reset all data on this device</button>
       </div>
-    </section>
-
-    <section id="panel-resources" class="card rounded-xl p-5 space-y-4 hidden">
-      <p class="text-gray-300 text-sm">If you are in immediate danger, call 911 (or your local emergency number).</p>
-      <ul class="space-y-3">
-        <li>
-          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
-             href="https://www.thehotline.org/">National Domestic Violence Hotline (US)</a>
-          <div class="text-xs text-gray-400">Call 1-800-799-SAFE (7233) or chat on their website.</div>
-        </li>
-        <li>
-          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
-             href="https://www.womenshealth.gov/relationships-and-safety/get-help/state-resources">US State Resources</a>
-        </li>
-        <li>
-          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
-             href="https://www.gov.uk/guidance/domestic-abuse-how-to-get-help">UK: Get help for domestic abuse</a>
-        </li>
-        <li>
-          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
-             href="https://endingviolencecanada.org/getting-help/">Canada: Getting Help</a>
-        </li>
-      </ul>
-      <p class="text-xs text-gray-500">Resources open in a new tab and do not share your data from this app.</p>
-    </section>
-
-    <section id="panel-settings" class="card rounded-xl p-5 space-y-6 hidden">
-      <div id="settingsLock" class="space-y-3">
-        <p class="text-gray-300">Settings are locked. Enter PIN to unlock.</p>
-        <div class="flex gap-2">
-          <input id="settingsPinInput" type="password" inputmode="numeric" maxlength="8" class="w-36 px-3 py-2 rounded-md bg-gray-800 border border-gray-700" placeholder="PIN" />
-          <button id="settingsUnlockBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Unlock</button>
-        </div>
+      <div class="space-y-2">
+        <label class="text-sm">Disguise Mode</label>
+        <button id="toggle-disguise" class="w-full py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Toggle Disguise</button>
       </div>
 
-      <div id="settingsArea" class="hidden space-y-6">
-        <div class="space-y-2">
-          <label class="block text-sm text-gray-300">Default timer (minutes)</label>
-          <input id="defaultMinutes" type="number" min="1" max="180" class="w-32 px-3 py-2 rounded-md bg-gray-800 border border-gray-700" />
-        </div>
-
-        <div class="space-y-2">
-          <label class="block text-sm text-gray-300 mb-1">Disguise</label>
-          <div class="flex items-center gap-2">
-            <input id="disguiseToggle" type="checkbox" class="h-4 w-4">
-            <span class="text-sm text-gray-400">Use neutral title</span>
-          </div>
-          <input id="disguiseTitle" type="text" class="mt-2 w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
-                 placeholder="e.g., Calculator, Notes" />
-        </div>
-
-        <div class="space-y-2">
-          <label class="block text-sm text-gray-300">Set / Change PIN</label>
-          <div id="pinNeedsCurrent" class="hidden">
-            <input id="currentPin" type="password" inputmode="numeric" maxlength="8"
-                   class="w-40 px-3 py-2 rounded-md bg-gray-800 border border-gray-700 mb-2"
-                   placeholder="Current PIN" />
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2">
-            <input id="newPin" type="password" inputmode="numeric" maxlength="8"
-                   class="w-40 px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
-                   placeholder="New PIN" />
-            <input id="confirmPin" type="password" inputmode="numeric" maxlength="8"
-                   class="w-40 px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
-                   placeholder="Confirm PIN" />
-            <button id="savePinBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Save PIN</button>
-          </div>
-          <button id="removePinBtn" class="mt-2 px-3 py-2 rounded-md ghost-btn">Remove PIN</button>
-        </div>
-
-        <div class="flex flex-wrap gap-2">
-          <button id="saveSettingsBtn" class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Save Settings</button>
-          <button id="clearDataBtn" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700">Erase All Local Data</button>
-        </div>
+      <!-- Calculator layout (only visible in disguise) -->
+      <div class="calc-grid mt-2">
+        <div class="col-span-4 bg-black/30 rounded-lg p-3 text-right" id="calc-screen">0</div>
+        <div class="calc-btn">7</div><div class="calc-btn">8</div><div class="calc-btn">9</div><div class="calc-btn">÷</div>
+        <div class="calc-btn">4</div><div class="calc-btn">5</div><div class="calc-btn">6</div><div class="calc-btn">×</div>
+        <div class="calc-btn">1</div><div class="calc-btn">2</div><div class="calc-btn">3</div><div class="calc-btn">−</div>
+        <div class="calc-btn">0</div><div class="calc-btn">.</div><div class="calc-btn">=</div><div class="calc-btn">+</div>
       </div>
     </section>
-  </div>
-
-  <!-- Simple toast -->
-  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm hidden"></div>
-
-  <!-- Modal for confirm -->
-  <div id="modal" class="fixed inset-0 bg-black/50 items-center justify-center hidden">
-    <div class="card rounded-xl p-5 w-80">
-      <div id="modalText" class="mb-4">Are you sure?</div>
-      <div class="flex gap-2 justify-end">
-        <button id="modalNo" class="px-3 py-2 rounded-md ghost-btn">Cancel</button>
-        <button id="modalYes" class="px-3 py-2 rounded-md bg-red-600 hover:bg-red-700">Delete</button>
-      </div>
-    </div>
   </div>
 
   <script>
-    /* ===================== Utilities ===================== */
-    const $ = (sel) => document.querySelector(sel);
-    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-    const fmt = (s) => (s < 10 ? '0' + s : '' + s);
-
-    const store = {
-      get(key, def) {
-        try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
-        catch { return def; }
-      },
-      set(key, val) { localStorage.setItem(key, JSON.stringify(val)); },
-      rm(key) { localStorage.removeItem(key); },
-      clear() { localStorage.clear(); }
+    /* ====== storage helpers ====== */
+    const S = {
+      get(k, d=null){ try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+      set(k, v){ localStorage.setItem(k, JSON.stringify(v)); },
+      del(k){ localStorage.removeItem(k); }
     };
 
-    const KEYS = {
-      settings: 'TO_SETTINGS',
-      sessions: 'TO_SESSIONS',
-      notes: 'TO_NOTES'
+    /* ====== tabs ====== */
+    const tabs = [...document.querySelectorAll('.tab-btn')];
+    const sections = {
+      home: document.getElementById('tab-home'),
+      checkin: document.getElementById('tab-checkin'),
+      journal: document.getElementById('tab-journal'),
+      resources: document.getElementById('tab-resources'),
+      settings: document.getElementById('tab-settings'),
     };
-
-    function toast(msg, ms=1600) {
-      const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
-      setTimeout(()=>t.classList.add('hidden'), ms);
+    function showTab(name){
+      tabs.forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+      Object.entries(sections).forEach(([k,el]) => el.classList.toggle('hidden', k!==name));
+      S.set('lastTab', name);
     }
+    tabs.forEach(b => b.addEventListener('click', ()=>showTab(b.dataset.tab)));
+    showTab(S.get('lastTab','home'));
 
-    function confirmModal(text) {
-      return new Promise((resolve) => {
-        const m = $('#modal'), txt = $('#modalText'), yes = $('#modalYes'), no = $('#modalNo');
-        txt.textContent = text;
-        m.classList.remove('hidden');
-        m.classList.add('flex');
-        const done = (res) => {
-          yes.removeEventListener('click', onYes);
-          no.removeEventListener('click', onNo);
-          m.classList.add('hidden');
-          m.classList.remove('flex');
-          resolve(res);
-        };
-        const onYes = () => done(true);
-        const onNo = () => done(false);
-        yes.addEventListener('click', onYes);
-        no.addEventListener('click', onNo);
+    /* ====== timer ====== */
+    const disp = document.getElementById('timer-display');
+    const btnStart = document.getElementById('timer-start');
+    const btnPause = document.getElementById('timer-pause');
+    const btnReset = document.getElementById('timer-reset');
+    let remaining = S.get('timerRemaining', 300);
+    let running = false, tId = null, lastTick = 0;
+    function fmt(s){ const m=Math.floor(s/60).toString().padStart(2,'0'); const sc=Math.floor(s%60).toString().padStart(2,'0'); return `${m}:${sc}`; }
+    function renderTimer(){ if(disp) disp.textContent = fmt(Math.max(0, remaining)); }
+    function tick(){
+      const now = Date.now();
+      if (lastTick){ remaining -= (now - lastTick)/1000; S.set('timerRemaining', Math.max(0, Math.floor(remaining))); }
+      lastTick = now;
+      renderTimer();
+      if (remaining <= 0){ running=false; clearInterval(tId); tId=null; lastTick=0; }
+    }
+    if (btnStart) btnStart.addEventListener('click', ()=>{ if (running) return; running=true; lastTick=0; tId=setInterval(tick, 250); });
+    if (btnPause) btnPause.addEventListener('click', ()=>{ running=false; clearInterval(tId); tId=null; lastTick=0; });
+    if (btnReset) btnReset.addEventListener('click', ()=>{ running=false; clearInterval(tId); tId=null; lastTick=0; remaining=300; S.set('timerRemaining', remaining); renderTimer(); });
+    document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click', ()=>{ remaining=+b.dataset.preset; S.set('timerRemaining', remaining); renderTimer(); }));
+    renderTimer();
+
+    /* ====== disguise / quick exit ====== */
+    const btnQuick = document.getElementById('btn-quick-exit');
+    const btnDisguise = document.getElementById('btn-disguise');
+    let pressTimer=null;
+    if (btnQuick){
+      btnQuick.addEventListener('mousedown', ()=>{ pressTimer=setTimeout(()=>toggleDisguise(true), 900); });
+      btnQuick.addEventListener('touchstart', ()=>{ pressTimer=setTimeout(()=>toggleDisguise(true), 900); });
+      const clearPress = ()=>clearTimeout(pressTimer);
+      btnQuick.addEventListener('mouseup', clearPress);
+      btnQuick.addEventListener('mouseleave', clearPress);
+      btnQuick.addEventListener('touchend', clearPress);
+      btnQuick.addEventListener('click', ()=>{
+        toggleDisguise(true);
+        try { window.location.replace('https://www.weather.com'); } catch {}
       });
     }
-
-    async function sha256Hex(text) {
-      const enc = new TextEncoder().encode(text);
-      const buf = await crypto.subtle.digest('SHA-256', enc);
-      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    function toggleDisguise(forceOn=null){
+      const root = document.body;
+      const on = forceOn===null ? !root.classList.contains('calc-shell') : forceOn;
+      root.classList.toggle('calc-shell', on);
+      S.set('disguised', on);
+      const title = document.getElementById('app-title');
+      if (title) title.textContent = on ? 'Calculator' : (S.get('appName')||'TimeOut');
     }
+    if (btnDisguise) btnDisguise.addEventListener('click', ()=>toggleDisguise());
+    if (S.get('disguised')) toggleDisguise(true);
 
-    /* ===================== Settings / PIN ===================== */
-    let settings = store.get(KEYS.settings, {
-      defaultMinutes: 5,
-      disguise: { enabled: false, title: 'Calculator' },
-      pinHash: null
+    const calcScreen = document.getElementById('calc-screen');
+    document.querySelectorAll('.calc-btn').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const t=b.textContent.trim();
+        if(t==='='){ calcScreen.textContent = (Math.random()*100).toFixed(0); }
+        else { calcScreen.textContent = (calcScreen.textContent==='0' ? t : calcScreen.textContent + t); }
+      });
     });
-    let unlocked = { journal:false, settings:false };
 
-    function applyDisguise() {
-      const title = settings.disguise.enabled ? (settings.disguise.title || 'Calculator') : 'TimeOut';
-      document.title = title;
-      $('#appTitle').textContent = title;
+    /* ====== Check-In (8 qs) ====== */
+    const form = document.getElementById('checkin-form');
+    const btnClear = document.getElementById('checkin-clear');
+    const resultBox = document.getElementById('checkin-result');
+    const summaryEl = document.getElementById('checkin-summary');
+    const safetyEl = document.getElementById('checkin-safety');
+
+    // load saved values
+    (S.get('checkin')||[]).forEach((v,i)=>{ const sel=form?.querySelector(`[name=q${i+1}]`); if (sel) sel.value=String(v); });
+
+    form?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const vals = [];
+      for(let i=1;i<=8;i++){ vals.push(+form[`q${i}`].value); }
+      S.set('checkin', vals);
+      const score = vals.reduce((a,b)=>a+b,0); // 0..32
+      const level = score<=6?'Low': score<=14?'Moderate': score<=22?'High':'Urgent';
+      const blurb = {
+        Low: 'Current answers suggest lower immediate risk. Keep support and a plan ready.',
+        Moderate: 'There are warning signs. Consider updating a safety plan and talking to someone you trust.',
+        High: 'Multiple risk factors present. It may help to connect with an advocate or shelter.',
+        Urgent: 'High risk. If you can, consider contacting a hotline, advocate, or emergency services.'
+      }[level];
+      summaryEl.textContent = `Risk level: ${level} (score ${score}/32). ${blurb}`;
+      safetyEl.textContent = 'If you are in immediate danger, call 911 (US) or local emergency. For confidential help: 1-800-799-7233 (The Hotline) or text START to 88788.';
+      resultBox.classList.remove('hidden');
+    });
+    btnClear?.addEventListener('click', ()=>{
+      for(let i=1;i<=8;i++){ form[`q${i}`].value='0'; }
+      S.del('checkin'); resultBox.classList.add('hidden');
+    });
+
+    /* ====== Journal (PIN) ====== */
+    const locked = document.getElementById('journal-locked');
+    const unlocked = document.getElementById('journal-unlocked');
+    const pinInput = document.getElementById('pin-input');
+    const pinUnlock = document.getElementById('pin-unlock');
+    const pinSet = document.getElementById('pin-set');
+    const jText = document.getElementById('journal-text');
+    const jSave = document.getElementById('journal-save');
+    const jLock = document.getElementById('journal-lock');
+
+    function showLocked(flag){
+      locked.classList.toggle('hidden', !flag);
+      unlocked.classList.toggle('hidden', flag);
     }
+    function loadJournal(){ jText.value = S.get('journal',''); }
 
-    function requirePin(area) {
-      const need = !!settings.pinHash && !unlocked[area];
-      if (area === 'journal') {
-        $('#journalLock').classList.toggle('hidden', !need);
-        $('#journalArea').classList.toggle('hidden', need);
-      } else if (area === 'settings') {
-        $('#settingsLock').classList.toggle('hidden', !need);
-        $('#settingsArea').classList.toggle('hidden', need);
+    pinUnlock?.addEventListener('click', ()=>{
+      const pin = S.get('pin', null);
+      if (!pin){ alert('No PIN set yet. Tap “Set / Change PIN” first.'); return; }
+      if (pinInput.value === pin){ loadJournal(); showLocked(false); }
+      else alert('Incorrect PIN');
+    });
+    pinSet?.addEventListener('click', ()=>{
+      const v = (pinInput.value||'').trim();
+      if (!/^\d{4,8}$/.test(v)) { alert('PIN must be 4–8 digits.'); return; }
+      S.set('pin', v);
+      alert('PIN saved.');
+    });
+    jSave?.addEventListener('click', ()=>{ S.set('journal', jText.value || ''); alert('Saved.'); });
+    jLock?.addEventListener('click', ()=>{ showLocked(true); pinInput.value=''; });
+
+    showLocked(true);
+
+    /* ====== Resources copy ====== */
+    document.querySelectorAll('[data-copy]').forEach(b=>{
+      b.addEventListener('click', async ()=>{
+        try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'Copied'; setTimeout(()=>b.textContent='Copy',900); }
+        catch { alert('Copy failed'); }
+      });
+    });
+
+    /* ====== Settings ====== */
+    const titleEl = document.getElementById('app-title');
+    const nameInput = document.getElementById('setting-appname');
+    const saveName = document.getElementById('setting-save-appname');
+    if (nameInput) nameInput.value = S.get('appName','TimeOut');
+    if (titleEl) titleEl.textContent = S.get('disguised') ? 'Calculator' : (S.get('appName','TimeOut'));
+    saveName?.addEventListener('click', ()=>{
+      const v = (nameInput.value||'').trim() || 'TimeOut';
+      S.set('appName', v);
+      if (!S.get('disguised') && titleEl) titleEl.textContent = v;
+    });
+
+    document.querySelectorAll('[data-theme]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const t = btn.dataset.theme;
+        if (t==='dark'){ document.documentElement.style.setProperty('--brand','#6366f1'); }
+        if (t==='indigo'){ document.documentElement.style.setProperty('--brand','#4f46e5'); }
+        if (t==='teal'){ document.documentElement.style.setProperty('--brand','#14b8a6'); }
+      });
+    });
+
+    document.getElementById('reset-all')?.addEventListener('click', ()=>{
+      if (confirm('This will erase Check-Ins, Journal, PIN, timer, and settings on this device. Continue?')){
+        localStorage.clear(); location.reload();
       }
-    }
+    });
 
-    async function tryUnlock(area, pin) {
-      if (!settings.pinHash) { unlocked[area] = true; requirePin(area); return true; }
-      const hash = await sha256Hex(pin || '');
-      if (hash === settings.pinHash) {
-        unlocked[area] = true; requirePin(area); toast('Unlocked');
-        return true;
-      } else { toast('Wrong PIN', 1400); return false; }
-    }
-
-    /* ===================== Tabs ===================== */
-    function showTab(name) {
-      $$('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
-      ['timer','journal','resources','settings'].forEach(t=>{
-        $('#panel-'+t).classList.toggle('hidden', t!==name);
-      });
-      if (name==='journal') { requirePin('journal'); renderNotes(); }
-      if (name==='settings') { requirePin('settings'); fillSettingsForm(); }
-    }
-
-    /* ===================== Timer ===================== */
-    let totalSec = (settings.defaultMinutes || 5) * 60;
-    let remainSec = totalSec;
-    let ticking = null;
-    const sessionLog = store.get(KEYS.sessions, []); // [{startedAt, endedAt, durationSec}]
-
-    function renderTime() {
-      const h = Math.floor(remainSec / 3600);
-      const m = Math.floor((remainSec % 3600) / 60);
-      const s = remainSec % 60;
-      const str = h>0 ? `${fmt(h)}:${fmt(m)}:${fmt(s)}` : `${fmt(m)}:${fmt(s)}`;
-      $('#timeDisplay').textContent = (h>0 ? str : `00:${str}`);
-    }
-
-    function renderSessions() {
-      const list = $('#sessionList');
-      list.innerHTML = '';
-      if (sessionLog.length === 0) {
-        list.innerHTML = '<li class="text-gray-500">No sessions yet.</li>';
-        return;
-      }
-      sessionLog.slice(-10).reverse().forEach(s=>{
-        const li = document.createElement('li');
-        const dur = new Date(s.durationSec*1000).toISOString().substr(11,8);
-        const when = new Date(s.endedAt||s.startedAt).toLocaleString();
-        li.className = 'flex justify-between items-center card rounded-lg p-3';
-        li.innerHTML = `<span class="text-gray-300">${when}</span><span class="text-gray-400">${dur}</span>`;
-        list.appendChild(li);
-      });
-    }
-
-    function startTimer() {
-      if (ticking) return;
-      const startTs = Date.now();
-      ticking = setInterval(()=>{
-        remainSec = Math.max(0, remainSec - 1);
-        renderTime();
-        if (remainSec === 0) {
-          clearInterval(ticking); ticking=null;
-          sessionLog.push({ startedAt:startTs, endedAt:Date.now(), durationSec: totalSec });
-          store.set(KEYS.sessions, sessionLog);
-          renderSessions();
-          toast('Done');
-        }
-      }, 1000);
-    }
-
-    function pauseTimer() {
-      if (!ticking) return;
-      clearInterval(ticking); ticking=null;
-      const ran = totalSec - remainSec;
-      if (ran>0) {
-        sessionLog.push({ startedAt: Date.now()-ran*1000, endedAt: Date.now(), durationSec: ran });
-        store.set(KEYS.sessions, sessionLog);
-        renderSessions();
-      }
-    }
-
-    function resetTimer(newMin) {
-      if (ticking) { clearInterval(ticking); ticking=null; }
-      totalSec = (newMin ?? settings.defaultMinutes ?? 5) * 60;
-      remainSec = totalSec;
-      renderTime();
-    }
-
-    /* ===================== Notes (Journal) ===================== */
-    function renderNotes() {
-      const notes = store.get(KEYS.notes, []);
-      const list = $('#notesList'); list.innerHTML = '';
-      if (notes.length === 0) {
-        list.innerHTML = '<li class="text-gray-500">No notes saved.</li>';
-        return;
-      }
-      notes.slice().reverse().forEach(n=>{
-        const li = document.createElement('li');
-        li.className = 'card rounded-lg p-3';
-        li.innerHTML = `
-          <div class="flex justify-between gap-2">
-            <div class="text-xs text-gray-400">${new Date(n.createdAt).toLocaleString()}</div>
-            <button class="text-red-400 hover:text-red-300" data-del="${n.id}">Delete</button>
-          </div>
-          <div class="mt-2 whitespace-pre-wrap text-sm">${n.text.replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
-        `;
-        list.appendChild(li);
-      });
-      list.querySelectorAll('[data-del]').forEach(btn=>{
-        btn.addEventListener('click', async ()=>{
-          const ok = await confirmModal('Delete this note?');
-          if (!ok) return;
-          const id = btn.getAttribute('data-del');
-          const notes2 = store.get(KEYS.notes, []).filter(n=>n.id!==id);
-          store.set(KEYS.notes, notes2);
-          renderNotes();
-          toast('Deleted');
-        });
-      });
-    }
-
-    /* ===================== Settings UI ===================== */
-    function fillSettingsForm() {
-      $('#defaultMinutes').value = settings.defaultMinutes ?? 5;
-      $('#disguiseToggle').checked = !!settings.disguise?.enabled;
-      $('#disguiseTitle').value = settings.disguise?.title ?? 'Calculator';
-      $('#pinNeedsCurrent').classList.toggle('hidden', !settings.pinHash);
-    }
-
-    async function savePinFlow() {
-      const has = !!settings.pinHash;
-      const cur = $('#currentPin').value;
-      if (has) {
-        if (!cur) { toast('Enter current PIN'); return; }
-        const ok = (await sha256Hex(cur)) === settings.pinHash;
-        if (!ok) { toast('Current PIN wrong'); return; }
-      }
-      const np = $('#newPin').value;
-      const cp = $('#confirmPin').value;
-      if (!np || np !== cp) { toast('PINs must match'); return; }
-      settings.pinHash = await sha256Hex(np);
-      store.set(KEYS.settings, settings);
-      unlocked = { journal:false, settings:false }; // relock areas
-      requirePin('journal'); requirePin('settings');
-      $('#newPin').value = ''; $('#confirmPin').value = ''; $('#currentPin').value='';
-      $('#pinNeedsCurrent').classList.remove('hidden');
-      toast('PIN saved');
-    }
-
-    async function removePinFlow() {
-      if (!settings.pinHash) { toast('No PIN set'); return; }
-      const ok = await confirmModal('Remove PIN protection?');
-      if (!ok) return;
-      settings.pinHash = null;
-      store.set(KEYS.settings, settings);
-      unlocked = { journal:true, settings:true };
-      requirePin('journal'); requirePin('settings');
-      $('#currentPin').value=''; $('#newPin').value=''; $('#confirmPin').value='';
-      $('#pinNeedsCurrent').classList.add('hidden');
-      toast('PIN removed');
-    }
-
-    function saveSettings() {
-      let m = parseInt($('#defaultMinutes').value || '5', 10);
-      if (Number.isNaN(m) || m<1) m=5;
-      settings.defaultMinutes = m;
-      settings.disguise = {
-        enabled: $('#disguiseToggle').checked,
-        title: $('#disguiseTitle').value || 'Calculator'
-      };
-      store.set(KEYS.settings, settings);
-      applyDisguise();
-      resetTimer(settings.defaultMinutes);
-      toast('Settings saved');
-    }
-
-    /* ===================== Quick Exit / Hide ===================== */
-    function quickExit() {
-      // Replace current page with neutral site (commonly weather or search)
-      location.replace('https://weather.com/');
-    }
-    function hideUI() {
-      document.body.classList.toggle('opacity-0');
-      setTimeout(()=>document.body.classList.toggle('opacity-0'), 2000);
-    }
-
-    /* ===================== Boot ===================== */
-    function bind() {
-      // Tabs
-      $$('.tab-btn').forEach(b=>{
-        b.addEventListener('click', ()=> showTab(b.dataset.tab));
-      });
-
-      // Timer controls
-      $('#startBtn').addEventListener('click', startTimer);
-      $('#pauseBtn').addEventListener('click', pauseTimer);
-      $('#resetBtn').addEventListener('click', ()=>resetTimer());
-      $$('.preset').forEach(p=>{
-        p.addEventListener('click', ()=> { resetTimer(parseInt(p.dataset.min,10)); });
-      });
-
-      // Journal lock/unlock
-      $('#journalUnlockBtn').addEventListener('click', ()=> tryUnlock('journal', $('#journalPinInput').value));
-      $('#saveNoteBtn').addEventListener('click', ()=>{
-        const txt = $('#noteText').value.trim();
-        if (!txt) { toast('Nothing to save'); return; }
-        const notes = store.get(KEYS.notes, []);
-        notes.push({ id: String(Date.now())+'-'+Math.random().toString(36).slice(2,6), text: txt, createdAt: Date.now() });
-        store.set(KEYS.notes, notes);
-        $('#noteText').value = '';
-        renderNotes();
-        toast('Saved');
-      });
-      $('#clearNoteBtn').addEventListener('click', ()=> $('#noteText').value='');
-
-      // Settings lock/unlock + actions
-      $('#settingsUnlockBtn').addEventListener('click', ()=> tryUnlock('settings', $('#settingsPinInput').value));
-      $('#savePinBtn').addEventListener('click', savePinFlow);
-      $('#removePinBtn').addEventListener('click', removePinFlow);
-      $('#saveSettingsBtn').addEventListener('click', saveSettings);
-      $('#clearDataBtn').addEventListener('click', async ()=>{
-        const ok = await confirmModal('Erase all local data? This cannot be undone.');
-        if (!ok) return;
-        localStorage.clear();
-        // reload defaults
-        settings = { defaultMinutes:5, disguise:{enabled:false,title:'Calculator'}, pinHash:null };
-        store.set(KEYS.settings, settings);
-        unlocked = { journal:false, settings:false };
-        applyDisguise();
-        resetTimer(5);
-        renderSessions();
-        renderNotes();
-        requirePin('journal'); requirePin('settings');
-        fillSettingsForm();
-        toast('Data erased');
-      });
-
-      // Quick exit / hide
-      $('#quickExitBtn').addEventListener('click', quickExit);
-      $('#hideBtn').addEventListener('click', hideUI);
-      window.addEventListener('keydown', (e)=> {
-        if (e.key === 'Escape') quickExit();
-      });
-    }
-
-    function firstRender() {
-      applyDisguise();
-      resetTimer(settings.defaultMinutes || 5);
-      renderTime();
-      renderSessions();
-      renderNotes();
-      showTab('timer');
-      // Lock areas if PIN exists
-      requirePin('journal');
-      requirePin('settings');
-      fillSettingsForm();
-    }
-
-    // init
-    bind();
-    firstRender();
+    // restore disguise if needed (title set above)
+    if (S.get('disguised')) document.body.classList.add('calc-shell');
   </script>
+
+  <!-- A11y note for screen readers -->
+  <div class="sr hide-when-disguised">This app includes a quick-exit and disguise. If you need help now, call 911 (US) or 112/999 elsewhere.</div>
 </body>
 </html>
