@@ -1,1 +1,317 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Timeout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: dark; }
+    .hidden{display:none}
+  </style>
+</head>
+<body class="min-h-screen bg-neutral-950 text-neutral-100">
+  <!-- Header / Nav -->
+  <header class="sticky top-0 z-10 bg-neutral-900/80 backdrop-blur border-b border-neutral-800">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="font-bold text-xl">⏱️ Timeout</h1>
+      <nav class="flex gap-2">
+        <button data-nav="home" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">Home</button>
+        <button data-nav="history" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">History</button>
+        <button data-nav="settings" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">Settings</button>
+        <button data-nav="profile" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">Profile</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <!-- Flash -->
+    <div id="flash" class="hidden rounded-lg px-3 py-2 text-sm"></div>
+
+    <!-- HOME -->
+    <section id="view-home" class="space-y-4">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
+        <h2 class="text-lg font-semibold mb-2">Focus Timer</h2>
+        <p class="text-sm text-neutral-400 mb-4">Press Start to begin. You can save a session with a label when you’re done.</p>
+
+        <div class="flex items-center gap-4">
+          <div class="text-5xl tabular-nums font-bold" id="time">25:00</div>
+          <div class="flex gap-2">
+            <button id="startBtn" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">Start</button>
+            <button id="pauseBtn" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500" disabled>Pause</button>
+            <button id="resetBtn" class="px-4 py-2 rounded-lg bg-neutral-700 hover:bg-neutral-600">Reset</button>
+          </div>
+        </div>
+
+        <div class="mt-4 grid sm:grid-cols-3 gap-3">
+          <label class="text-sm">
+            Duration (minutes)
+            <input id="duration" type="number" min="1" max="180" value="25"
+              class="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2"/>
+          </label>
+          <label class="text-sm">
+            Label (optional)
+            <input id="label" type="text" placeholder="e.g. Reading"
+              class="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2"/>
+          </label>
+          <div class="flex items-end">
+            <button id="saveBtn" class="w-full px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500" disabled>Save Session</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="view-history" class="hidden">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold">History</h2>
+          <button id="clearHistory" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500">Clear</button>
+        </div>
+        <div id="historyEmpty" class="text-neutral-400 text-sm">No sessions yet.</div>
+        <ul id="historyList" class="divide-y divide-neutral-800"></ul>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="hidden">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 space-y-4">
+        <h2 class="text-lg font-semibold">Settings</h2>
+
+        <label class="flex items-center justify-between bg-neutral-800/60 border border-neutral-700 rounded-lg p-3">
+          <div>
+            <div class="font-medium">Sound on finish</div>
+            <div class="text-xs text-neutral-400">Play a short chime when a timer completes.</div>
+          </div>
+          <input id="soundToggle" type="checkbox" class="h-5 w-5 accent-indigo-600">
+        </label>
+
+        <label class="flex items-center justify-between bg-neutral-800/60 border border-neutral-700 rounded-lg p-3">
+          <div>
+            <div class="font-medium">Auto-save on finish</div>
+            <div class="text-xs text-neutral-400">Automatically save a session when the timer hits 0.</div>
+          </div>
+          <input id="autosaveToggle" type="checkbox" class="h-5 w-5 accent-indigo-600">
+        </label>
+
+        <div class="text-sm text-neutral-400">All settings & data are saved locally on this device.</div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="view-profile" class="hidden">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 space-y-4">
+        <h2 class="text-lg font-semibold">Profile</h2>
+        <label class="text-sm">
+          Display name
+          <input id="displayName" type="text" placeholder="Your name"
+            class="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2"/>
+        </label>
+        <button id="saveProfile" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">Save Profile</button>
+        <div id="profileInfo" class="text-sm text-neutral-400"></div>
+      </div>
+    </section>
+  </main>
+
+  <audio id="ding" preload="auto">
+    <source src="https://upload.wikimedia.org/wikipedia/commons/1/15/Short_Beep.ogg" type="audio/ogg">
+  </audio>
+
+  <script>
+    // ---------- Tiny SPA Router ----------
+    const views = ["home","history","settings","profile"];
+    const show = (name) => {
+      views.forEach(v => document.getElementById(`view-${v}`).classList.toggle("hidden", v!==name));
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("bg-indigo-600", b.dataset.nav===name));
+      location.hash = name;
+    };
+    window.addEventListener("hashchange", () => {
+      const target = location.hash.replace("#","") || "home";
+      show(views.includes(target)?target:"home");
+      if (target==="history") renderHistory();
+    });
+
+    // ---------- Storage helpers ----------
+    const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+    const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+    const notify = (msg, type="ok") => {
+      const el = document.getElementById("flash");
+      el.textContent = msg;
+      el.className = type==="err" ? "rounded-lg px-3 py-2 text-sm bg-red-700/60 border border-red-600" :
+                                    "rounded-lg px-3 py-2 text-sm bg-emerald-700/40 border border-emerald-600";
+      el.classList.remove("hidden");
+      setTimeout(()=>el.classList.add("hidden"), 1800);
+    };
+
+    // ---------- State ----------
+    let timer = null;
+    let remaining = 25*60; // seconds
+    let running = false;
+
+    // Elements
+    const timeEl = document.getElementById("time");
+    const startBtn = document.getElementById("startBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const durationEl = document.getElementById("duration");
+    const labelEl = document.getElementById("label");
+    const saveBtn = document.getElementById("saveBtn");
+    const ding = document.getElementById("ding");
+
+    // Settings
+    const soundToggle = document.getElementById("soundToggle");
+    const autosaveToggle = document.getElementById("autosaveToggle");
+
+    // Profile
+    const displayName = document.getElementById("displayName");
+    const saveProfile = document.getElementById("saveProfile");
+    const profileInfo = document.getElementById("profileInfo");
+
+    // History
+    const historyList = document.getElementById("historyList");
+    const historyEmpty = document.getElementById("historyEmpty");
+    const clearHistory = document.getElementById("clearHistory");
+
+    // ---------- Init from storage ----------
+    const settings = load("timeout_settings",{ sound:true, autosave:false });
+    soundToggle.checked = settings.sound;
+    autosaveToggle.checked = settings.autosave;
+
+    const profile = load("timeout_profile",{ name:"" });
+    displayName.value = profile.name;
+    profileInfo.textContent = profile.name ? `Signed in as ${profile.name}` : "No name saved.";
+
+    // ---------- Timer ----------
+    const fmt = (s)=>{
+      const m = Math.floor(s/60), ss = s%60;
+      return `${String(m).padStart(2,"0")}:${String(ss).padStart(2,"0")}`;
+    };
+    const renderTime = () => timeEl.textContent = fmt(remaining);
+
+    const tick = ()=>{
+      if (!running) return;
+      remaining = Math.max(0, remaining-1);
+      renderTime();
+      if (remaining === 0) {
+        stopTimer();
+        if (soundToggle.checked) ding.play().catch(()=>{});
+        if (autosaveToggle.checked) doSave();
+        notify("Time's up!");
+      }
+    };
+
+    const startTimer = ()=>{
+      if (running) return;
+      running = true;
+      startBtn.textContent = "Resume";
+      pauseBtn.disabled = false;
+      timer = setInterval(tick, 1000);
+    };
+    const stopTimer = ()=>{
+      running = false;
+      clearInterval(timer);
+      timer = null;
+      pauseBtn.disabled = true;
+    };
+    const resetTimer = ()=>{
+      stopTimer();
+      remaining = Math.max(60, Math.min(180*60, Number(durationEl.value||25)*60));
+      renderTime();
+      startBtn.textContent = "Start";
+    };
+
+    // ---------- Session Save / History ----------
+    const doSave = ()=>{
+      const sessions = load("timeout_sessions", []);
+      const totalPlanned = Math.max(60, Math.min(180*60, Number(durationEl.value||25)*60));
+      const elapsed = totalPlanned - remaining;
+      const entry = {
+        id: crypto.randomUUID?.() ?? String(Date.now()),
+        at: Date.now(),
+        label: (labelEl.value||"").trim(),
+        planned: totalPlanned,
+        elapsed
+      };
+      sessions.unshift(entry);
+      save("timeout_sessions", sessions);
+      renderHistory();
+      saveBtn.disabled = true;
+      notify("Session saved.");
+    };
+
+    const renderHistory = ()=>{
+      const sessions = load("timeout_sessions", []);
+      historyList.innerHTML = "";
+      historyEmpty.classList.toggle("hidden", sessions.length>0);
+      sessions.forEach(s=>{
+        const li = document.createElement("li");
+        const date = new Date(s.at).toLocaleString();
+        const pct = Math.round((s.elapsed / s.planned) * 100);
+        li.className = "py-3 flex items-start justify-between gap-3";
+        li.innerHTML = `
+          <div>
+            <div class="font-medium">${s.label || "Untitled session"}</div>
+            <div class="text-xs text-neutral-400">${date}</div>
+            <div class="text-xs text-neutral-400">Elapsed ${fmt(s.elapsed)} / Planned ${fmt(s.planned)} (${pct}%)</div>
+          </div>
+          <button class="px-2 py-1 text-sm rounded bg-neutral-800 hover:bg-neutral-700" data-id="${s.id}">Delete</button>
+        `;
+        historyList.appendChild(li);
+      });
+      // delete handlers
+      historyList.querySelectorAll("button[data-id]").forEach(btn=>{
+        btn.onclick = ()=>{
+          const id = btn.getAttribute("data-id");
+          const sessions = load("timeout_sessions", []);
+          save("timeout_sessions", sessions.filter(x=>x.id!==id));
+          renderHistory();
+          notify("Deleted.");
+        };
+      });
+    };
+
+    // ---------- Events ----------
+    startBtn.onclick = ()=>{ startTimer(); saveBtn.disabled = false; };
+    pauseBtn.onclick = ()=>{ stopTimer(); };
+    resetBtn.onclick = ()=>{ resetTimer(); saveBtn.disabled = true; };
+    saveBtn.onclick = ()=> doSave();
+
+    durationEl.onchange = ()=> resetTimer();
+
+    soundToggle.onchange = ()=>{
+      const s = load("timeout_settings",{ sound:true, autosave:false });
+      s.sound = soundToggle.checked; save("timeout_settings", s);
+      notify(s.sound ? "Sound on." : "Sound off.");
+    };
+    autosaveToggle.onchange = ()=>{
+      const s = load("timeout_settings",{ sound:true, autosave:false });
+      s.autosave = autosaveToggle.checked; save("timeout_settings", s);
+      notify(s.autosave ? "Autosave on." : "Autosave off.");
+    };
+
+    saveProfile.onclick = ()=>{
+      const name = displayName.value.trim();
+      save("timeout_profile", { name });
+      profileInfo.textContent = name ? `Signed in as ${name}` : "No name saved.";
+      notify("Profile saved.");
+    };
+
+    clearHistory.onclick = ()=>{
+      if (!confirm("Clear all sessions?")) return;
+      save("timeout_sessions", []);
+      renderHistory();
+      notify("History cleared.");
+    };
+
+    // nav
+    document.querySelectorAll("[data-nav]").forEach(btn=>{
+      btn.onclick = ()=> show(btn.dataset.nav);
+    });
+
+    // start
+    resetTimer();
+    show((location.hash||"#home").replace("#",""));
+  </script>
+</body>
+</html>
