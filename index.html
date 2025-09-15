@@ -1,317 +1,518 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Timeout</title>
+  <title>TimeOut</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root { color-scheme: dark; }
-    .hidden{display:none}
+    html,body { background:#0d1117; }
+    .card { background:#111827; border:1px solid #1f2937; }
+    .ghost-btn { background:transparent; border:1px solid #374151; }
+    .ghost-btn:hover { border-color:#6b7280; }
+    .tab-btn.active { background:#4f46e5; color:white; }
+    .hidden-imp { display:none !important; }
   </style>
 </head>
-<body class="min-h-screen bg-neutral-950 text-neutral-100">
-  <!-- Header / Nav -->
-  <header class="sticky top-0 z-10 bg-neutral-900/80 backdrop-blur border-b border-neutral-800">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-      <h1 class="font-bold text-xl">⏱️ Timeout</h1>
-      <nav class="flex gap-2">
-        <button data-nav="home" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">Home</button>
-        <button data-nav="history" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">History</button>
-        <button data-nav="settings" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">Settings</button>
-        <button data-nav="profile" class="nav-btn px-3 py-1.5 rounded-lg hover:bg-neutral-800">Profile</button>
-      </nav>
+<body class="text-gray-100 min-h-screen">
+  <div class="max-w-3xl mx-auto p-4 sm:p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between gap-3 mb-4">
+      <h1 id="appTitle" class="text-2xl font-semibold">TimeOut</h1>
+      <div class="flex items-center gap-2">
+        <button id="quickExitBtn" class="px-3 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold">
+          Quick Exit (Esc)
+        </button>
+        <button id="hideBtn" class="px-3 py-2 rounded-md ghost-btn">Hide UI</button>
+      </div>
     </div>
-  </header>
 
-  <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
-    <!-- Flash -->
-    <div id="flash" class="hidden rounded-lg px-3 py-2 text-sm"></div>
+    <!-- Tabs -->
+    <nav class="flex gap-2 mb-4">
+      <button data-tab="timer" class="tab-btn px-3 py-2 rounded-md ghost-btn active">Timer</button>
+      <button data-tab="journal" class="tab-btn px-3 py-2 rounded-md ghost-btn">Journal</button>
+      <button data-tab="resources" class="tab-btn px-3 py-2 rounded-md ghost-btn">Resources</button>
+      <button data-tab="settings" class="tab-btn px-3 py-2 rounded-md ghost-btn">Settings</button>
+    </nav>
 
-    <!-- HOME -->
-    <section id="view-home" class="space-y-4">
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
-        <h2 class="text-lg font-semibold mb-2">Focus Timer</h2>
-        <p class="text-sm text-neutral-400 mb-4">Press Start to begin. You can save a session with a label when you’re done.</p>
+    <!-- Panels -->
+    <section id="panel-timer" class="card rounded-xl p-5 space-y-5">
+      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div>
+          <div class="text-sm text-gray-400">Remaining</div>
+          <div id="timeDisplay" class="text-5xl sm:text-6xl font-bold tracking-tight">00:05:00</div>
+        </div>
+        <div class="grid grid-cols-5 gap-2">
+          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="5">5m</button>
+          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="10">10m</button>
+          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="15">15m</button>
+          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="20">20m</button>
+          <button class="preset ghost-btn px-3 py-2 rounded-md" data-min="25">25m</button>
+        </div>
+      </div>
 
-        <div class="flex items-center gap-4">
-          <div class="text-5xl tabular-nums font-bold" id="time">25:00</div>
+      <div class="flex flex-wrap gap-2">
+        <button id="startBtn" class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Start</button>
+        <button id="pauseBtn" class="px-4 py-2 rounded-md ghost-btn">Pause</button>
+        <button id="resetBtn" class="px-4 py-2 rounded-md ghost-btn">Reset</button>
+      </div>
+
+      <div>
+        <h3 class="font-semibold mb-2">Recent Sessions</h3>
+        <ul id="sessionList" class="space-y-2 text-sm"></ul>
+      </div>
+    </section>
+
+    <section id="panel-journal" class="card rounded-xl p-5 space-y-5 hidden">
+      <div id="journalLock" class="space-y-3">
+        <p class="text-gray-300">This section is locked. Enter PIN to unlock.</p>
+        <div class="flex gap-2">
+          <input id="journalPinInput" type="password" inputmode="numeric" maxlength="8" class="w-36 px-3 py-2 rounded-md bg-gray-800 border border-gray-700" placeholder="PIN" />
+          <button id="journalUnlockBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Unlock</button>
+        </div>
+      </div>
+
+      <div id="journalArea" class="hidden">
+        <div class="space-y-2">
+          <textarea id="noteText" rows="4" class="w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700" placeholder="Write a private note (stored only on this device)"></textarea>
           <div class="flex gap-2">
-            <button id="startBtn" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">Start</button>
-            <button id="pauseBtn" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500" disabled>Pause</button>
-            <button id="resetBtn" class="px-4 py-2 rounded-lg bg-neutral-700 hover:bg-neutral-600">Reset</button>
+            <button id="saveNoteBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Save Note</button>
+            <button id="clearNoteBtn" class="px-3 py-2 rounded-md ghost-btn">Clear</button>
           </div>
         </div>
-
-        <div class="mt-4 grid sm:grid-cols-3 gap-3">
-          <label class="text-sm">
-            Duration (minutes)
-            <input id="duration" type="number" min="1" max="180" value="25"
-              class="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2"/>
-          </label>
-          <label class="text-sm">
-            Label (optional)
-            <input id="label" type="text" placeholder="e.g. Reading"
-              class="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2"/>
-          </label>
-          <div class="flex items-end">
-            <button id="saveBtn" class="w-full px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500" disabled>Save Session</button>
-          </div>
+        <div>
+          <h3 class="font-semibold mt-4 mb-2">Your Notes</h3>
+          <ul id="notesList" class="space-y-2 text-sm"></ul>
         </div>
       </div>
     </section>
 
-    <!-- HISTORY -->
-    <section id="view-history" class="hidden">
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-semibold">History</h2>
-          <button id="clearHistory" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500">Clear</button>
+    <section id="panel-resources" class="card rounded-xl p-5 space-y-4 hidden">
+      <p class="text-gray-300 text-sm">If you are in immediate danger, call 911 (or your local emergency number).</p>
+      <ul class="space-y-3">
+        <li>
+          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
+             href="https://www.thehotline.org/">National Domestic Violence Hotline (US)</a>
+          <div class="text-xs text-gray-400">Call 1-800-799-SAFE (7233) or chat on their website.</div>
+        </li>
+        <li>
+          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
+             href="https://www.womenshealth.gov/relationships-and-safety/get-help/state-resources">US State Resources</a>
+        </li>
+        <li>
+          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
+             href="https://www.gov.uk/guidance/domestic-abuse-how-to-get-help">UK: Get help for domestic abuse</a>
+        </li>
+        <li>
+          <a class="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener"
+             href="https://endingviolencecanada.org/getting-help/">Canada: Getting Help</a>
+        </li>
+      </ul>
+      <p class="text-xs text-gray-500">Resources open in a new tab and do not share your data from this app.</p>
+    </section>
+
+    <section id="panel-settings" class="card rounded-xl p-5 space-y-6 hidden">
+      <div id="settingsLock" class="space-y-3">
+        <p class="text-gray-300">Settings are locked. Enter PIN to unlock.</p>
+        <div class="flex gap-2">
+          <input id="settingsPinInput" type="password" inputmode="numeric" maxlength="8" class="w-36 px-3 py-2 rounded-md bg-gray-800 border border-gray-700" placeholder="PIN" />
+          <button id="settingsUnlockBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Unlock</button>
         </div>
-        <div id="historyEmpty" class="text-neutral-400 text-sm">No sessions yet.</div>
-        <ul id="historyList" class="divide-y divide-neutral-800"></ul>
       </div>
-    </section>
 
-    <!-- SETTINGS -->
-    <section id="view-settings" class="hidden">
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 space-y-4">
-        <h2 class="text-lg font-semibold">Settings</h2>
+      <div id="settingsArea" class="hidden space-y-6">
+        <div class="space-y-2">
+          <label class="block text-sm text-gray-300">Default timer (minutes)</label>
+          <input id="defaultMinutes" type="number" min="1" max="180" class="w-32 px-3 py-2 rounded-md bg-gray-800 border border-gray-700" />
+        </div>
 
-        <label class="flex items-center justify-between bg-neutral-800/60 border border-neutral-700 rounded-lg p-3">
-          <div>
-            <div class="font-medium">Sound on finish</div>
-            <div class="text-xs text-neutral-400">Play a short chime when a timer completes.</div>
+        <div class="space-y-2">
+          <label class="block text-sm text-gray-300 mb-1">Disguise</label>
+          <div class="flex items-center gap-2">
+            <input id="disguiseToggle" type="checkbox" class="h-4 w-4">
+            <span class="text-sm text-gray-400">Use neutral title</span>
           </div>
-          <input id="soundToggle" type="checkbox" class="h-5 w-5 accent-indigo-600">
-        </label>
+          <input id="disguiseTitle" type="text" class="mt-2 w-full px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+                 placeholder="e.g., Calculator, Notes" />
+        </div>
 
-        <label class="flex items-center justify-between bg-neutral-800/60 border border-neutral-700 rounded-lg p-3">
-          <div>
-            <div class="font-medium">Auto-save on finish</div>
-            <div class="text-xs text-neutral-400">Automatically save a session when the timer hits 0.</div>
+        <div class="space-y-2">
+          <label class="block text-sm text-gray-300">Set / Change PIN</label>
+          <div id="pinNeedsCurrent" class="hidden">
+            <input id="currentPin" type="password" inputmode="numeric" maxlength="8"
+                   class="w-40 px-3 py-2 rounded-md bg-gray-800 border border-gray-700 mb-2"
+                   placeholder="Current PIN" />
           </div>
-          <input id="autosaveToggle" type="checkbox" class="h-5 w-5 accent-indigo-600">
-        </label>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="newPin" type="password" inputmode="numeric" maxlength="8"
+                   class="w-40 px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+                   placeholder="New PIN" />
+            <input id="confirmPin" type="password" inputmode="numeric" maxlength="8"
+                   class="w-40 px-3 py-2 rounded-md bg-gray-800 border border-gray-700"
+                   placeholder="Confirm PIN" />
+            <button id="savePinBtn" class="px-3 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Save PIN</button>
+          </div>
+          <button id="removePinBtn" class="mt-2 px-3 py-2 rounded-md ghost-btn">Remove PIN</button>
+        </div>
 
-        <div class="text-sm text-neutral-400">All settings & data are saved locally on this device.</div>
+        <div class="flex flex-wrap gap-2">
+          <button id="saveSettingsBtn" class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 font-semibold">Save Settings</button>
+          <button id="clearDataBtn" class="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700">Erase All Local Data</button>
+        </div>
       </div>
     </section>
+  </div>
 
-    <!-- PROFILE -->
-    <section id="view-profile" class="hidden">
-      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 space-y-4">
-        <h2 class="text-lg font-semibold">Profile</h2>
-        <label class="text-sm">
-          Display name
-          <input id="displayName" type="text" placeholder="Your name"
-            class="mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2"/>
-        </label>
-        <button id="saveProfile" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">Save Profile</button>
-        <div id="profileInfo" class="text-sm text-neutral-400"></div>
+  <!-- Simple toast -->
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-sm hidden"></div>
+
+  <!-- Modal for confirm -->
+  <div id="modal" class="fixed inset-0 bg-black/50 items-center justify-center hidden">
+    <div class="card rounded-xl p-5 w-80">
+      <div id="modalText" class="mb-4">Are you sure?</div>
+      <div class="flex gap-2 justify-end">
+        <button id="modalNo" class="px-3 py-2 rounded-md ghost-btn">Cancel</button>
+        <button id="modalYes" class="px-3 py-2 rounded-md bg-red-600 hover:bg-red-700">Delete</button>
       </div>
-    </section>
-  </main>
-
-  <audio id="ding" preload="auto">
-    <source src="https://upload.wikimedia.org/wikipedia/commons/1/15/Short_Beep.ogg" type="audio/ogg">
-  </audio>
+    </div>
+  </div>
 
   <script>
-    // ---------- Tiny SPA Router ----------
-    const views = ["home","history","settings","profile"];
-    const show = (name) => {
-      views.forEach(v => document.getElementById(`view-${v}`).classList.toggle("hidden", v!==name));
-      document.querySelectorAll(".nav-btn").forEach(b => b.classList.toggle("bg-indigo-600", b.dataset.nav===name));
-      location.hash = name;
-    };
-    window.addEventListener("hashchange", () => {
-      const target = location.hash.replace("#","") || "home";
-      show(views.includes(target)?target:"home");
-      if (target==="history") renderHistory();
-    });
+    /* ===================== Utilities ===================== */
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+    const fmt = (s) => (s < 10 ? '0' + s : '' + s);
 
-    // ---------- Storage helpers ----------
-    const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
-    const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
-    const notify = (msg, type="ok") => {
-      const el = document.getElementById("flash");
-      el.textContent = msg;
-      el.className = type==="err" ? "rounded-lg px-3 py-2 text-sm bg-red-700/60 border border-red-600" :
-                                    "rounded-lg px-3 py-2 text-sm bg-emerald-700/40 border border-emerald-600";
-      el.classList.remove("hidden");
-      setTimeout(()=>el.classList.add("hidden"), 1800);
+    const store = {
+      get(key, def) {
+        try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+        catch { return def; }
+      },
+      set(key, val) { localStorage.setItem(key, JSON.stringify(val)); },
+      rm(key) { localStorage.removeItem(key); },
+      clear() { localStorage.clear(); }
     };
 
-    // ---------- State ----------
-    let timer = null;
-    let remaining = 25*60; // seconds
-    let running = false;
-
-    // Elements
-    const timeEl = document.getElementById("time");
-    const startBtn = document.getElementById("startBtn");
-    const pauseBtn = document.getElementById("pauseBtn");
-    const resetBtn = document.getElementById("resetBtn");
-    const durationEl = document.getElementById("duration");
-    const labelEl = document.getElementById("label");
-    const saveBtn = document.getElementById("saveBtn");
-    const ding = document.getElementById("ding");
-
-    // Settings
-    const soundToggle = document.getElementById("soundToggle");
-    const autosaveToggle = document.getElementById("autosaveToggle");
-
-    // Profile
-    const displayName = document.getElementById("displayName");
-    const saveProfile = document.getElementById("saveProfile");
-    const profileInfo = document.getElementById("profileInfo");
-
-    // History
-    const historyList = document.getElementById("historyList");
-    const historyEmpty = document.getElementById("historyEmpty");
-    const clearHistory = document.getElementById("clearHistory");
-
-    // ---------- Init from storage ----------
-    const settings = load("timeout_settings",{ sound:true, autosave:false });
-    soundToggle.checked = settings.sound;
-    autosaveToggle.checked = settings.autosave;
-
-    const profile = load("timeout_profile",{ name:"" });
-    displayName.value = profile.name;
-    profileInfo.textContent = profile.name ? `Signed in as ${profile.name}` : "No name saved.";
-
-    // ---------- Timer ----------
-    const fmt = (s)=>{
-      const m = Math.floor(s/60), ss = s%60;
-      return `${String(m).padStart(2,"0")}:${String(ss).padStart(2,"0")}`;
-    };
-    const renderTime = () => timeEl.textContent = fmt(remaining);
-
-    const tick = ()=>{
-      if (!running) return;
-      remaining = Math.max(0, remaining-1);
-      renderTime();
-      if (remaining === 0) {
-        stopTimer();
-        if (soundToggle.checked) ding.play().catch(()=>{});
-        if (autosaveToggle.checked) doSave();
-        notify("Time's up!");
-      }
+    const KEYS = {
+      settings: 'TO_SETTINGS',
+      sessions: 'TO_SESSIONS',
+      notes: 'TO_NOTES'
     };
 
-    const startTimer = ()=>{
-      if (running) return;
-      running = true;
-      startBtn.textContent = "Resume";
-      pauseBtn.disabled = false;
-      timer = setInterval(tick, 1000);
-    };
-    const stopTimer = ()=>{
-      running = false;
-      clearInterval(timer);
-      timer = null;
-      pauseBtn.disabled = true;
-    };
-    const resetTimer = ()=>{
-      stopTimer();
-      remaining = Math.max(60, Math.min(180*60, Number(durationEl.value||25)*60));
-      renderTime();
-      startBtn.textContent = "Start";
-    };
+    function toast(msg, ms=1600) {
+      const t = $('#toast'); t.textContent = msg; t.classList.remove('hidden');
+      setTimeout(()=>t.classList.add('hidden'), ms);
+    }
 
-    // ---------- Session Save / History ----------
-    const doSave = ()=>{
-      const sessions = load("timeout_sessions", []);
-      const totalPlanned = Math.max(60, Math.min(180*60, Number(durationEl.value||25)*60));
-      const elapsed = totalPlanned - remaining;
-      const entry = {
-        id: crypto.randomUUID?.() ?? String(Date.now()),
-        at: Date.now(),
-        label: (labelEl.value||"").trim(),
-        planned: totalPlanned,
-        elapsed
-      };
-      sessions.unshift(entry);
-      save("timeout_sessions", sessions);
-      renderHistory();
-      saveBtn.disabled = true;
-      notify("Session saved.");
-    };
-
-    const renderHistory = ()=>{
-      const sessions = load("timeout_sessions", []);
-      historyList.innerHTML = "";
-      historyEmpty.classList.toggle("hidden", sessions.length>0);
-      sessions.forEach(s=>{
-        const li = document.createElement("li");
-        const date = new Date(s.at).toLocaleString();
-        const pct = Math.round((s.elapsed / s.planned) * 100);
-        li.className = "py-3 flex items-start justify-between gap-3";
-        li.innerHTML = `
-          <div>
-            <div class="font-medium">${s.label || "Untitled session"}</div>
-            <div class="text-xs text-neutral-400">${date}</div>
-            <div class="text-xs text-neutral-400">Elapsed ${fmt(s.elapsed)} / Planned ${fmt(s.planned)} (${pct}%)</div>
-          </div>
-          <button class="px-2 py-1 text-sm rounded bg-neutral-800 hover:bg-neutral-700" data-id="${s.id}">Delete</button>
-        `;
-        historyList.appendChild(li);
-      });
-      // delete handlers
-      historyList.querySelectorAll("button[data-id]").forEach(btn=>{
-        btn.onclick = ()=>{
-          const id = btn.getAttribute("data-id");
-          const sessions = load("timeout_sessions", []);
-          save("timeout_sessions", sessions.filter(x=>x.id!==id));
-          renderHistory();
-          notify("Deleted.");
+    function confirmModal(text) {
+      return new Promise((resolve) => {
+        const m = $('#modal'), txt = $('#modalText'), yes = $('#modalYes'), no = $('#modalNo');
+        txt.textContent = text;
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        const done = (res) => {
+          yes.removeEventListener('click', onYes);
+          no.removeEventListener('click', onNo);
+          m.classList.add('hidden');
+          m.classList.remove('flex');
+          resolve(res);
         };
+        const onYes = () => done(true);
+        const onNo = () => done(false);
+        yes.addEventListener('click', onYes);
+        no.addEventListener('click', onNo);
       });
-    };
+    }
 
-    // ---------- Events ----------
-    startBtn.onclick = ()=>{ startTimer(); saveBtn.disabled = false; };
-    pauseBtn.onclick = ()=>{ stopTimer(); };
-    resetBtn.onclick = ()=>{ resetTimer(); saveBtn.disabled = true; };
-    saveBtn.onclick = ()=> doSave();
+    async function sha256Hex(text) {
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
 
-    durationEl.onchange = ()=> resetTimer();
-
-    soundToggle.onchange = ()=>{
-      const s = load("timeout_settings",{ sound:true, autosave:false });
-      s.sound = soundToggle.checked; save("timeout_settings", s);
-      notify(s.sound ? "Sound on." : "Sound off.");
-    };
-    autosaveToggle.onchange = ()=>{
-      const s = load("timeout_settings",{ sound:true, autosave:false });
-      s.autosave = autosaveToggle.checked; save("timeout_settings", s);
-      notify(s.autosave ? "Autosave on." : "Autosave off.");
-    };
-
-    saveProfile.onclick = ()=>{
-      const name = displayName.value.trim();
-      save("timeout_profile", { name });
-      profileInfo.textContent = name ? `Signed in as ${name}` : "No name saved.";
-      notify("Profile saved.");
-    };
-
-    clearHistory.onclick = ()=>{
-      if (!confirm("Clear all sessions?")) return;
-      save("timeout_sessions", []);
-      renderHistory();
-      notify("History cleared.");
-    };
-
-    // nav
-    document.querySelectorAll("[data-nav]").forEach(btn=>{
-      btn.onclick = ()=> show(btn.dataset.nav);
+    /* ===================== Settings / PIN ===================== */
+    let settings = store.get(KEYS.settings, {
+      defaultMinutes: 5,
+      disguise: { enabled: false, title: 'Calculator' },
+      pinHash: null
     });
+    let unlocked = { journal:false, settings:false };
 
-    // start
-    resetTimer();
-    show((location.hash||"#home").replace("#",""));
+    function applyDisguise() {
+      const title = settings.disguise.enabled ? (settings.disguise.title || 'Calculator') : 'TimeOut';
+      document.title = title;
+      $('#appTitle').textContent = title;
+    }
+
+    function requirePin(area) {
+      const need = !!settings.pinHash && !unlocked[area];
+      if (area === 'journal') {
+        $('#journalLock').classList.toggle('hidden', !need);
+        $('#journalArea').classList.toggle('hidden', need);
+      } else if (area === 'settings') {
+        $('#settingsLock').classList.toggle('hidden', !need);
+        $('#settingsArea').classList.toggle('hidden', need);
+      }
+    }
+
+    async function tryUnlock(area, pin) {
+      if (!settings.pinHash) { unlocked[area] = true; requirePin(area); return true; }
+      const hash = await sha256Hex(pin || '');
+      if (hash === settings.pinHash) {
+        unlocked[area] = true; requirePin(area); toast('Unlocked');
+        return true;
+      } else { toast('Wrong PIN', 1400); return false; }
+    }
+
+    /* ===================== Tabs ===================== */
+    function showTab(name) {
+      $$('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+      ['timer','journal','resources','settings'].forEach(t=>{
+        $('#panel-'+t).classList.toggle('hidden', t!==name);
+      });
+      if (name==='journal') { requirePin('journal'); renderNotes(); }
+      if (name==='settings') { requirePin('settings'); fillSettingsForm(); }
+    }
+
+    /* ===================== Timer ===================== */
+    let totalSec = (settings.defaultMinutes || 5) * 60;
+    let remainSec = totalSec;
+    let ticking = null;
+    const sessionLog = store.get(KEYS.sessions, []); // [{startedAt, endedAt, durationSec}]
+
+    function renderTime() {
+      const h = Math.floor(remainSec / 3600);
+      const m = Math.floor((remainSec % 3600) / 60);
+      const s = remainSec % 60;
+      const str = h>0 ? `${fmt(h)}:${fmt(m)}:${fmt(s)}` : `${fmt(m)}:${fmt(s)}`;
+      $('#timeDisplay').textContent = (h>0 ? str : `00:${str}`);
+    }
+
+    function renderSessions() {
+      const list = $('#sessionList');
+      list.innerHTML = '';
+      if (sessionLog.length === 0) {
+        list.innerHTML = '<li class="text-gray-500">No sessions yet.</li>';
+        return;
+      }
+      sessionLog.slice(-10).reverse().forEach(s=>{
+        const li = document.createElement('li');
+        const dur = new Date(s.durationSec*1000).toISOString().substr(11,8);
+        const when = new Date(s.endedAt||s.startedAt).toLocaleString();
+        li.className = 'flex justify-between items-center card rounded-lg p-3';
+        li.innerHTML = `<span class="text-gray-300">${when}</span><span class="text-gray-400">${dur}</span>`;
+        list.appendChild(li);
+      });
+    }
+
+    function startTimer() {
+      if (ticking) return;
+      const startTs = Date.now();
+      ticking = setInterval(()=>{
+        remainSec = Math.max(0, remainSec - 1);
+        renderTime();
+        if (remainSec === 0) {
+          clearInterval(ticking); ticking=null;
+          sessionLog.push({ startedAt:startTs, endedAt:Date.now(), durationSec: totalSec });
+          store.set(KEYS.sessions, sessionLog);
+          renderSessions();
+          toast('Done');
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (!ticking) return;
+      clearInterval(ticking); ticking=null;
+      const ran = totalSec - remainSec;
+      if (ran>0) {
+        sessionLog.push({ startedAt: Date.now()-ran*1000, endedAt: Date.now(), durationSec: ran });
+        store.set(KEYS.sessions, sessionLog);
+        renderSessions();
+      }
+    }
+
+    function resetTimer(newMin) {
+      if (ticking) { clearInterval(ticking); ticking=null; }
+      totalSec = (newMin ?? settings.defaultMinutes ?? 5) * 60;
+      remainSec = totalSec;
+      renderTime();
+    }
+
+    /* ===================== Notes (Journal) ===================== */
+    function renderNotes() {
+      const notes = store.get(KEYS.notes, []);
+      const list = $('#notesList'); list.innerHTML = '';
+      if (notes.length === 0) {
+        list.innerHTML = '<li class="text-gray-500">No notes saved.</li>';
+        return;
+      }
+      notes.slice().reverse().forEach(n=>{
+        const li = document.createElement('li');
+        li.className = 'card rounded-lg p-3';
+        li.innerHTML = `
+          <div class="flex justify-between gap-2">
+            <div class="text-xs text-gray-400">${new Date(n.createdAt).toLocaleString()}</div>
+            <button class="text-red-400 hover:text-red-300" data-del="${n.id}">Delete</button>
+          </div>
+          <div class="mt-2 whitespace-pre-wrap text-sm">${n.text.replace(/[<>&]/g, c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}</div>
+        `;
+        list.appendChild(li);
+      });
+      list.querySelectorAll('[data-del]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const ok = await confirmModal('Delete this note?');
+          if (!ok) return;
+          const id = btn.getAttribute('data-del');
+          const notes2 = store.get(KEYS.notes, []).filter(n=>n.id!==id);
+          store.set(KEYS.notes, notes2);
+          renderNotes();
+          toast('Deleted');
+        });
+      });
+    }
+
+    /* ===================== Settings UI ===================== */
+    function fillSettingsForm() {
+      $('#defaultMinutes').value = settings.defaultMinutes ?? 5;
+      $('#disguiseToggle').checked = !!settings.disguise?.enabled;
+      $('#disguiseTitle').value = settings.disguise?.title ?? 'Calculator';
+      $('#pinNeedsCurrent').classList.toggle('hidden', !settings.pinHash);
+    }
+
+    async function savePinFlow() {
+      const has = !!settings.pinHash;
+      const cur = $('#currentPin').value;
+      if (has) {
+        if (!cur) { toast('Enter current PIN'); return; }
+        const ok = (await sha256Hex(cur)) === settings.pinHash;
+        if (!ok) { toast('Current PIN wrong'); return; }
+      }
+      const np = $('#newPin').value;
+      const cp = $('#confirmPin').value;
+      if (!np || np !== cp) { toast('PINs must match'); return; }
+      settings.pinHash = await sha256Hex(np);
+      store.set(KEYS.settings, settings);
+      unlocked = { journal:false, settings:false }; // relock areas
+      requirePin('journal'); requirePin('settings');
+      $('#newPin').value = ''; $('#confirmPin').value = ''; $('#currentPin').value='';
+      $('#pinNeedsCurrent').classList.remove('hidden');
+      toast('PIN saved');
+    }
+
+    async function removePinFlow() {
+      if (!settings.pinHash) { toast('No PIN set'); return; }
+      const ok = await confirmModal('Remove PIN protection?');
+      if (!ok) return;
+      settings.pinHash = null;
+      store.set(KEYS.settings, settings);
+      unlocked = { journal:true, settings:true };
+      requirePin('journal'); requirePin('settings');
+      $('#currentPin').value=''; $('#newPin').value=''; $('#confirmPin').value='';
+      $('#pinNeedsCurrent').classList.add('hidden');
+      toast('PIN removed');
+    }
+
+    function saveSettings() {
+      let m = parseInt($('#defaultMinutes').value || '5', 10);
+      if (Number.isNaN(m) || m<1) m=5;
+      settings.defaultMinutes = m;
+      settings.disguise = {
+        enabled: $('#disguiseToggle').checked,
+        title: $('#disguiseTitle').value || 'Calculator'
+      };
+      store.set(KEYS.settings, settings);
+      applyDisguise();
+      resetTimer(settings.defaultMinutes);
+      toast('Settings saved');
+    }
+
+    /* ===================== Quick Exit / Hide ===================== */
+    function quickExit() {
+      // Replace current page with neutral site (commonly weather or search)
+      location.replace('https://weather.com/');
+    }
+    function hideUI() {
+      document.body.classList.toggle('opacity-0');
+      setTimeout(()=>document.body.classList.toggle('opacity-0'), 2000);
+    }
+
+    /* ===================== Boot ===================== */
+    function bind() {
+      // Tabs
+      $$('.tab-btn').forEach(b=>{
+        b.addEventListener('click', ()=> showTab(b.dataset.tab));
+      });
+
+      // Timer controls
+      $('#startBtn').addEventListener('click', startTimer);
+      $('#pauseBtn').addEventListener('click', pauseTimer);
+      $('#resetBtn').addEventListener('click', ()=>resetTimer());
+      $$('.preset').forEach(p=>{
+        p.addEventListener('click', ()=> { resetTimer(parseInt(p.dataset.min,10)); });
+      });
+
+      // Journal lock/unlock
+      $('#journalUnlockBtn').addEventListener('click', ()=> tryUnlock('journal', $('#journalPinInput').value));
+      $('#saveNoteBtn').addEventListener('click', ()=>{
+        const txt = $('#noteText').value.trim();
+        if (!txt) { toast('Nothing to save'); return; }
+        const notes = store.get(KEYS.notes, []);
+        notes.push({ id: String(Date.now())+'-'+Math.random().toString(36).slice(2,6), text: txt, createdAt: Date.now() });
+        store.set(KEYS.notes, notes);
+        $('#noteText').value = '';
+        renderNotes();
+        toast('Saved');
+      });
+      $('#clearNoteBtn').addEventListener('click', ()=> $('#noteText').value='');
+
+      // Settings lock/unlock + actions
+      $('#settingsUnlockBtn').addEventListener('click', ()=> tryUnlock('settings', $('#settingsPinInput').value));
+      $('#savePinBtn').addEventListener('click', savePinFlow);
+      $('#removePinBtn').addEventListener('click', removePinFlow);
+      $('#saveSettingsBtn').addEventListener('click', saveSettings);
+      $('#clearDataBtn').addEventListener('click', async ()=>{
+        const ok = await confirmModal('Erase all local data? This cannot be undone.');
+        if (!ok) return;
+        localStorage.clear();
+        // reload defaults
+        settings = { defaultMinutes:5, disguise:{enabled:false,title:'Calculator'}, pinHash:null };
+        store.set(KEYS.settings, settings);
+        unlocked = { journal:false, settings:false };
+        applyDisguise();
+        resetTimer(5);
+        renderSessions();
+        renderNotes();
+        requirePin('journal'); requirePin('settings');
+        fillSettingsForm();
+        toast('Data erased');
+      });
+
+      // Quick exit / hide
+      $('#quickExitBtn').addEventListener('click', quickExit);
+      $('#hideBtn').addEventListener('click', hideUI);
+      window.addEventListener('keydown', (e)=> {
+        if (e.key === 'Escape') quickExit();
+      });
+    }
+
+    function firstRender() {
+      applyDisguise();
+      resetTimer(settings.defaultMinutes || 5);
+      renderTime();
+      renderSessions();
+      renderNotes();
+      showTab('timer');
+      // Lock areas if PIN exists
+      requirePin('journal');
+      requirePin('settings');
+      fillSettingsForm();
+    }
+
+    // init
+    bind();
+    firstRender();
   </script>
 </body>
 </html>
