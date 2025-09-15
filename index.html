@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Timeout Demo</title>
+    <style>
+      body{margin:0;background:#111;color:#fff;font-family:system-ui,Arial}
+      .wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+      button{padding:10px 16px;border:0;border-radius:12px;background:#4f46e5;color:#fff;font-weight:600}
+      .hint{opacity:.7;font-size:14px}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Timeout Demo</h1>
+      <div class="hint">Don’t touch for 10 seconds to see it fire.</div>
+      <button id="reset">Reset Timer</button>
+      <div class="hint" id="status">Timer running…</div>
+    </div>
+    <script>
+      let t; const DELAY = 10000; // 10s demo
+      const statusEl = document.getElementById('status');
+      const start = () => {
+        clearTimeout(t);
+        statusEl.textContent = 'Timer running…';
+        t = setTimeout(() => {
+          alert('Session timed out — logging out…');
+          statusEl.textContent = 'Timed out.';
+        }, DELAY);
+      };
+      ['click','keydown','touchstart','mousemove'].forEach(ev =>
+        window.addEventListener(ev, start, {passive:true})
+      );
+      document.getElementById('reset').addEventListener('click', start);
+      start();
+    </script>
+  </body>
+</html>
