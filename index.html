@@ -1,453 +1,569 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>TimeOut — Safety & Support</title>
-  <meta name="theme-color" content="#0b1020" />
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+  />
+  <title>TimeOut</title>
+  <meta name="theme-color" content="#0d1117" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    html,body{height:100%}
-    body{background:#0b1020}
-    .card{background:#121a2a;border:1px solid rgba(255,255,255,.06)}
-    .pill{border-radius:9999px}
-    .ghost::-webkit-scrollbar{height:6px;width:6px}
-    .ghost::-webkit-scrollbar-thumb{background:#334155;border-radius:9999px}
-    .tap:active{transform:translateY(1px)}
-    .kbd{border:1px solid #475569;border-bottom-width:2px;padding:.15rem .4rem;border-radius:.375rem;font-size:.7rem}
+    body{font-family:ui-sans-serif,system-ui,"Segoe UI",Roboto,Inter,"Helvetica Neue",Arial,"Apple Color Emoji","Segoe UI Emoji";background:#0d1117;color:#e5e7eb}
+    .tab-btn{padding:.5rem .9rem;border-radius:.6rem}
+    .tab-btn.active{background:#4f46e5;color:#fff}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:1rem}
+    .choice{display:inline-block;padding:.45rem .9rem;border-radius:.6rem;border:1px solid #4b5563;cursor:pointer;user-select:none}
+    .choice.active{background:#4f46e5;border-color:#4338ca;color:#fff}
+    .pill{padding:.25rem .5rem;border-radius:9999px;background:#1f2937;border:1px solid #374151}
+    .btn{padding:.55rem 1rem;border-radius:.7rem;font-weight:600}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:1rem;background:#4f46e5;color:#fff;padding:.5rem .8rem;border-radius:.6rem;opacity:0;transition:opacity .25s}
+    .toast.show{opacity:1}
+    .lock-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:50}
   </style>
 </head>
-<body class="text-slate-100">
-  <main class="max-w-md mx-auto min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="sticky top-0 z-20 backdrop-blur bg-black/40 border-b border-white/10">
-      <div class="px-4 py-3 flex items-center justify-between">
-        <h1 class="text-lg font-semibold">TimeOut</h1>
-        <div class="flex items-center gap-2">
-          <span id="trustBadge" class="text-xs px-2 py-1 pill bg-indigo-600/20 border border-indigo-400/30 text-indigo-200">Trust: 0%</span>
-          <button id="quickExit" class="tap text-xs px-3 py-1 pill bg-rose-600 hover:bg-rose-700">Quick Exit</button>
+  <!-- PIN LOCK -->
+  <div id="lockScreen" class="lock-backdrop">
+    <div class="card w-80 p-6 space-y-3 text-center">
+      <h2 class="text-xl font-semibold">Enter PIN</h2>
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="4"
+             class="w-full text-center bg-gray-800 border border-gray-700 rounded-lg py-2"
+             placeholder="••••" />
+      <button id="pinSubmit" class="btn w-full bg-indigo-600 hover:bg-indigo-700 text-white">Unlock</button>
+      <p id="pinMsg" class="text-sm text-red-400 h-5"></p>
+      <div class="text-xs text-gray-400">
+        First time? <button id="setPin" class="underline">Set PIN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="p-4 bg-[#111827] border-b border-[#1f2937] flex items-center justify-between">
+    <div class="font-bold">TimeOut</div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs text-gray-400">Trust</span>
+      <span id="trustScore" class="pill font-mono">0%</span>
+    </div>
+  </header>
+
+  <!-- NAV -->
+  <nav class="p-2 bg-[#0b1220] border-b border-[#1f2937] flex gap-2 overflow-x-auto">
+    <button class="tab-btn active" data-view="timer">Timer</button>
+    <button class="tab-btn" data-view="checkin">Check-In</button>
+    <button class="tab-btn" data-view="journal">Journal</button>
+    <button class="tab-btn" data-view="resources">Resources</button>
+    <button class="tab-btn" data-view="settings">Settings</button>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="flex-1 p-4 space-y-6 overflow-y-auto">
+
+    <!-- TIMER -->
+    <section id="view-timer" class="view">
+      <div class="card p-5 space-y-4">
+        <h2 class="text-lg font-semibold">Timer</h2>
+        <div id="timerDisplay" class="text-5xl font-mono text-center">00:00</div>
+        <div class="flex justify-center gap-2">
+          <button id="startBtn" class="btn bg-green-600 hover:bg-green-700 text-white">Start</button>
+          <button id="stopBtn"  class="btn bg-red-600 hover:bg-red-700 text-white">Stop</button>
+          <button id="resetBtn" class="btn bg-gray-700 hover:bg-gray-600 text-white">Reset</button>
         </div>
       </div>
-      <!-- Tabs row 1 -->
-      <nav class="px-2 pb-2 grid grid-cols-4 gap-2 text-xs">
-        <button data-tab="home" class="tab pill px-3 py-2 bg-indigo-600">Home</button>
-        <button data-tab="checkin" class="tab pill px-3 py-2 bg-slate-700/60">Check-In</button>
-        <button data-tab="assessment" class="tab pill px-3 py-2 bg-slate-700/60">Assessment</button>
-        <button data-tab="resources" class="tab pill px-3 py-2 bg-slate-700/60">Resources</button>
-      </nav>
-      <!-- Tabs row 2 -->
-      <nav class="px-2 pb-3 grid grid-cols-3 gap-2 text-xs">
-        <button data-tab="safety" class="tab pill px-3 py-2 bg-slate-700/60">Safety Plan</button>
-        <button data-tab="profile" class="tab pill px-3 py-2 bg-slate-700/60">Profile</button>
-        <button data-tab="settings" class="tab pill px-3 py-2 bg-slate-700/60">Settings</button>
-      </nav>
-    </header>
+    </section>
 
-    <!-- Content -->
-    <section id="view" class="flex-1 p-4 space-y-3"></section>
-
-    <!-- Footer actions -->
-    <footer class="sticky bottom-0 bg-black/40 border-t border-white/10">
-      <div class="px-4 py-3 flex items-center gap-2">
-        <button id="primaryAction" class="tap flex-1 pill px-4 py-3 bg-indigo-600 hover:bg-indigo-700 font-semibold">New Check-In</button>
-        <button id="resetAll" class="tap pill px-4 py-3 bg-slate-700 hover:bg-slate-600">Reset</button>
+    <!-- CHECK-IN -->
+    <section id="view-checkin" class="view hidden">
+      <div class="card p-5 space-y-4">
+        <h2 class="text-lg font-semibold">Daily Check-In</h2>
+        <p class="text-sm text-gray-400">Answer honestly. Your answers are stored on your device only.</p>
+        <div id="questions" class="space-y-4"></div>
       </div>
-    </footer>
+    </section>
+
+    <!-- JOURNAL -->
+    <section id="view-journal" class="view hidden">
+      <div class="card p-5 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">Journal</h2>
+          <span id="journalSavedAt" class="text-xs text-gray-400"></span>
+        </div>
+        <textarea id="journalText" class="w-full h-48 bg-gray-800 border border-gray-700 rounded-lg p-3"
+                  placeholder="Write your thoughts…"></textarea>
+        <div class="flex gap-2">
+          <button id="saveJournal" class="btn bg-indigo-600 hover:bg-indigo-700 text-white">Save</button>
+          <button id="clearJournal" class="btn bg-gray-700 hover:bg-gray-600 text-white">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESOURCES -->
+    <section id="view-resources" class="view hidden">
+      <div class="card p-5 space-y-4">
+        <h2 class="text-lg font-semibold">Resources</h2>
+        <ul class="space-y-3 text-sm">
+          <li>
+            <a class="text-indigo-300 underline" href="tel:18007997233">
+              National Domestic Violence Hotline — 1-800-799-SAFE (7233)
+            </a>
+          </li>
+          <li>
+            <a class="text-indigo-300 underline" href="https://www.thehotline.org/" target="_blank" rel="noopener">
+              thehotline.org (24/7 chat & resources)
+            </a>
+          </li>
+          <li>
+            <a class="text-indigo-300 underline" href="https://www.rainn.org/" target="_blank" rel="noopener">
+              RAINN (sexual assault) — rainn.org
+            </a>
+          </li>
+          <li class="text-gray-300">In an emergency, call <strong>911</strong>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="view hidden">
+      <div class="card p-5 space-y-4">
+        <h2 class="text-lg font-semibold">Settings</h2>
+        <div class="space-y-2">
+          <button id="quickExit" class="btn w-full bg-red-700 hover:bg-red-800 text-white">Quick Exit</button>
+          <button id="resetAll" class="btn w-full bg-gray-700 hover:bg-gray-600 text-white">Reset All Data</button>
+        </div>
+        <div class="pt-3 border-t border-gray-700 space-y-2">
+          <div class="text-sm text-gray-400">PIN & Decoy</div>
+          <button id="changePin" class="btn bg-indigo-600 hover:bg-indigo-700 text-white">Change PIN</button>
+          <button id="setDecoy" class="btn bg-gray-700 hover:bg-gray-600 text-white">Set Decoy PIN</button>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <script>
-  // =============== STATE & STORAGE ===============
-  const STORAGE_KEY = 'timeout_app_v1';
-  const $ = (s, r=document)=>r.querySelector(s);
-  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+  <!-- FOOTER -->
+  <footer class="p-3 text-center text-xs text-gray-500 border-t border-[#1f2937]">
+    TimeOut · Local-only storage · v1.0
+  </footer>
 
-  const state = {
-    tab: 'home',
-    profile: { displayName:'', zip:'', safeContact:'', notes:'' },
-    checkins: [], // [{ts, mood, safety, note}]
-    assessment: { answers:{}, score:0 }, // 8 Qs
-    safetyPlan: { codeWord:'', escapeRoute:'', essentials:'', transport:'', pets:'' },
-    trust: 0
-  };
+  <!-- TOAST -->
+  <div id="toast" class="toast">Saved</div>
 
-  function load(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) Object.assign(state, JSON.parse(raw));
-    }catch{}
-  }
-  function save(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    renderTrust();
-  }
+<script>
+/* ====== Utilities ====== */
+const $ = (sel, root=document)=>root.querySelector(sel);
+const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
+function showToast(msg='Saved'){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1000);}
 
-  // =============== TRUST SCORE ===============
-  function computeTrust(){
-    // Base from assessment (lower score => safer => higher trust)
-    const base = Math.max(0, 100 - state.assessment.score*8); // 0..100
-    // Consistency from last 7 check-ins: higher safety => higher trust
-    const recent = state.checkins.slice(-7);
-    const avgSafety = recent.length ? recent.reduce((a,c)=>a+c.safety,0)/recent.length : 5;
-    const consistency = Math.round((avgSafety/10)*100); // 0..100
-    // Engagement from total number of check-ins
-    const engagement = Math.min(100, state.checkins.length*7); // caps at ~15+ check-ins
-    const t = Math.round(base*0.5 + consistency*0.25 + engagement*0.25);
-    state.trust = Math.min(100, Math.max(0, t));
-  }
-  function renderTrust(){
-    computeTrust();
-    const b = $('#trustBadge');
-    b.textContent = 'Trust: ' + state.trust + '%';
-    b.className = 'text-xs px-2 py-1 pill border ' +
-      (state.trust>=75 ? 'bg-emerald-600/20 border-emerald-400/30 text-emerald-200' :
-       state.trust>=40 ? 'bg-amber-600/20 border-amber-400/30 text-amber-200' :
-                         'bg-rose-600/20 border-rose-400/30 text-rose-200');
-  }
-
-  // =============== VIEW HELPERS ===============
-  const view = $('#view');
-
-  function setTab(t){
-    state.tab = t;
-    $$('.tab').forEach(btn=>{
-      const active = btn.dataset.tab===t;
-      btn.classList.toggle('bg-indigo-600', active);
-      btn.classList.toggle('bg-slate-700/60', !active);
+/* ====== Navigation ====== */
+const views = ['timer','checkin','journal','resources','settings'];
+$$('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const v = btn.dataset.view;
+    views.forEach(id=>{
+      const el = document.getElementById(`view-${id}`);
+      el.classList.toggle('hidden', id!==v);
     });
-    render();
-    save();
-  }
+    $$('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
 
-  function card(title, inner=''){
-    const el = document.createElement('div');
-    el.className = 'card rounded-2xl p-4';
-    el.innerHTML = `
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="font-semibold">${title}</h3>
+/* ====== Timer ====== */
+let timer=null, seconds=0;
+const timerDisplay = $('#timerDisplay');
+function renderTimer(){
+  const m = String(Math.floor(seconds/60)).padStart(2,'0');
+  const s = String(seconds%60).padStart(2,'0');
+  timerDisplay.textContent = `${m}:${s}`;
+}
+$('#startBtn').onclick=()=>{ if(!timer) timer=setInterval(()=>{seconds++;renderTimer();},1000); };
+$('#stopBtn').onclick =()=>{ clearInterval(timer); timer=null; };
+$('#resetBtn').onclick=()=>{ seconds=0; renderTimer(); };
+
+/* ====== Check-In (8 questions) & Trust Score ====== */
+const LS_ANS='timeout.answers';
+const SCORE_KEY='timeout.trust';
+const QUESTIONS = [
+  "Do you feel safe at home?",
+  "Has anyone hurt you recently?",
+  "Do you have someone you trust to talk to?",
+  "Do you feel isolated?",
+  "Do you have access to money if you need it?",
+  "Do you know where your important documents are?",
+  "Do you know who to call in an emergency?",
+  "Do you have a safe place you could go?"
+];
+let answers = JSON.parse(localStorage.getItem(LS_ANS)||'{}');
+
+function renderQuestions(){
+  const wrap = $('#questions');
+  wrap.innerHTML = '';
+  QUESTIONS.forEach((q, i)=>{
+    const id = 'q'+(i+1);
+    const val = answers[id];
+    const row = document.createElement('div');
+    row.className = 'space-y-2';
+    row.innerHTML = `
+      <p class="font-medium">${i+1}) ${q}</p>
+      <div class="flex gap-2" data-q="${id}">
+        <button class="choice ${val==='yes'?'active':''}" data-val="yes">Yes</button>
+        <button class="choice ${val==='no'?'active':''}"  data-val="no">No</button>
+        <button class="choice ${val==='skip'?'active':''}" data-val="skip">Skip</button>
       </div>
-      <div class="text-sm space-y-2">${inner}</div>`;
-    return el;
-  }
+    `;
+    wrap.appendChild(row);
+  });
 
-  function render(){
-    switch(state.tab){
-      case 'home': return renderHome();
-      case 'checkin': return renderCheckIn();
-      case 'assessment': return renderAssessment();
-      case 'resources': return renderResources();
-      case 'safety': return renderSafety();
-      case 'profile': return renderProfile();
-      case 'settings': return renderSettings();
-    }
-  }
+  // bind
+  $$('[data-q]').forEach(group=>{
+    group.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.choice');
+      if(!btn) return;
+      const qid = group.dataset.q;
+      answers[qid] = btn.dataset.val;
+      group.querySelectorAll('.choice').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      localStorage.setItem(LS_ANS, JSON.stringify(answers));
+      calcTrust();
+      showToast('Saved');
+    });
+  });
+}
 
-  // =============== HOME ===============
-  function renderHome(){
-    view.innerHTML = '';
-    const hero = card('Welcome', `
-      <p>Your private space to check-in, assess risk, and keep a safety plan handy.</p>
-      <ul class="text-slate-300 list-disc pl-5 space-y-1">
-        <li>Use <b>Quick Exit</b> if you need to leave now.</li>
-        <li>Run the <b>Assessment</b> (8 questions) to update your risk level.</li>
-        <li>Track feelings with <b>Check-Ins</b>. That improves your Trust score.</li>
-      </ul>
-    `);
-    const latest = card('Recent Check-Ins');
-    if (!state.checkins.length){
-      latest.querySelector('.text-sm').innerHTML = '<p class="text-slate-400">No check-ins yet.</p>';
-    } else {
-      const list = document.createElement('div');
-      list.className = 'space-y-2 max-h-56 overflow-auto ghost pr-1';
-      state.checkins.slice(-10).reverse().forEach(c=>{
-        const d = new Date(c.ts).toLocaleString();
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between bg-slate-800/50 rounded-xl p-2';
-        row.innerHTML = `
-          <div>
-            <div class="text-xs text-slate-400">${d}</div>
-            <div class="text-sm">${c.note || '(no note)'}</div>
+function calcTrust(){
+  // Simple model: yes=12 pts, skip=6 pts, no=0; cap 100
+  let score = 0;
+  Object.values(answers).forEach(v=>{
+    if(v==='yes') score += 12;
+    else if(v==='skip') score += 6;
+  });
+  score = Math.min(100, score);
+  localStorage.setItem(SCORE_KEY, String(score));
+  $('#trustScore').textContent = score + '%';
+}
+function initTrust(){
+  const s = localStorage.getItem(SCORE_KEY);
+  if(s) $('#trustScore').textContent = s + '%';
+  else calcTrust();
+}
+renderQuestions();
+initTrust();
+
+/* ====== Journal ====== */
+const JOURNAL_KEY='timeout.journal';
+const journal = $('#journalText');
+const savedAt = $('#journalSavedAt');
+function loadJournal(){
+  const txt = localStorage.getItem(JOURNAL_KEY) || '';
+  journal.value = txt;
+  const ts = localStorage.getItem(JOURNAL_KEY+'.ts');
+  savedAt.textContent = ts ? ('Saved ' + new Date(Number(ts)).toLocaleString()) : '';
+}
+function saveJournal(){
+  localStorage.setItem(JOURNAL_KEY, journal.value);
+  localStorage.setItem(JOURNAL_KEY+'.ts', String(Date.now()));
+  loadJournal();
+  showToast('Journal saved');
+}
+$('#saveJournal').onclick = saveJournal;
+$('#clearJournal').onclick = ()=>{
+  if(confirm('Clear journal text?')){ localStorage.removeItem(JOURNAL_KEY); localStorage.removeItem(JOURNAL_KEY+'.ts'); loadJournal(); }
+};
+loadJournal();
+
+/* ====== Quick Exit & Reset ====== */
+$('#quickExit').onclick = ()=>{ window.location.href='https://www.weather.com/'; };
+$('#resetAll').onclick  = ()=>{
+  if(confirm('Erase all data (PIN, answers, journal)?')){
+    localStorage.clear();
+    location.reload();
+  }
+};
+
+/* ====== PIN & Decoy Lock ====== */
+const PIN_KEY='timeout.pin';
+const DECOY_KEY='timeout.pin.decoy';
+const lockScreen = $('#lockScreen');
+const pinInput = $('#pinInput');
+const pinMsg = $('#pinMsg');
+
+async function sha256(s){
+  const buf = new TextEncoder().encode(s);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function setPinFlow(){
+  const p = prompt('Set 4-digit PIN');
+  if(!/^\d{4}$/.test(p||'')) return alert('PIN must be 4 digits');
+  const c = prompt('Confirm PIN');
+  if(p!==c) return alert('PINs do not match');
+  localStorage.setItem(PIN_KEY, await sha256(p));
+  alert('PIN set.');
+}
+
+async function setDecoyFlow(){
+  const d = prompt('Set 4-digit Decoy PIN (optional)');
+  if(!d){ localStorage.removeItem(DECOY_KEY); return alert('Decoy cleared.'); }
+  if(!/^\d{4}$/.test(d)) return alert('Decoy must be 4 digits');
+  localStorage.setItem(DECOY_KEY, await sha256(d));
+  alert('Decoy set.');
+}
+
+async function checkPin(p){
+  const h = await sha256(p);
+  if(h === localStorage.getItem(PIN_KEY)) return 'real';
+  if(h === localStorage.getItem(DECOY_KEY)) return 'decoy';
+  return 'bad';
+}
+
+$('#pinSubmit').onclick = async ()=>{
+  const code = pinInput.value;
+  const res = await checkPin(code);
+  if(res==='real'){
+    pinMsg.textContent = '';
+    lockScreen.style.display='none';
+  } else if(res==='decoy'){
+    pinMsg.textContent='';
+    lockScreen.style.display='none';
+    // Replace app with harmless decoy content
+    document.body.innerHTML = `
+      <div class="min-h-screen p-6 text-center bg-gray-900 text-gray-200">
+        <h1 class="text-2xl font-bold mb-2">Wellness Center</h1>
+        <p class="text-gray-400 mb-6">Daily tips and breathing exercises</p>
+        <div class="max-w-md mx-auto card p-5 space-y-3">
+          <div class="text-left">
+            <h3 class="font-semibold">Breathing (4-7-8)</h3>
+            <p class="text-sm text-gray-400">Breathe in 4s, hold 7s, out 8s — repeat 4 cycles.</p>
           </div>
-          <div class="text-right">
-            <div class="text-xs">Mood: <b>${c.mood}/10</b></div>
-            <div class="text-xs">Safety: <b>${c.safety}/10</b></div>
-          </div>`;
-        list.appendChild(row);
-      });
-      latest.querySelector('.text-sm').replaceWith(list);
-    }
-    view.appendChild(hero);
-    view.appendChild(latest);
-    const pa = $('#primaryAction');
-    pa.textContent = 'New Check-In';
-    pa.onclick = ()=>setTab('checkin');
-  }
-
-  // =============== CHECK-IN ===============
-  function renderCheckIn(){
-    view.innerHTML = '';
-    const form = card('Quick Check-In', `
-      <label class="block">Mood (0–10)
-        <input id="mood" type="range" min="0" max="10" value="5" class="w-full">
-      </label>
-      <label class="block">How safe do you feel right now? (0–10)
-        <input id="safety" type="range" min="0" max="10" value="5" class="w-full">
-      </label>
-      <label class="block">Note (optional)
-        <textarea id="note" rows="3" class="w-full bg-slate-900 rounded-lg p-2 border border-white/10" placeholder="Anything you want to remember…"></textarea>
-      </label>
-      <button id="saveCheckin" class="tap w-full pill bg-indigo-600 hover:bg-indigo-700 py-3 font-semibold">Save Check-In</button>
-    `);
-    view.appendChild(form);
-    $('#saveCheckin').onclick = ()=>{
-      const mood = +$('#mood').value;
-      const safety = +$('#safety').value;
-      const note = $('#note').value.trim();
-      state.checkins.push({ ts: Date.now(), mood, safety, note });
-      save();
-      setTab('home');
-    };
-    const pa = $('#primaryAction');
-    pa.textContent = 'Save Check-In';
-    pa.onclick = ()=>$('#saveCheckin').click();
-  }
-
-  // =============== ASSESSMENT (8 Qs) ===============
-  const QUESTIONS = [
-    'Has your partner threatened you or someone you love?',
-    'Has physical violence happened in the last 30 days?',
-    'Does your partner control where you go, who you see, or your money?',
-    'Has your partner ever strangled/choked you?',
-    'Does your partner have access to weapons?',
-    'Has your partner ever destroyed property or hurt pets?',
-    'Are there children who have witnessed violence?',
-    'Are you currently afraid to go home?'
-  ];
-  function renderAssessment(){
-    view.innerHTML = '';
-    const wrap = card('Safety Assessment (8 questions)');
-    const box = document.createElement('div');
-    box.className = 'space-y-3';
-    QUESTIONS.forEach((q, i)=>{
-      const id = 'q'+(i+1);
-      const val = state.assessment.answers[id] ?? '';
-      const row = document.createElement('div');
-      row.className = 'bg-slate-800/50 rounded-xl p-3';
-      row.innerHTML = `
-        <div class="text-sm mb-2">${i+1}. ${q}</div>
-        <div class="flex gap-2">
-          ${['No','Unsure','Yes'].map(opt=>{
-            const v = opt.toLowerCase();
-            const active = val===v ? 'bg-indigo-600' : 'bg-slate-700';
-            return `<button class="ans tap px-3 py-2 pill ${active}" data-id="${id}" data-val="${v}">${opt}</button>`;
-          }).join('')}
-        </div>`;
-      box.appendChild(row);
-    });
-    wrap.querySelector('.text-sm').replaceWith(box);
-    view.appendChild(wrap);
-
-    const summary = card('Summary', `
-      <div id="riskLine">Risk: <b>Unknown</b></div>
-      <button id="saveAssessment" class="tap w-full pill bg-amber-600 hover:bg-amber-700 py-3 font-semibold">Save Assessment</button>
-    `);
-    view.appendChild(summary);
-
-    $$('.ans', view).forEach(b=>{
-      b.onclick = ()=>{
-        const id = b.dataset.id, v = b.dataset.val;
-        state.assessment.answers[id] = v;
-        // toggle peers
-        $$(`.ans[data-id="${id}"]`, view).forEach(p=>p.classList.remove('bg-indigo-600'));
-        b.classList.add('bg-indigo-600');
-        updateAssessmentRisk();
-      };
-    });
-    $('#saveAssessment').onclick = ()=>{
-      updateAssessmentRisk();
-      save();
-      setTab('home');
-    };
-    updateAssessmentRisk();
-
-    const pa = $('#primaryAction');
-    pa.textContent = 'Save Assessment';
-    pa.onclick = ()=>$('#saveAssessment').click();
-  }
-  function updateAssessmentRisk(){
-    const a = state.assessment.answers;
-    let score = 0;
-    Object.keys(a).forEach(k=>{
-      score += (a[k]==='yes'?2 : a[k]==='unsure'?1 : 0);
-    });
-    state.assessment.score = score;
-    const risk = score>=10 ? 'High' : score>=5 ? 'Moderate' : 'Lower';
-    const c = score>=10 ? 'text-rose-300' : score>=5 ? 'text-amber-300' : 'text-emerald-300';
-    const line = $('#riskLine');
-    if (line) line.innerHTML = `Risk: <b class="${c}">${risk}</b> (score ${score})`;
-    renderTrust();
-  }
-
-  // =============== RESOURCES ===============
-  function renderResources(){
-    view.innerHTML = '';
-    view.appendChild(card('Resources', `
-      <div class="space-y-2">
-        <a class="block p-3 rounded-xl bg-slate-800/50" href="tel:18007997233">National DV Hotline (US): 1-800-799-7233</a>
-        <a class="block p-3 rounded-xl bg-slate-800/50" href="sms:88788">Text: 88788 (US)</a>
-        <a class="block p-3 rounded-xl bg-slate-800/50" href="https://www.thehotline.org" target="_blank" rel="noopener">thehotline.org</a>
-        <p class="text-slate-400 text-xs">Outside the US? Search your country’s hotline.</p>
+          <div class="text-left">
+            <h3 class="font-semibold">Mini Walk</h3>
+            <p class="text-sm text-gray-400">Stand, stretch, take 100 steps.</p>
+          </div>
+          <a href="https://www.weather.com/" class="underline text-indigo-300">More tips</a>
+        </div>
       </div>
-    `));
-    const pa = $('#primaryAction');
-    pa.textContent = 'New Check-In';
-    pa.onclick = ()=>setTab('checkin');
+    `;
+  } else {
+    pinMsg.textContent = 'Wrong PIN';
   }
+};
 
-  // =============== SAFETY PLAN ===============
-  function renderSafety(){
-    view.innerHTML = '';
-    const f = card('Safety Plan', `
-      <label class="block text-sm">Code word with trusted person
-        <input id="sp_code" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
-      </label>
-      <label class="block text-sm">Escape route / safe places
-        <textarea id="sp_route" rows="2" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10"></textarea>
-      </label>
-      <label class="block text-sm">Essentials bag (IDs, meds, cash)
-        <textarea id="sp_ess" rows="2" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10"></textarea>
-      </label>
-      <label class="block text-sm">Transport plan
-        <input id="sp_trans" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
-      </label>
-      <label class="block text-sm">Pets plan
-        <input id="sp_pets" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
-      </label>
-      <button id="savePlan" class="tap w-full pill bg-indigo-600 hover:bg-indigo-700 py-3 font-semibold">Save Plan</button>
-    `);
-    view.appendChild(f);
-    // preload
-    $('#sp_code').value = state.safetyPlan.codeWord || '';
-    $('#sp_route').value = state.safetyPlan.escapeRoute || '';
-    $('#sp_ess').value = state.safetyPlan.essentials || '';
-    $('#sp_trans').value = state.safetyPlan.transport || '';
-    $('#sp_pets').value = state.safetyPlan.pets || '';
-    $('#savePlan').onclick = ()=>{
-      state.safetyPlan = {
-        codeWord: $('#sp_code').value.trim(),
-        escapeRoute: $('#sp_route').value.trim(),
-        essentials: $('#sp_ess').value.trim(),
-        transport: $('#sp_trans').value.trim(),
-        pets: $('#sp_pets').value.trim()
-      };
-      save(); setTab('home');
-    };
-    const pa = $('#primaryAction');
-    pa.textContent = 'Save Plan';
-    pa.onclick = ()=>$('#savePlan').click();
-  }
+$('#setPin').onclick = setPinFlow;
+$('#changePin').onclick = setPinFlow;
+$('#setDecoy').onclick = setDecoyFlow;
 
-  // =============== PROFILE ===============
-  function renderProfile(){
-    view.innerHTML = '';
-    const f = card('Profile', `
-      <label class="block text-sm">Display name
-        <input id="pf_name" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10" placeholder="Optional alias">
-      </label>
-      <label class="block text-sm">ZIP / Area
-        <input id="pf_zip" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10" placeholder="e.g., 30303">
-      </label>
-      <label class="block text-sm">Trusted contact (phone or email)
-        <input id="pf_contact" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
-      </label>
-      <label class="block text-sm">Notes (private)
-        <textarea id="pf_notes" rows="3" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10"></textarea>
-      </label>
-      <button id="saveProfile" class="tap w-full pill bg-indigo-600 hover:bg-indigo-700 py-3 font-semibold">Save Profile</button>
-    `);
-    view.appendChild(f);
-    $('#pf_name').value = state.profile.displayName || '';
-    $('#pf_zip').value = state.profile.zip || '';
-    $('#pf_contact').value = state.profile.safeContact || '';
-    $('#pf_notes').value = state.profile.notes || '';
-    $('#saveProfile').onclick = ()=>{
-      state.profile = {
-        displayName: $('#pf_name').value.trim(),
-        zip: $('#pf_zip').value.trim(),
-        safeContact: $('#pf_contact').value.trim(),
-        notes: $('#pf_notes').value.trim()
-      };
-      save(); setTab('home');
-    };
-    const pa = $('#primaryAction');
-    pa.textContent = 'Save Profile';
-    pa.onclick = ()=>$('#saveProfile').click();
-  }
+// First-time: no PIN -> ask to set after short delay
+window.addEventListener('load', ()=>{
+  if(!localStorage.getItem(PIN_KEY</div>`;
+          list.appendChild(el);
+        });
 
-  // =============== SETTINGS ===============
-  function renderSettings(){
-    view.innerHTML = '';
-    const privacy = card('Privacy & Storage', `
-      <p class="text-slate-300">Data is stored only on this device (localStorage).</p>
-      <div class="grid grid-cols-2 gap-2">
-        <button id="exportData" class="tap pill bg-slate-700 hover:bg-slate-600 py-2">Export JSON</button>
-        <button id="importData" class="tap pill bg-slate-700 hover:bg-slate-600 py-2">Import JSON</button>
-      </div>
-      <input id="importFile" type="file" accept="application/json" class="hidden">
-    `);
-    const tips = card('Tips', `
-      <p class="text-slate-300">Add to Home Screen for an app-like icon. Use <span class="kbd">Reset</span> to clear local data on this device.</p>
-    `);
-    view.appendChild(privacy);
-    view.appendChild(tips);
+        // Search
+        root.querySelector('#search-meetings').addEventListener('input', (e) => {
+          const q = e.target.value.toLowerCase();
+          const filteredList = this.state.meetings.filter(m => (m.title || '').toLowerCase().includes(q));
+          this.renderMeetings(filteredList, e.target.value);
+        });
 
-    $('#exportData').onclick = ()=>{
-      const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'timeout-export.json';
-      a.click();
-    };
-    $('#importData').onclick = ()=>$('#importFile').click();
-    $('#importFile').onchange = async e=>{
-      const f = e.target.files[0];
-      if (!f) return;
-      try{
-        const data = JSON.parse(await f.text());
-        Object.assign(state, data);
-        save(); render();
-      }catch{
-        alert('Invalid file.');
+        // Save
+        root.querySelector('#save-meeting-btn').addEventListener('click', async () => {
+          const title = root.querySelector('#meeting-title').value.trim();
+          const date = root.querySelector('#meeting-date').value;
+          const time = root.querySelector('#meeting-time').value;
+          if (!title) return this.showMessage('Please enter a meeting title.', true);
+          try {
+            if (this.state.editingMeetingId) {
+              const ref = doc(this.db, `artifacts/${appId}/public/data/meetings`, this.state.editingMeetingId);
+              await updateDoc(ref, { title, date, time, updatedAt: serverTimestamp() });
+              this.state.editingMeetingId = null;
+              this.showMessage('Meeting updated.');
+            } else {
+              await addDoc(collection(this.db, `artifacts/${appId}/public/data/meetings`), {
+                title, date, time, createdBy: this.state.userId, createdAt: serverTimestamp()
+              });
+              this.showMessage('Meeting created.');
+            }
+          } catch (e) { console.error(e); this.showMessage('Failed to save meeting.', true); }
+        });
+
+        // Cancel edit
+        const cancel = root.querySelector('#cancel-edit-btn');
+        if (cancel) cancel.addEventListener('click', () => { this.state.editingMeetingId = null; this.renderMeetings(); });
+
+        // Edit / Delete / Chat buttons
+        list.querySelectorAll('.edit-meeting').forEach(btn => btn.addEventListener('click', () => {
+          this.state.editingMeetingId = btn.dataset.id;
+          this.renderMeetings();
+        }));
+        list.querySelectorAll('.delete-meeting').forEach(btn => btn.addEventListener('click', async () => {
+          const ok = await this.askConfirm('Delete this meeting?');
+          if (!ok) return;
+          try {
+            await deleteDoc(doc(this.db, `artifacts/${appId}/public/data/meetings`, btn.dataset.id));
+            this.showMessage('Meeting deleted.');
+          } catch (e) { console.error(e); this.showMessage('Failed to delete.', true); }
+        }));
+        list.querySelectorAll('.join-meeting').forEach(btn => btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const m = this.state.meetings.find(x => x.id === id);
+          this.openChat('meetings', id, `Meeting: ${m?.title || ''}`);
+        }));
       }
-    };
 
-    const pa = $('#primaryAction');
-    pa.textContent = 'New Check-In';
-    pa.onclick = ()=>setTab('checkin');
-  }
+      // ---------- Groups ----------
+      renderGroups() {
+        const root = document.getElementById('groups-view');
+        root.innerHTML = `
+          <div class="space-y-6">
+            <h2 class="text-2xl font-semibold text-white text-center">Community Groups</h2>
+            <div class="bg-[#1b2530] p-6 rounded-2xl shadow-inner space-y-4">
+              <h3 class="text-xl font-semibold text-gray-200">Create a Group</h3>
+              <input id="group-name" class="form-input" type="text" placeholder="Group Name">
+              <button id="save-group-btn" class="form-button bg-green-600 hover:bg-green-700">Save Group</button>
+            </div>
+            <div id="groups-list" class="space-y-3"></div>
+          </div>
+        `;
 
-  // =============== GLOBAL ACTIONS ===============
-  $('#quickExit').onclick = ()=>{
-    document.body.innerHTML = '<div class="p-6 text-center text-slate-200">Loading…</div>';
-    location.href = 'https://www.weather.com/';
-  };
-  $('#resetAll').onclick = ()=>{
-    if (!confirm('Erase all local data on this device?')) return;
-    localStorage.removeItem(STORAGE_KEY);
-    state.tab='home';
-    state.profile={displayName:'',zip:'',safeContact:'',notes:''};
-    state.checkins=[];
-    state.assessment={answers:{},score:0};
-    state.safetyPlan={codeWord:'',escapeRoute:'',essentials:'',transport:'',pets:''};
-    state.trust=0;
-    renderTrust(); render(); save();
-  };
-  $$('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+        const list = root.querySelector('#groups-list');
+        this.state.groups.forEach(g => {
+          const el = document.createElement('div');
+          el.className = 'bg-[#1b2530] p-4 rounded-xl shadow-lg flex justify-between items-center card-glow';
+          el.innerHTML = `
+            <div>
+              <h3 class="font-bold text-gray-100">${g.name}</h3>
+              <p class="text-xs text-gray-400">Created by ${this.state.allUserProfiles[g.createdBy]?.publicName || g.createdBy}</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="join-group action-button bg-indigo-600 hover:bg-indigo-700" data-id="${g.id}">Chat</button>
+              ${g.createdBy === this.state.userId ? `
+                <button class="delete-group action-button bg-red-600 hover:bg-red-700" data-id="${g.id}">Delete</button>
+              ` : ''}
+            </div>`;
+          list.appendChild(el);
+        });
 
-  // =============== BOOT ===============
-  load();
-  renderTrust();
-  setTab(state.tab || 'home');
+        // Save group
+        root.querySelector('#save-group-btn').addEventListener('click', async () => {
+          const name = root.querySelector('#group-name').value.trim();
+          if (!name) return this.showMessage('Please enter a group name.', true);
+          try {
+            await addDoc(collection(this.db, `artifacts/${appId}/public/data/groups`), {
+              name, createdBy: this.state.userId, createdAt: serverTimestamp()
+            });
+            this.showMessage('Group created.');
+          } catch (e) { console.error(e); this.showMessage('Failed to save group.', true); }
+        });
+
+        // Delete / Chat
+        list.querySelectorAll('.delete-group').forEach(btn => btn.addEventListener('click', async () => {
+          const ok = await this.askConfirm('Delete this group?');
+          if (!ok) return;
+          try {
+            await deleteDoc(doc(this.db, `artifacts/${appId}/public/data/groups`, btn.dataset.id));
+            this.showMessage('Group deleted.');
+          } catch (e) { console.error(e); this.showMessage('Failed to delete group.', true); }
+        }));
+        list.querySelectorAll('.join-group').forEach(btn => btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const g = this.state.groups.find(x => x.id === id);
+          this.openChat('groups', id, `Group: ${g?.name || ''}`);
+        }));
+      }
+
+      // ---------- Profile ----------
+      renderProfile() {
+        const root = document.getElementById('profile-view');
+        root.innerHTML = `
+          <div class="space-y-6">
+            <h2 class="text-2xl font-semibold text-white text-center">Profile</h2>
+            <div class="bg-[#1b2530] p-6 rounded-2xl shadow-inner space-y-4">
+              <label class="block text-gray-200">Display Name</label>
+              <input id="profile-name" class="form-input" type="text" value="${this.state.userProfile?.publicName || ''}">
+              <label class="block text-gray-200">Trust Score</label>
+              <p class="text-indigo-400 font-bold">${this.state.userProfile?.trustScore || 25}</p>
+              <button id="save-profile-btn" class="form-button bg-green-600 hover:bg-green-700">Save Profile</button>
+            </div>
+          </div>
+        `;
+
+        root.querySelector('#save-profile-btn').addEventListener('click', async () => {
+          const newName = root.querySelector('#profile-name').value.trim();
+          if (!newName) return this.showMessage('Please enter a name.', true);
+          try {
+            this.state.userProfile.publicName = newName;
+            await setDoc(doc(this.db, `artifacts/${appId}/users/${this.state.userId}/profile`, 'my_profile'),
+              this.state.userProfile, { merge: true });
+            await setDoc(doc(this.db, `artifacts/${appId}/public/data/profiles`, this.state.userId),
+              { publicName: newName }, { merge: true });
+            this.showMessage('Profile updated.');
+          } catch (e) { console.error(e); this.showMessage('Failed to update profile.', true); }
+        });
+      }
+
+      // ---------- Chat ----------
+      openChat(type, id, title) {
+        this.state.selectedChatType = type;
+        this.state.selectedChatId = id;
+        this.showView('chat');
+        this.renderChatMessages(title);
+      }
+
+      renderChatMessages(title = '') {
+        const root = document.getElementById('chat-view');
+        const msgs = this.state.messages[this.state.selectedChatId] || [];
+
+        root.innerHTML = `
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-white">${title}</h2>
+            <button id="chat-back-btn" class="action-button bg-gray-600 hover:bg-gray-700">Back</button>
+          </div>
+          <div id="chat-messages" class="chat-scroll h-80 overflow-y-auto space-y-2 mb-4 bg-[#1b2530] p-4 rounded-xl shadow-inner">
+            ${msgs.map(m => `
+              <div class="chat-message ${m.userId === this.state.userId ? 'text-right' : 'text-left'}">
+                <span class="inline-block px-3 py-2 rounded-lg ${m.userId === this.state.userId ? 'bg-indigo-600 text-white' : 'bg-gray-700 text-gray-200'}">
+                  ${m.text}
+                </span>
+              </div>`).join('')}
+          </div>
+          <div class="flex gap-2">
+            <input id="chat-input" class="form-input flex-grow" type="text" placeholder="Type a message...">
+            <button id="chat-send-btn" class="action-button bg-green-600 hover:bg-green-700">Send</button>
+          </div>
+        `;
+
+        document.getElementById('chat-back-btn').addEventListener('click', () => {
+          this.showView(this.state.selectedChatType);
+        });
+
+        document.getElementById('chat-send-btn').addEventListener('click', async () => {
+          const input = document.getElementById('chat-input');
+          const text = input.value.trim();
+          if (!text) return;
+          try {
+            await addDoc(collection(this.db, `artifacts/${appId}/public/data/${this.state.selectedChatType}/${this.state.selectedChatId}/messages`), {
+              text, userId: this.state.userId, createdAt: serverTimestamp()
+            });
+            input.value = '';
+          } catch (e) { console.error(e); this.showMessage('Failed to send message.', true); }
+        });
+
+        // Listen for messages
+        if (this.chatUnsubscribe) this.chatUnsubscribe();
+        const msgsCol = query(collection(this.db, `artifacts/${appId}/public/data/${this.state.selectedChatType}/${this.state.selectedChatId}/messages`), orderBy('createdAt'));
+        this.chatUnsubscribe = onSnapshot(msgsCol, (snapshot) => {
+          this.state.messages[this.state.selectedChatId] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          this.renderChatMessages(title);
+        });
+      }
+    }
+
+    // Boot app
+    new UnbrokenPathApp();
   </script>
 </body>
 </html>
