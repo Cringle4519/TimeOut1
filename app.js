@@ -1,8 +1,14 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+// --- HARD TRUTH MODE: fail loudly so we can fix fast ---
+window.onerror = (m, s, l, c, e) => console.log('WINDOW ERROR:', m, s, l, c, e);
 
-// USE YOUR REAL CONFIG (you posted this):
+// Firebase CDN v11.6.1
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, getDocs, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+// ---- CONFIG (your real project; no placeholders) ----
 const firebaseConfig = {
   apiKey: "AIzaSyC3Ga-GhV8xQztnbef7ybPFu4BRtLANtuk",
   authDomain: "unbrokenpath-630b0.firebaseapp.com",
@@ -13,56 +19,73 @@ const firebaseConfig = {
   measurementId: "G-0Y8G7SS1BV"
 };
 
-// One fixed app ID used in Firestore paths
+// We’ll use this same ID in your Firestore path
 const APP_ID = "unbroken-path-app";
 
+// ---- UI helpers ----
+const $ = (id) => document.getElementById(id);
+const setStatus = (t) => { const el = $('status'); if (el) el.textContent = t; };
+
+// ---- Boot ----
+setStatus('Booting…');
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const auth = getAuth();
+const db = getFirestore();
 
-const $status = document.getElementById("status");
-const $uid = document.getElementById("uid");
-const $list = document.getElementById("list");
-const $add = document.getElementById("add");
-const $refresh = document.getElementById("refresh");
+setStatus('Signing in (anonymous)…');
 
-$status.textContent = "Signing in anonymously…";
-
+// Sign-in and then load meetings (seeding if empty)
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    await signInAnonymously(auth);
-    return;
-  }
-  $status.innerHTML = '<span class="ok">Connected ✅</span>';
-  $uid.textContent = "User ID: " + user.uid;
-  await refreshList();
-});
+  if (!user) return;
+  $('user-id').textContent = user.uid;
+  setStatus('Signed in. Loading meetings…');
 
-function meetingsCol() {
-  return collection(db, `artifacts/${APP_ID}/public/data/meetings`);
-}
-
-async function addSampleMeeting() {
-  await addDoc(meetingsCol(), {
-    title: "Sample Meeting " + new Date().toLocaleString(),
-    createdAt: serverTimestamp()
-  });
-}
-
-async function refreshList() {
-  const snap = await getDocs(meetingsCol());
-  const items = [];
-  snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-  $list.textContent = items.length ? JSON.stringify(items, null, 2) : "(none yet)";
-}
-
-$add.addEventListener("click", async () => {
   try {
-    await addSampleMeeting();
-    await refreshList();
+    const meetingsCol = collection(db, `artifacts/${APP_ID}/public/data/meetings`);
+    const snap = await getDocs(meetingsCol);
+
+    if (snap.empty) {
+      // Seed one meeting so you see something immediately
+      await addDoc(meetingsCol, {
+        title: "Welcome Meeting",
+        date: new Date().toISOString().slice(0,10),
+        time: "12:00",
+        createdAt: serverTimestamp(),
+        createdBy: user.uid
+      });
+      setStatus('No meetings found. Seeded a demo meeting. Reloading…');
+      // Re-read after seed
+      const again = await getDocs(meetingsCol);
+      renderMeetings(again);
+      setStatus('Ready.');
+    } else {
+      renderMeetings(snap);
+      setStatus('Ready.');
+    }
   } catch (e) {
-    $status.innerHTML = '<span class="bad">Write failed ❌ (see console)</span>';
     console.error(e);
+    setStatus(`Failed to load meetings: ${e?.message || e}`);
   }
 });
-$refresh.addEventListener("click", refreshList);
+
+// Start sign-in
+signInAnonymously(auth).catch(err => setStatus(`Auth error: ${err?.message || err}`));
+
+// ---- Render ----
+function renderMeetings(snapshot) {
+  const root = $('meetings');
+  root.innerHTML = '';
+  snapshot.forEach(doc => {
+    const m = doc.data();
+    const div = document.createElement('div');
+    div.className = 'p-3 bg-gray-800 rounded';
+    div.innerHTML = `
+      <div class="text-white font-medium">${m.title || '(Untitled)'}</div>
+      <div class="text-xs text-gray-400">${m.date || ''} ${m.time ? 'at ' + m.time : ''}</div>
+    `;
+    root.appendChild(div);
+  });
+  if (root.children.length === 0) {
+    root.innerHTML = '<div class="text-gray-400">No meetings</div>';
+  }
+}
