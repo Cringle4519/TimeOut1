@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Ideas</title>
+<style>
+  body{margin:0;font-family:Inter,system-ui,Arial;background:#0b1220;color:#e7eaf6}
+  main{max-width:720px;margin:28px auto;padding:0 16px}
+  a{color:#a5b4fc;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Daily Ideas</h1>
+  <p>Quick notes for better focus and organization.</p>
+  <ul>
+    <li>Pick three outcomes for today.</li>
+    <li>Work in short, single-task blocks.</li>
+    <li>Capture ideas; review this evening.</li>
+  </ul>
+  <p class="muted">© Notes</p>
+</main>
+<script>
+  // Prevent back navigation revealing the DV app
+  history.pushState(null,'',location.href);
+  window.addEventListener('popstate',()=>history.pushState(null,'',location.href));
+</script>
+</body></html>
