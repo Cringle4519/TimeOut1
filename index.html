@@ -1,452 +1,453 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <title>TimeOut</title>
-  <meta name="theme-color" content="#0d1117"/>
-  <link rel="manifest" href='data:application/manifest+json,{"name":"TimeOut","short_name":"TimeOut","start_url":".","display":"standalone","background_color":"#0d1117","theme_color":"#0d1117"}'>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>TimeOut — Safety & Support</title>
+  <meta name="theme-color" content="#0b1020" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root { --bg:#0d1117; --card:#131a22; --ink:#e5e7eb; --muted:#a3a3a3; --brand:#6366f1; }
-    body { background:var(--bg); color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif; }
-    .card { background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:1rem; box-shadow:0 6px 20px rgba(0,0,0,.25); }
-    .tab-btn { border-radius:9999px; padding:.55rem .9rem; }
-    .tab-btn.active { background:var(--brand); color:white; }
-    .muted { color:var(--muted) }
-    .calc-shell { background:#0b0b0b !important; }
-    .calc-shell .hide-when-disguised { display:none !important; }
-    .calc-shell .calc-grid { display:grid !important; }
-    .calc-grid { display:none; grid-template-columns:repeat(4,1fr); gap:.5rem; }
-    .calc-btn { background:#1a1a1a; border-radius:.75rem; padding:.9rem 0; text-align:center; font-weight:600; }
-    .sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
-    button:active { transform: translateY(0.5px); }
+    html,body{height:100%}
+    body{background:#0b1020}
+    .card{background:#121a2a;border:1px solid rgba(255,255,255,.06)}
+    .pill{border-radius:9999px}
+    .ghost::-webkit-scrollbar{height:6px;width:6px}
+    .ghost::-webkit-scrollbar-thumb{background:#334155;border-radius:9999px}
+    .tap:active{transform:translateY(1px)}
+    .kbd{border:1px solid #475569;border-bottom-width:2px;padding:.15rem .4rem;border-radius:.375rem;font-size:.7rem}
   </style>
 </head>
-<body class="min-h-screen">
-  <div class="max-w-md mx-auto p-4 sm:p-6">
+<body class="text-slate-100">
+  <main class="max-w-md mx-auto min-h-screen flex flex-col">
 
     <!-- Header -->
-    <header class="flex items-center justify-between mb-4">
-      <div class="hide-when-disguised">
-        <h1 id="app-title" class="text-xl font-bold">TimeOut</h1>
-        <p class="text-xs muted -mt-0.5">Ground. Breathe. Choose safely.</p>
+    <header class="sticky top-0 z-20 backdrop-blur bg-black/40 border-b border-white/10">
+      <div class="px-4 py-3 flex items-center justify-between">
+        <h1 class="text-lg font-semibold">TimeOut</h1>
+        <div class="flex items-center gap-2">
+          <span id="trustBadge" class="text-xs px-2 py-1 pill bg-indigo-600/20 border border-indigo-400/30 text-indigo-200">Trust: 0%</span>
+          <button id="quickExit" class="tap text-xs px-3 py-1 pill bg-rose-600 hover:bg-rose-700">Quick Exit</button>
+        </div>
       </div>
-      <div class="flex gap-2">
-        <button id="btn-disguise" class="px-3 py-2 text-xs rounded-full bg-neutral-700 hover:bg-neutral-600" title="Hide app instantly">Disguise</button>
-        <button id="btn-quick-exit" class="px-3 py-2 text-xs rounded-full bg-red-600 hover:bg-red-500" title="Leave page">Quick Exit</button>
-      </div>
+      <!-- Tabs row 1 -->
+      <nav class="px-2 pb-2 grid grid-cols-4 gap-2 text-xs">
+        <button data-tab="home" class="tab pill px-3 py-2 bg-indigo-600">Home</button>
+        <button data-tab="checkin" class="tab pill px-3 py-2 bg-slate-700/60">Check-In</button>
+        <button data-tab="assessment" class="tab pill px-3 py-2 bg-slate-700/60">Assessment</button>
+        <button data-tab="resources" class="tab pill px-3 py-2 bg-slate-700/60">Resources</button>
+      </nav>
+      <!-- Tabs row 2 -->
+      <nav class="px-2 pb-3 grid grid-cols-3 gap-2 text-xs">
+        <button data-tab="safety" class="tab pill px-3 py-2 bg-slate-700/60">Safety Plan</button>
+        <button data-tab="profile" class="tab pill px-3 py-2 bg-slate-700/60">Profile</button>
+        <button data-tab="settings" class="tab pill px-3 py-2 bg-slate-700/60">Settings</button>
+      </nav>
     </header>
 
-    <!-- Tabs -->
-    <nav class="flex flex-wrap gap-2 mb-4 hide-when-disguised">
-      <button class="tab-btn active" data-tab="home">Home</button>
-      <button class="tab-btn" data-tab="checkin">Check-In</button>
-      <button class="tab-btn" data-tab="journal">Journal</button>
-      <button class="tab-btn" data-tab="resources">Resources</button>
-      <button class="tab-btn" data-tab="settings">Settings</button>
-    </nav>
+    <!-- Content -->
+    <section id="view" class="flex-1 p-4 space-y-3"></section>
 
-    <!-- HOME / TIMER -->
-    <section id="tab-home" class="card p-4 space-y-4">
-      <div class="text-center hide-when-disguised">
-        <div id="timer-display" class="text-5xl font-extrabold tracking-wider">05:00</div>
-        <p class="muted text-xs mt-1">Tap start and breathe with the timer.</p>
+    <!-- Footer actions -->
+    <footer class="sticky bottom-0 bg-black/40 border-t border-white/10">
+      <div class="px-4 py-3 flex items-center gap-2">
+        <button id="primaryAction" class="tap flex-1 pill px-4 py-3 bg-indigo-600 hover:bg-indigo-700 font-semibold">New Check-In</button>
+        <button id="resetAll" class="tap pill px-4 py-3 bg-slate-700 hover:bg-slate-600">Reset</button>
       </div>
-      <div class="grid grid-cols-3 gap-2 hide-when-disguised">
-        <button class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500" id="timer-start">Start</button>
-        <button class="py-3 rounded-lg bg-neutral-700 hover:bg-neutral-600" id="timer-pause">Pause</button>
-        <button class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700" id="timer-reset">Reset</button>
-      </div>
-      <div class="grid grid-cols-3 gap-2 hide-when-disguised">
-        <button class="py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-preset="300">5m</button>
-        <button class="py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-preset="600">10m</button>
-        <button class="py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-preset="900">15m</button>
-      </div>
-
-      <!-- Disguise calculator face -->
-      <div class="calc-grid mt-2">
-        <div class="col-span-4 bg-black/30 rounded-lg p-3 text-right" id="calc-screen">0</div>
-        <div class="calc-btn">7</div><div class="calc-btn">8</div><div class="calc-btn">9</div><div class="calc-btn">÷</div>
-        <div class="calc-btn">4</div><div class="calc-btn">5</div><div class="calc-btn">6</div><div class="calc-btn">×</div>
-        <div class="calc-btn">1</div><div class="calc-btn">2</div><div class="calc-btn">3</div><div class="calc-btn">−</div>
-        <div class="calc-btn">0</div><div class="calc-btn">.</div><div class="calc-btn">=</div><div class="calc-btn">+</div>
-      </div>
-
-      <div class="text-xs muted text-center">Pro tip: hold Quick Exit for 1s to silently disguise without navigating.</div>
-    </section>
-
-    <!-- CHECK-IN -->
-    <section id="tab-checkin" class="card p-4 space-y-4 hidden">
-      <p class="text-sm muted">Answer what you can. Responses stay on this device.</p>
-      <form id="checkin-form" class="space-y-3">
-        <div class="space-y-1">
-          <label class="text-sm">1) Do you feel safe going home today?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q1">
-            <option value="0">Yes, I feel safe</option>
-            <option value="1">Mostly safe</option>
-            <option value="2">Unsure</option>
-            <option value="3">Not really</option>
-            <option value="4">No, I do not feel safe</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-sm">2) Threats, stalking, or control this week?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q2">
-            <option value="0">None</option>
-            <option value="1">Rare</option>
-            <option value="2">Sometimes</option>
-            <option value="3">Often</option>
-            <option value="4">Constant</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-sm">3) Any physical harm or property damage?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q3">
-            <option value="0">No</option>
-            <option value="1">Minor</option>
-            <option value="2">Some</option>
-            <option value="3">Serious</option>
-            <option value="4">Severe</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-sm">4) Are kids, pets, or others at risk?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q4">
-            <option value="0">No</option>
-            <option value="1">Maybe</option>
-            <option value="2">Sometimes</option>
-            <option value="3">Likely</option>
-            <option value="4">Yes</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-sm">5) Access to money, documents, and a safe place?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q5">
-            <option value="0">Yes, all</option>
-            <option value="1">Most</option>
-            <option value="2">Some</option>
-            <option value="3">Few</option>
-            <option value="4">None</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-sm">6) Has violence escalated recently?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q6">
-            <option value="0">No</option>
-            <option value="1">Slight</option>
-            <option value="2">Some</option>
-            <option value="3">A lot</option>
-            <option value="4">Extreme</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-sm">7) Do you have support (friend, advocate, shelter)?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q7">
-            <option value="0">Strong support</option>
-            <option value="1">Some support</option>
-            <option value="2">Limited</option>
-            <option value="3">Very little</option>
-            <option value="4">None</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-sm">8) Do you want help making a safety plan?</label>
-          <select class="w-full bg-neutral-900 rounded-lg p-2" name="q8">
-            <option value="0">No</option>
-            <option value="1">Maybe later</option>
-            <option value="2">Not sure</option>
-            <option value="3">Probably</option>
-            <option value="4">Yes</option>
-          </select>
-        </div>
-        <div class="grid grid-cols-2 gap-2 pt-2">
-          <button id="checkin-submit" type="submit" class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500">Save Check-In</button>
-          <button id="checkin-clear" type="button" class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Clear</button>
-        </div>
-      </form>
-      <div id="checkin-result" class="hidden bg-neutral-900 rounded-lg p-3">
-        <h3 class="font-semibold mb-1">Summary</h3>
-        <p id="checkin-summary" class="text-sm"></p>
-        <p id="checkin-safety" class="text-xs mt-2 muted"></p>
-      </div>
-    </section>
-
-    <!-- JOURNAL (PIN) -->
-    <section id="tab-journal" class="card p-4 space-y-3 hidden">
-      <div id="journal-locked" class="space-y-3">
-        <label class="text-sm">Enter PIN (4–8 digits) to unlock your journal</label>
-        <input id="pin-input" inputmode="numeric" class="w-full p-3 rounded-lg bg-neutral-900" placeholder="••••"/>
-        <div class="grid grid-cols-2 gap-2">
-          <button id="pin-unlock" class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500">Unlock</button>
-          <button id="pin-set" class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Set / Change PIN</button>
-        </div>
-        <p class="text-xs muted">PIN & notes are stored on this device only.</p>
-      </div>
-
-      <div id="journal-unlocked" class="hidden space-y-3">
-        <textarea id="journal-text" class="w-full h-40 p-3 rounded-lg bg-neutral-900" placeholder="Write anything you want…"></textarea>
-        <div class="grid grid-cols-2 gap-2">
-          <button id="journal-save" class="py-3 rounded-lg bg-indigo-600 hover:bg-indigo-500">Save</button>
-          <button id="journal-lock" class="py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Lock</button>
-        </div>
-        <p class="text-xs muted">Use Settings → “Reset all data” if you need to wipe this device.</p>
-      </div>
-    </section>
-
-    <!-- RESOURCES -->
-    <section id="tab-resources" class="card p-4 space-y-3 hidden">
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="font-semibold">National DV Hotline (US)</p>
-            <p class="text-xs muted">Call 1-800-799-SAFE (7233) • Text START to 88788 • thehotline.org</p>
-          </div>
-          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-copy="1-800-799-7233">Copy</button>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="font-semibold">911 / Local Emergency</p>
-            <p class="text-xs muted">If you or someone else is in immediate danger</p>
-          </div>
-          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-copy="911">Copy</button>
-        </div>
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="font-semibold">RAINN (SA Hotline)</p>
-            <p class="text-xs muted">Call 800-656-HOPE • online.rainn.org</p>
-          </div>
-          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-copy="800-656-4673">Copy</button>
-        </div>
-      </div>
-      <p class="text-xs muted pt-2">Use Settings to rename the app or enable Disguise Mode quickly.</p>
-    </section>
-
-    <!-- SETTINGS -->
-    <section id="tab-settings" class="card p-4 space-y-4 hidden">
-      <div class="space-y-2">
-        <label class="text-sm">App display name</label>
-        <input id="setting-appname" class="w-full p-3 rounded-lg bg-neutral-900" placeholder="TimeOut">
-        <button id="setting-save-appname" class="mt-2 py-2 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Save name</button>
-      </div>
-      <div class="space-y-2">
-        <label class="text-sm">Theme</label>
-        <div class="flex gap-2">
-          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-theme="dark">Dark</button>
-          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-theme="indigo">Indigo</button>
-          <button class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700" data-theme="teal">Teal</button>
-        </div>
-      </div>
-      <div class="space-y-2">
-        <label class="text-sm">Danger zone</label>
-        <button id="reset-all" class="w-full py-3 rounded-lg bg-red-600 hover:bg-red-500">Reset all data on this device</button>
-      </div>
-      <div class="space-y-2">
-        <label class="text-sm">Disguise Mode</label>
-        <button id="toggle-disguise" class="w-full py-3 rounded-lg bg-neutral-800 hover:bg-neutral-700">Toggle Disguise</button>
-      </div>
-
-      <!-- Calculator layout (only visible in disguise) -->
-      <div class="calc-grid mt-2">
-        <div class="col-span-4 bg-black/30 rounded-lg p-3 text-right" id="calc-screen">0</div>
-        <div class="calc-btn">7</div><div class="calc-btn">8</div><div class="calc-btn">9</div><div class="calc-btn">÷</div>
-        <div class="calc-btn">4</div><div class="calc-btn">5</div><div class="calc-btn">6</div><div class="calc-btn">×</div>
-        <div class="calc-btn">1</div><div class="calc-btn">2</div><div class="calc-btn">3</div><div class="calc-btn">−</div>
-        <div class="calc-btn">0</div><div class="calc-btn">.</div><div class="calc-btn">=</div><div class="calc-btn">+</div>
-      </div>
-    </section>
-  </div>
+    </footer>
+  </main>
 
   <script>
-    /* ====== storage helpers ====== */
-    const S = {
-      get(k, d=null){ try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
-      set(k, v){ localStorage.setItem(k, JSON.stringify(v)); },
-      del(k){ localStorage.removeItem(k); }
+  // =============== STATE & STORAGE ===============
+  const STORAGE_KEY = 'timeout_app_v1';
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  const state = {
+    tab: 'home',
+    profile: { displayName:'', zip:'', safeContact:'', notes:'' },
+    checkins: [], // [{ts, mood, safety, note}]
+    assessment: { answers:{}, score:0 }, // 8 Qs
+    safetyPlan: { codeWord:'', escapeRoute:'', essentials:'', transport:'', pets:'' },
+    trust: 0
+  };
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) Object.assign(state, JSON.parse(raw));
+    }catch{}
+  }
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    renderTrust();
+  }
+
+  // =============== TRUST SCORE ===============
+  function computeTrust(){
+    // Base from assessment (lower score => safer => higher trust)
+    const base = Math.max(0, 100 - state.assessment.score*8); // 0..100
+    // Consistency from last 7 check-ins: higher safety => higher trust
+    const recent = state.checkins.slice(-7);
+    const avgSafety = recent.length ? recent.reduce((a,c)=>a+c.safety,0)/recent.length : 5;
+    const consistency = Math.round((avgSafety/10)*100); // 0..100
+    // Engagement from total number of check-ins
+    const engagement = Math.min(100, state.checkins.length*7); // caps at ~15+ check-ins
+    const t = Math.round(base*0.5 + consistency*0.25 + engagement*0.25);
+    state.trust = Math.min(100, Math.max(0, t));
+  }
+  function renderTrust(){
+    computeTrust();
+    const b = $('#trustBadge');
+    b.textContent = 'Trust: ' + state.trust + '%';
+    b.className = 'text-xs px-2 py-1 pill border ' +
+      (state.trust>=75 ? 'bg-emerald-600/20 border-emerald-400/30 text-emerald-200' :
+       state.trust>=40 ? 'bg-amber-600/20 border-amber-400/30 text-amber-200' :
+                         'bg-rose-600/20 border-rose-400/30 text-rose-200');
+  }
+
+  // =============== VIEW HELPERS ===============
+  const view = $('#view');
+
+  function setTab(t){
+    state.tab = t;
+    $$('.tab').forEach(btn=>{
+      const active = btn.dataset.tab===t;
+      btn.classList.toggle('bg-indigo-600', active);
+      btn.classList.toggle('bg-slate-700/60', !active);
+    });
+    render();
+    save();
+  }
+
+  function card(title, inner=''){
+    const el = document.createElement('div');
+    el.className = 'card rounded-2xl p-4';
+    el.innerHTML = `
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold">${title}</h3>
+      </div>
+      <div class="text-sm space-y-2">${inner}</div>`;
+    return el;
+  }
+
+  function render(){
+    switch(state.tab){
+      case 'home': return renderHome();
+      case 'checkin': return renderCheckIn();
+      case 'assessment': return renderAssessment();
+      case 'resources': return renderResources();
+      case 'safety': return renderSafety();
+      case 'profile': return renderProfile();
+      case 'settings': return renderSettings();
+    }
+  }
+
+  // =============== HOME ===============
+  function renderHome(){
+    view.innerHTML = '';
+    const hero = card('Welcome', `
+      <p>Your private space to check-in, assess risk, and keep a safety plan handy.</p>
+      <ul class="text-slate-300 list-disc pl-5 space-y-1">
+        <li>Use <b>Quick Exit</b> if you need to leave now.</li>
+        <li>Run the <b>Assessment</b> (8 questions) to update your risk level.</li>
+        <li>Track feelings with <b>Check-Ins</b>. That improves your Trust score.</li>
+      </ul>
+    `);
+    const latest = card('Recent Check-Ins');
+    if (!state.checkins.length){
+      latest.querySelector('.text-sm').innerHTML = '<p class="text-slate-400">No check-ins yet.</p>';
+    } else {
+      const list = document.createElement('div');
+      list.className = 'space-y-2 max-h-56 overflow-auto ghost pr-1';
+      state.checkins.slice(-10).reverse().forEach(c=>{
+        const d = new Date(c.ts).toLocaleString();
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-slate-800/50 rounded-xl p-2';
+        row.innerHTML = `
+          <div>
+            <div class="text-xs text-slate-400">${d}</div>
+            <div class="text-sm">${c.note || '(no note)'}</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs">Mood: <b>${c.mood}/10</b></div>
+            <div class="text-xs">Safety: <b>${c.safety}/10</b></div>
+          </div>`;
+        list.appendChild(row);
+      });
+      latest.querySelector('.text-sm').replaceWith(list);
+    }
+    view.appendChild(hero);
+    view.appendChild(latest);
+    const pa = $('#primaryAction');
+    pa.textContent = 'New Check-In';
+    pa.onclick = ()=>setTab('checkin');
+  }
+
+  // =============== CHECK-IN ===============
+  function renderCheckIn(){
+    view.innerHTML = '';
+    const form = card('Quick Check-In', `
+      <label class="block">Mood (0–10)
+        <input id="mood" type="range" min="0" max="10" value="5" class="w-full">
+      </label>
+      <label class="block">How safe do you feel right now? (0–10)
+        <input id="safety" type="range" min="0" max="10" value="5" class="w-full">
+      </label>
+      <label class="block">Note (optional)
+        <textarea id="note" rows="3" class="w-full bg-slate-900 rounded-lg p-2 border border-white/10" placeholder="Anything you want to remember…"></textarea>
+      </label>
+      <button id="saveCheckin" class="tap w-full pill bg-indigo-600 hover:bg-indigo-700 py-3 font-semibold">Save Check-In</button>
+    `);
+    view.appendChild(form);
+    $('#saveCheckin').onclick = ()=>{
+      const mood = +$('#mood').value;
+      const safety = +$('#safety').value;
+      const note = $('#note').value.trim();
+      state.checkins.push({ ts: Date.now(), mood, safety, note });
+      save();
+      setTab('home');
     };
+    const pa = $('#primaryAction');
+    pa.textContent = 'Save Check-In';
+    pa.onclick = ()=>$('#saveCheckin').click();
+  }
 
-    /* ====== tabs ====== */
-    const tabs = [...document.querySelectorAll('.tab-btn')];
-    const sections = {
-      home: document.getElementById('tab-home'),
-      checkin: document.getElementById('tab-checkin'),
-      journal: document.getElementById('tab-journal'),
-      resources: document.getElementById('tab-resources'),
-      settings: document.getElementById('tab-settings'),
+  // =============== ASSESSMENT (8 Qs) ===============
+  const QUESTIONS = [
+    'Has your partner threatened you or someone you love?',
+    'Has physical violence happened in the last 30 days?',
+    'Does your partner control where you go, who you see, or your money?',
+    'Has your partner ever strangled/choked you?',
+    'Does your partner have access to weapons?',
+    'Has your partner ever destroyed property or hurt pets?',
+    'Are there children who have witnessed violence?',
+    'Are you currently afraid to go home?'
+  ];
+  function renderAssessment(){
+    view.innerHTML = '';
+    const wrap = card('Safety Assessment (8 questions)');
+    const box = document.createElement('div');
+    box.className = 'space-y-3';
+    QUESTIONS.forEach((q, i)=>{
+      const id = 'q'+(i+1);
+      const val = state.assessment.answers[id] ?? '';
+      const row = document.createElement('div');
+      row.className = 'bg-slate-800/50 rounded-xl p-3';
+      row.innerHTML = `
+        <div class="text-sm mb-2">${i+1}. ${q}</div>
+        <div class="flex gap-2">
+          ${['No','Unsure','Yes'].map(opt=>{
+            const v = opt.toLowerCase();
+            const active = val===v ? 'bg-indigo-600' : 'bg-slate-700';
+            return `<button class="ans tap px-3 py-2 pill ${active}" data-id="${id}" data-val="${v}">${opt}</button>`;
+          }).join('')}
+        </div>`;
+      box.appendChild(row);
+    });
+    wrap.querySelector('.text-sm').replaceWith(box);
+    view.appendChild(wrap);
+
+    const summary = card('Summary', `
+      <div id="riskLine">Risk: <b>Unknown</b></div>
+      <button id="saveAssessment" class="tap w-full pill bg-amber-600 hover:bg-amber-700 py-3 font-semibold">Save Assessment</button>
+    `);
+    view.appendChild(summary);
+
+    $$('.ans', view).forEach(b=>{
+      b.onclick = ()=>{
+        const id = b.dataset.id, v = b.dataset.val;
+        state.assessment.answers[id] = v;
+        // toggle peers
+        $$(`.ans[data-id="${id}"]`, view).forEach(p=>p.classList.remove('bg-indigo-600'));
+        b.classList.add('bg-indigo-600');
+        updateAssessmentRisk();
+      };
+    });
+    $('#saveAssessment').onclick = ()=>{
+      updateAssessmentRisk();
+      save();
+      setTab('home');
     };
-    function showTab(name){
-      tabs.forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
-      Object.entries(sections).forEach(([k,el]) => el.classList.toggle('hidden', k!==name));
-      S.set('lastTab', name);
-    }
-    tabs.forEach(b => b.addEventListener('click', ()=>showTab(b.dataset.tab)));
-    showTab(S.get('lastTab','home'));
+    updateAssessmentRisk();
 
-    /* ====== timer ====== */
-    const disp = document.getElementById('timer-display');
-    const btnStart = document.getElementById('timer-start');
-    const btnPause = document.getElementById('timer-pause');
-    const btnReset = document.getElementById('timer-reset');
-    let remaining = S.get('timerRemaining', 300);
-    let running = false, tId = null, lastTick = 0;
-    function fmt(s){ const m=Math.floor(s/60).toString().padStart(2,'0'); const sc=Math.floor(s%60).toString().padStart(2,'0'); return `${m}:${sc}`; }
-    function renderTimer(){ if(disp) disp.textContent = fmt(Math.max(0, remaining)); }
-    function tick(){
-      const now = Date.now();
-      if (lastTick){ remaining -= (now - lastTick)/1000; S.set('timerRemaining', Math.max(0, Math.floor(remaining))); }
-      lastTick = now;
-      renderTimer();
-      if (remaining <= 0){ running=false; clearInterval(tId); tId=null; lastTick=0; }
-    }
-    if (btnStart) btnStart.addEventListener('click', ()=>{ if (running) return; running=true; lastTick=0; tId=setInterval(tick, 250); });
-    if (btnPause) btnPause.addEventListener('click', ()=>{ running=false; clearInterval(tId); tId=null; lastTick=0; });
-    if (btnReset) btnReset.addEventListener('click', ()=>{ running=false; clearInterval(tId); tId=null; lastTick=0; remaining=300; S.set('timerRemaining', remaining); renderTimer(); });
-    document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click', ()=>{ remaining=+b.dataset.preset; S.set('timerRemaining', remaining); renderTimer(); }));
-    renderTimer();
-
-    /* ====== disguise / quick exit ====== */
-    const btnQuick = document.getElementById('btn-quick-exit');
-    const btnDisguise = document.getElementById('btn-disguise');
-    let pressTimer=null;
-    if (btnQuick){
-      btnQuick.addEventListener('mousedown', ()=>{ pressTimer=setTimeout(()=>toggleDisguise(true), 900); });
-      btnQuick.addEventListener('touchstart', ()=>{ pressTimer=setTimeout(()=>toggleDisguise(true), 900); });
-      const clearPress = ()=>clearTimeout(pressTimer);
-      btnQuick.addEventListener('mouseup', clearPress);
-      btnQuick.addEventListener('mouseleave', clearPress);
-      btnQuick.addEventListener('touchend', clearPress);
-      btnQuick.addEventListener('click', ()=>{
-        toggleDisguise(true);
-        try { window.location.replace('https://www.weather.com'); } catch {}
-      });
-    }
-    function toggleDisguise(forceOn=null){
-      const root = document.body;
-      const on = forceOn===null ? !root.classList.contains('calc-shell') : forceOn;
-      root.classList.toggle('calc-shell', on);
-      S.set('disguised', on);
-      const title = document.getElementById('app-title');
-      if (title) title.textContent = on ? 'Calculator' : (S.get('appName')||'TimeOut');
-    }
-    if (btnDisguise) btnDisguise.addEventListener('click', ()=>toggleDisguise());
-    if (S.get('disguised')) toggleDisguise(true);
-
-    const calcScreen = document.getElementById('calc-screen');
-    document.querySelectorAll('.calc-btn').forEach(b=>{
-      b.addEventListener('click', ()=>{
-        const t=b.textContent.trim();
-        if(t==='='){ calcScreen.textContent = (Math.random()*100).toFixed(0); }
-        else { calcScreen.textContent = (calcScreen.textContent==='0' ? t : calcScreen.textContent + t); }
-      });
+    const pa = $('#primaryAction');
+    pa.textContent = 'Save Assessment';
+    pa.onclick = ()=>$('#saveAssessment').click();
+  }
+  function updateAssessmentRisk(){
+    const a = state.assessment.answers;
+    let score = 0;
+    Object.keys(a).forEach(k=>{
+      score += (a[k]==='yes'?2 : a[k]==='unsure'?1 : 0);
     });
+    state.assessment.score = score;
+    const risk = score>=10 ? 'High' : score>=5 ? 'Moderate' : 'Lower';
+    const c = score>=10 ? 'text-rose-300' : score>=5 ? 'text-amber-300' : 'text-emerald-300';
+    const line = $('#riskLine');
+    if (line) line.innerHTML = `Risk: <b class="${c}">${risk}</b> (score ${score})`;
+    renderTrust();
+  }
 
-    /* ====== Check-In (8 qs) ====== */
-    const form = document.getElementById('checkin-form');
-    const btnClear = document.getElementById('checkin-clear');
-    const resultBox = document.getElementById('checkin-result');
-    const summaryEl = document.getElementById('checkin-summary');
-    const safetyEl = document.getElementById('checkin-safety');
+  // =============== RESOURCES ===============
+  function renderResources(){
+    view.innerHTML = '';
+    view.appendChild(card('Resources', `
+      <div class="space-y-2">
+        <a class="block p-3 rounded-xl bg-slate-800/50" href="tel:18007997233">National DV Hotline (US): 1-800-799-7233</a>
+        <a class="block p-3 rounded-xl bg-slate-800/50" href="sms:88788">Text: 88788 (US)</a>
+        <a class="block p-3 rounded-xl bg-slate-800/50" href="https://www.thehotline.org" target="_blank" rel="noopener">thehotline.org</a>
+        <p class="text-slate-400 text-xs">Outside the US? Search your country’s hotline.</p>
+      </div>
+    `));
+    const pa = $('#primaryAction');
+    pa.textContent = 'New Check-In';
+    pa.onclick = ()=>setTab('checkin');
+  }
 
-    // load saved values
-    (S.get('checkin')||[]).forEach((v,i)=>{ const sel=form?.querySelector(`[name=q${i+1}]`); if (sel) sel.value=String(v); });
+  // =============== SAFETY PLAN ===============
+  function renderSafety(){
+    view.innerHTML = '';
+    const f = card('Safety Plan', `
+      <label class="block text-sm">Code word with trusted person
+        <input id="sp_code" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
+      </label>
+      <label class="block text-sm">Escape route / safe places
+        <textarea id="sp_route" rows="2" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10"></textarea>
+      </label>
+      <label class="block text-sm">Essentials bag (IDs, meds, cash)
+        <textarea id="sp_ess" rows="2" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10"></textarea>
+      </label>
+      <label class="block text-sm">Transport plan
+        <input id="sp_trans" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
+      </label>
+      <label class="block text-sm">Pets plan
+        <input id="sp_pets" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
+      </label>
+      <button id="savePlan" class="tap w-full pill bg-indigo-600 hover:bg-indigo-700 py-3 font-semibold">Save Plan</button>
+    `);
+    view.appendChild(f);
+    // preload
+    $('#sp_code').value = state.safetyPlan.codeWord || '';
+    $('#sp_route').value = state.safetyPlan.escapeRoute || '';
+    $('#sp_ess').value = state.safetyPlan.essentials || '';
+    $('#sp_trans').value = state.safetyPlan.transport || '';
+    $('#sp_pets').value = state.safetyPlan.pets || '';
+    $('#savePlan').onclick = ()=>{
+      state.safetyPlan = {
+        codeWord: $('#sp_code').value.trim(),
+        escapeRoute: $('#sp_route').value.trim(),
+        essentials: $('#sp_ess').value.trim(),
+        transport: $('#sp_trans').value.trim(),
+        pets: $('#sp_pets').value.trim()
+      };
+      save(); setTab('home');
+    };
+    const pa = $('#primaryAction');
+    pa.textContent = 'Save Plan';
+    pa.onclick = ()=>$('#savePlan').click();
+  }
 
-    form?.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const vals = [];
-      for(let i=1;i<=8;i++){ vals.push(+form[`q${i}`].value); }
-      S.set('checkin', vals);
-      const score = vals.reduce((a,b)=>a+b,0); // 0..32
-      const level = score<=6?'Low': score<=14?'Moderate': score<=22?'High':'Urgent';
-      const blurb = {
-        Low: 'Current answers suggest lower immediate risk. Keep support and a plan ready.',
-        Moderate: 'There are warning signs. Consider updating a safety plan and talking to someone you trust.',
-        High: 'Multiple risk factors present. It may help to connect with an advocate or shelter.',
-        Urgent: 'High risk. If you can, consider contacting a hotline, advocate, or emergency services.'
-      }[level];
-      summaryEl.textContent = `Risk level: ${level} (score ${score}/32). ${blurb}`;
-      safetyEl.textContent = 'If you are in immediate danger, call 911 (US) or local emergency. For confidential help: 1-800-799-7233 (The Hotline) or text START to 88788.';
-      resultBox.classList.remove('hidden');
-    });
-    btnClear?.addEventListener('click', ()=>{
-      for(let i=1;i<=8;i++){ form[`q${i}`].value='0'; }
-      S.del('checkin'); resultBox.classList.add('hidden');
-    });
+  // =============== PROFILE ===============
+  function renderProfile(){
+    view.innerHTML = '';
+    const f = card('Profile', `
+      <label class="block text-sm">Display name
+        <input id="pf_name" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10" placeholder="Optional alias">
+      </label>
+      <label class="block text-sm">ZIP / Area
+        <input id="pf_zip" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10" placeholder="e.g., 30303">
+      </label>
+      <label class="block text-sm">Trusted contact (phone or email)
+        <input id="pf_contact" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10">
+      </label>
+      <label class="block text-sm">Notes (private)
+        <textarea id="pf_notes" rows="3" class="mt-1 w-full bg-slate-900 rounded-lg p-2 border border-white/10"></textarea>
+      </label>
+      <button id="saveProfile" class="tap w-full pill bg-indigo-600 hover:bg-indigo-700 py-3 font-semibold">Save Profile</button>
+    `);
+    view.appendChild(f);
+    $('#pf_name').value = state.profile.displayName || '';
+    $('#pf_zip').value = state.profile.zip || '';
+    $('#pf_contact').value = state.profile.safeContact || '';
+    $('#pf_notes').value = state.profile.notes || '';
+    $('#saveProfile').onclick = ()=>{
+      state.profile = {
+        displayName: $('#pf_name').value.trim(),
+        zip: $('#pf_zip').value.trim(),
+        safeContact: $('#pf_contact').value.trim(),
+        notes: $('#pf_notes').value.trim()
+      };
+      save(); setTab('home');
+    };
+    const pa = $('#primaryAction');
+    pa.textContent = 'Save Profile';
+    pa.onclick = ()=>$('#saveProfile').click();
+  }
 
-    /* ====== Journal (PIN) ====== */
-    const locked = document.getElementById('journal-locked');
-    const unlocked = document.getElementById('journal-unlocked');
-    const pinInput = document.getElementById('pin-input');
-    const pinUnlock = document.getElementById('pin-unlock');
-    const pinSet = document.getElementById('pin-set');
-    const jText = document.getElementById('journal-text');
-    const jSave = document.getElementById('journal-save');
-    const jLock = document.getElementById('journal-lock');
+  // =============== SETTINGS ===============
+  function renderSettings(){
+    view.innerHTML = '';
+    const privacy = card('Privacy & Storage', `
+      <p class="text-slate-300">Data is stored only on this device (localStorage).</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button id="exportData" class="tap pill bg-slate-700 hover:bg-slate-600 py-2">Export JSON</button>
+        <button id="importData" class="tap pill bg-slate-700 hover:bg-slate-600 py-2">Import JSON</button>
+      </div>
+      <input id="importFile" type="file" accept="application/json" class="hidden">
+    `);
+    const tips = card('Tips', `
+      <p class="text-slate-300">Add to Home Screen for an app-like icon. Use <span class="kbd">Reset</span> to clear local data on this device.</p>
+    `);
+    view.appendChild(privacy);
+    view.appendChild(tips);
 
-    function showLocked(flag){
-      locked.classList.toggle('hidden', !flag);
-      unlocked.classList.toggle('hidden', flag);
-    }
-    function loadJournal(){ jText.value = S.get('journal',''); }
-
-    pinUnlock?.addEventListener('click', ()=>{
-      const pin = S.get('pin', null);
-      if (!pin){ alert('No PIN set yet. Tap “Set / Change PIN” first.'); return; }
-      if (pinInput.value === pin){ loadJournal(); showLocked(false); }
-      else alert('Incorrect PIN');
-    });
-    pinSet?.addEventListener('click', ()=>{
-      const v = (pinInput.value||'').trim();
-      if (!/^\d{4,8}$/.test(v)) { alert('PIN must be 4–8 digits.'); return; }
-      S.set('pin', v);
-      alert('PIN saved.');
-    });
-    jSave?.addEventListener('click', ()=>{ S.set('journal', jText.value || ''); alert('Saved.'); });
-    jLock?.addEventListener('click', ()=>{ showLocked(true); pinInput.value=''; });
-
-    showLocked(true);
-
-    /* ====== Resources copy ====== */
-    document.querySelectorAll('[data-copy]').forEach(b=>{
-      b.addEventListener('click', async ()=>{
-        try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'Copied'; setTimeout(()=>b.textContent='Copy',900); }
-        catch { alert('Copy failed'); }
-      });
-    });
-
-    /* ====== Settings ====== */
-    const titleEl = document.getElementById('app-title');
-    const nameInput = document.getElementById('setting-appname');
-    const saveName = document.getElementById('setting-save-appname');
-    if (nameInput) nameInput.value = S.get('appName','TimeOut');
-    if (titleEl) titleEl.textContent = S.get('disguised') ? 'Calculator' : (S.get('appName','TimeOut'));
-    saveName?.addEventListener('click', ()=>{
-      const v = (nameInput.value||'').trim() || 'TimeOut';
-      S.set('appName', v);
-      if (!S.get('disguised') && titleEl) titleEl.textContent = v;
-    });
-
-    document.querySelectorAll('[data-theme]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const t = btn.dataset.theme;
-        if (t==='dark'){ document.documentElement.style.setProperty('--brand','#6366f1'); }
-        if (t==='indigo'){ document.documentElement.style.setProperty('--brand','#4f46e5'); }
-        if (t==='teal'){ document.documentElement.style.setProperty('--brand','#14b8a6'); }
-      });
-    });
-
-    document.getElementById('reset-all')?.addEventListener('click', ()=>{
-      if (confirm('This will erase Check-Ins, Journal, PIN, timer, and settings on this device. Continue?')){
-        localStorage.clear(); location.reload();
+    $('#exportData').onclick = ()=>{
+      const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'timeout-export.json';
+      a.click();
+    };
+    $('#importData').onclick = ()=>$('#importFile').click();
+    $('#importFile').onchange = async e=>{
+      const f = e.target.files[0];
+      if (!f) return;
+      try{
+        const data = JSON.parse(await f.text());
+        Object.assign(state, data);
+        save(); render();
+      }catch{
+        alert('Invalid file.');
       }
-    });
+    };
 
-    // restore disguise if needed (title set above)
-    if (S.get('disguised')) document.body.classList.add('calc-shell');
+    const pa = $('#primaryAction');
+    pa.textContent = 'New Check-In';
+    pa.onclick = ()=>setTab('checkin');
+  }
+
+  // =============== GLOBAL ACTIONS ===============
+  $('#quickExit').onclick = ()=>{
+    document.body.innerHTML = '<div class="p-6 text-center text-slate-200">Loading…</div>';
+    location.href = 'https://www.weather.com/';
+  };
+  $('#resetAll').onclick = ()=>{
+    if (!confirm('Erase all local data on this device?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state.tab='home';
+    state.profile={displayName:'',zip:'',safeContact:'',notes:''};
+    state.checkins=[];
+    state.assessment={answers:{},score:0};
+    state.safetyPlan={codeWord:'',escapeRoute:'',essentials:'',transport:'',pets:''};
+    state.trust=0;
+    renderTrust(); render(); save();
+  };
+  $$('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+
+  // =============== BOOT ===============
+  load();
+  renderTrust();
+  setTab(state.tab || 'home');
   </script>
-
-  <!-- A11y note for screen readers -->
-  <div class="sr hide-when-disguised">This app includes a quick-exit and disguise. If you need help now, call 911 (US) or 112/999 elsewhere.</div>
 </body>
 </html>
