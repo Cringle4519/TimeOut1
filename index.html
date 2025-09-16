@@ -1,69 +1,114 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TimeOut</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="theme-color" content="#0a0c11" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <style>
-    :root { --maxw: 480px; }
-    body { background:#0a0c11; color:#e5e7eb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial; }
-    .container { max-width: var(--maxw); margin: 0 auto; }
-    .card { background: #0f1624; border: 1px solid #1f2a3a; border-radius: 16px; }
-    .btn { border-radius: 12px; padding: .65rem .9rem; font-weight: 600; }
-    .btn-primary { background:#2563eb; color:white; }
-    .btn-ghost { background:transparent; border:1px solid #233145; color:#e5e7eb; }
-    .tab-btn { padding:.55rem .85rem; border-radius:999px; }
-    .hidden-soft { display:none !important; }
-    .neon { font-feature-settings:"tnum"; letter-spacing:.02em; text-shadow:0 0 6px rgba(56,189,248,.35),0 0 18px rgba(59,130,246,.25); }
-    .glass { background: linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.45)); backdrop-filter: blur(6px); border:1px solid rgba(99,102,241,.12); }
-    .glow-border { box-shadow: 0 0 0 1px rgba(59,130,246,.15), inset 0 0 0 1px rgba(255,255,255,.04); }
-    .grad-mesh {
-      background:
-        radial-gradient(40% 50% at 20% 10%, rgba(34,197,94,.14), transparent 60%),
-        radial-gradient(45% 60% at 80% 0%, rgba(37,99,235,.20), transparent 60%),
-        radial-gradient(60% 80% at 50% 120%, rgba(236,72,153,.10), transparent 60%),
-        #0a0c11;
-    }
-    .lang-toggle button { font-weight:700; font-size:.8rem; padding:.35rem .55rem; border-radius:8px; border:1px solid #233145; }
-    .lang-active { background:#0f1624; border-color:#334155; }
-    .pill { border:1px solid #2b3b52; background:#0b1220; border-radius:999px; padding:.2rem .6rem; font-size:.75rem; color:#9ca3af; }
-    .shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-    .ghost-sep { color:#6b7280; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>TimeOut</title>
+<meta name="theme-color" content="#07090d" />
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root { --maxw: 480px; }
+  body { background:#07090d; color:#e5e7eb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, "Helvetica Neue", Arial; }
+  .container { max-width: var(--maxw); margin: 0 auto; }
+  .card { background: rgba(10,14,24,.55); border: 1px solid rgba(90,110,160,.18); border-radius: 16px; backdrop-filter: blur(8px); }
+  .btn { border-radius: 12px; padding:.65rem .9rem; font-weight:600; }
+  .btn-ghost { background:transparent; border:1px solid rgba(90,110,160,.25); color:#e5e7eb; }
+  .btn-primary { background:#2563eb; color:#fff; }
+  .tab-btn { padding:.55rem .85rem; border-radius:999px; }
+  .pill { border:1px solid rgba(90,110,160,.35); background:#0b1220; border-radius:999px; padding:.2rem .6rem; font-size:.75rem; color:#9ca3af; }
+  .hidden-soft { display:none !important; }
+
+  /* ===== THEMES ===== */
+  body.theme-aurora {
+    background:
+      radial-gradient(40% 50% at 20% 10%, rgba(34,197,94,.14), transparent 60%),
+      radial-gradient(45% 60% at 80% 0%, rgba(37,99,235,.25), transparent 60%),
+      radial-gradient(60% 80% at 50% 120%, rgba(236,72,153,.12), transparent 60%),
+      #07090d;
+  }
+  body.theme-neon {
+    background:
+      radial-gradient(50% 50% at 50% -10%, rgba(59,130,246,.18), transparent 60%),
+      radial-gradient(60% 70% at 110% 20%, rgba(16,185,129,.14), transparent 60%),
+      #06080c;
+  }
+  body.theme-amoled { background:#000; }
+
+  /* ===== Flip Clock ===== */
+  .flipwrap { display:inline-grid; grid-auto-flow:column; gap:.2rem; user-select:none; }
+  .digit {
+    position:relative; width:60px; height:84px; border-radius:12px;
+    background: linear-gradient(180deg, rgba(18,24,38,.9), rgba(10,14,24,.9));
+    border:1px solid rgba(120,140,200,.18); box-shadow: inset 0 -8px 16px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.25);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:48px; letter-spacing:.02em;
+    text-shadow: 0 0 8px rgba(59,130,246,.35);
+    overflow:hidden;
+  }
+  .digit:before {
+    content:""; position:absolute; inset:auto 0 50% 0; height:1px; background:rgba(255,255,255,.06);
+  }
+  .tick { animation: tick .65s ease; }
+  @keyframes tick { 0%{ transform: rotateX(0deg);} 49%{ transform: rotateX(-85deg);} 50%{ transform: rotateX(85deg);} 100%{ transform: rotateX(0deg);} }
+  .sep { width:12px; display:flex; align-items:center; justify-content:center; opacity:.85; }
+  .sep:after { content: ":"; font-size:42px; font-weight:800; color:#9fb5ff; text-shadow:0 0 10px rgba(99,102,241,.35); }
+
+  /* Stopwatch number style */
+  .neon { font-feature-settings:"tnum"; letter-spacing:.02em; text-shadow:0 0 6px rgba(56,189,248,.35), 0 0 16px rgba(59,130,246,.25); }
+  .lang-toggle button { font-weight:700; font-size:.8rem; padding:.35rem .55rem; border-radius:8px; border:1px solid rgba(90,110,160,.25); }
+  .lang-active { background:rgba(12,18,30,.9); border-color:rgba(120,140,200,.45); }
+  .theme-dot { width:18px; height:18px; border-radius:999px; border:1px solid rgba(255,255,255,.25); cursor:pointer; }
+  .theme-dot[data-t="aurora"]{ background:linear-gradient(135deg, #2563eb 0%, #22c55e 100%); }
+  .theme-dot[data-t="neon"]{ background:linear-gradient(135deg, #22d3ee 0%, #6366f1 100%); }
+  .theme-dot[data-t="amoled"]{ background:#000; }
+</style>
 </head>
-<body class="grad-mesh">
+<body class="theme-aurora">
   <div class="container px-4 py-3">
-    <!-- HEADER (inconspicuous) -->
+    <!-- HEADER -->
     <header class="flex items-center justify-between mb-3">
       <div class="min-w-0">
         <h1 id="decoyTitle" class="text-xl font-bold select-none">TimeOut</h1>
-        <p class="text-xs text-gray-400"><span id="hdrSub">Clock & Stopwatch</span> • <span class="pill">v1.3.5</span></p>
+        <p class="text-xs text-gray-400"><span id="hdrSub">Clock</span> • <span class="pill">v1.3.5</span></p>
       </div>
-      <div class="flex items-center gap-2">
-        <div class="lang-toggle flex gap-1 mr-1" aria-label="Language">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2" title="Theme">
+          <div class="theme-dot" data-t="aurora" aria-label="Aurora"></div>
+          <div class="theme-dot" data-t="neon" aria-label="Neon"></div>
+          <div class="theme-dot" data-t="amoled" aria-label="AMOLED"></div>
+        </div>
+        <div class="lang-toggle flex gap-1" aria-label="Language">
           <button id="langEN">EN</button>
           <button id="langES">ES</button>
         </div>
-        <button id="quickExitBtn" class="btn btn-ghost" title="Home"><span id="btnExitLabel" class="hidden sm:inline">Home</span><span class="sm:hidden">Home</span></button>
+        <button id="quickExitBtn" class="btn btn-ghost" title="Home"><span id="btnExitLabel">Home</span></button>
       </div>
     </header>
 
-    <!-- DECOY: CLOCK / STOPWATCH (no Panic on decoy) -->
-    <section id="decoyView" class="card glass glow-border p-5 shadow-soft">
+    <!-- DECOY: CLOCK/STOPWATCH -->
+    <section id="decoyView" class="card p-5">
+      <!-- decoy tabs -->
       <div class="flex items-center justify-center gap-2 mb-4">
         <button id="decoyTabClock" class="tab-btn bg-blue-600 text-white">Clock</button>
         <button id="decoyTabStopwatch" class="tab-btn btn-ghost">Stopwatch</button>
       </div>
 
-      <!-- CLOCK -->
+      <!-- CLOCK (Flip style) -->
       <div id="clockPane" class="text-center">
-        <div id="liveClock" class="neon text-7xl sm:text-8xl font-extrabold tabular-nums leading-none select-none py-3">00:00:00</div>
+        <div id="flipClock" class="inline-flex items-center justify-center select-none" style="gap:.2rem;">
+          <div class="flipwrap" id="hh">
+            <div class="digit">0</div><div class="digit">0</div>
+          </div>
+          <div class="sep"></div>
+          <div class="flipwrap" id="mm">
+            <div class="digit">0</div><div class="digit">0</div>
+          </div>
+          <div class="sep"></div>
+          <div class="flipwrap" id="ss">
+            <div class="digit">0</div><div class="digit">0</div>
+          </div>
+        </div>
         <div id="liveDate" class="text-sm text-gray-300 mt-2">—</div>
-        <p class="text-[11px] text-gray-500 mt-4">Long-press the digits to edit alarm.</p><!-- innocuous hint; still triggers PIN -->
+        <p class="text-[11px] text-gray-500 mt-3">Long-press the digits to edit.</p>
       </div>
 
       <!-- STOPWATCH -->
@@ -71,8 +116,8 @@
         <div id="swDisplay" class="neon text-7xl sm:text-8xl font-extrabold tabular-nums leading-none select-none py-3">00:00.00</div>
         <div class="mt-4 flex items-center justify-center gap-2">
           <button id="swStart" class="btn btn-primary min-w-[96px]"><span id="lblStart">Start</span></button>
-          <button id="swLap" class="btn btn-ghost min-w-[96px]"><span id="lblLap">Lap</span></button>
-          <button id="swReset" class="btn btn-ghost min-w-[96px]"><span id="lblReset">Reset</span></button>
+          <button id="swLap"   class="btn btn-ghost   min-w-[96px]"><span id="lblLap">Lap</span></button>
+          <button id="swReset" class="btn btn-ghost   min-w-[96px]"><span id="lblReset">Reset</span></button>
         </div>
         <ul id="swLaps" class="mt-4 text-sm text-gray-300 space-y-1 max-h-36 overflow-auto"></ul>
       </div>
@@ -80,7 +125,7 @@
 
     <!-- PIN MODAL -->
     <div id="pinModal" class="fixed inset-0 bg-black/70 hidden-soft items-end sm:items-center justify-center p-4">
-      <div class="card w-full sm:max-w-sm p-4">
+      <div class="card w-full sm:max-w-sm p-5">
         <h3 id="pinModalTitle" class="text-lg font-semibold mb-2">Enter PIN</h3>
         <form id="pinForm" class="space-y-3">
           <input id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-3 card text-center font-bold tracking-[0.35em]" placeholder="••••" autocomplete="off" />
@@ -99,7 +144,7 @@
       </div>
     </div>
 
-    <!-- REAL APP (hidden until unlock) -->
+    <!-- REAL APP -->
     <section id="realApp" class="hidden-soft">
       <div class="mt-4 card p-4">
         <div class="flex items-center justify-between">
@@ -117,7 +162,6 @@
         </div>
       </div>
 
-      <!-- Tabs -->
       <nav class="mt-3">
         <div class="flex gap-2">
           <button data-tab="home" class="tab-btn bg-blue-600 text-white" id="tabBtnHome">Home</button>
@@ -178,18 +222,17 @@
           <input id="displayNameInput" class="card px-3 py-2" placeholder="Your name (optional)" />
           <button id="saveProfile" class="btn btn-primary"><span id="btnSaveProfile">Save Profile</span></button>
         </div>
-        <hr class="my-4 border-[#1f2a3a]" />
+        <hr class="my-4 border-[#1c2639]" />
         <div class="grid grid-cols-1 gap-2">
           <label class="text-sm" id="lblChangePIN">Change PIN</label>
           <button id="openChangePin" class="btn btn-ghost"><span id="btnChangePIN">Change PIN</span></button>
         </div>
-        <hr class="my-4 border-[#1f2a3a]" />
+        <hr class="my-4 border-[#1c2639]" />
         <div class="grid grid-cols-1 gap-2">
           <label class="text-sm" id="lblExport">Export Data</label>
           <button id="exportJson" class="btn btn-ghost"><span id="btnExport">Export JSON</span></button>
         </div>
-        <hr class="my-4 border-[#1f2a3a]" />
-        <!-- Panic is hidden from decoy, available here as "Clear Data" -->
+        <hr class="my-4 border-[#1c2639]" />
         <div class="grid grid-cols-1 gap-2">
           <label class="text-sm" id="lblClear">Clear Data</label>
           <button id="clearData" class="btn btn-ghost"><span id="btnClearData">Clear Data</span></button>
@@ -202,475 +245,307 @@
     </section>
   </div>
 
-  <script>
-    // ====== CONFIG ======
-    const APP_VERSION = "v1.3.5";
-    const DEFAULT_PIN = "1111";
-    const LS = {
-      profile: "timeout_profile",
-      answers: "timeout_answers",
-      resources: "timeout_resources",
-      pin: "timeout_pin",
-      lang: "timeout_lang"
-    };
+<script>
+  // ===== Config / Local Storage Keys =====
+  const APP_VERSION = "v1.3.5";
+  const DEFAULT_PIN = "1111";
+  const LS = { profile:"timeout_profile", answers:"timeout_answers", resources:"timeout_resources", pin:"timeout_pin", lang:"timeout_lang", theme:"timeout_theme" };
 
-    // ====== i18n ======
-    const STR = {
-      en: {
-        sub: "Clock & Stopwatch",
-        exit: "Home",
-        tabClock: "Clock", tabStop: "Stopwatch", start:"Start", lap:"Lap", reset:"Reset",
-        pinEnter:"Enter PIN", pinChange:"Change PIN", pinCurrent:"Current PIN",
-        pinNew:"New PIN (min 4)", pinConfirmNew:"Confirm New PIN",
-        confirm:"Confirm", cancel:"Cancel",
-        pinDefaultNote:"Default PIN: 1111. Change in Profile.",
-        errBadPin:"Incorrect PIN.", errShortPin:"New PIN must be at least 4 digits.", errNoMatch:"PINs do not match.",
-        signedIn:"Signed in as", trust:"Trust", lock:"Lock",
-        tabs: { home:"Home", check:"Check-In", res:"Resources", profile:"Profile" },
-        welcome:"Welcome", introA:"Hi", introB:"Your trust score is", percent:"%",
-        goCheck:"Go to Check-In", saveAll:"Save", autoHide:"Switching apps will auto-hide this screen.",
-        checkTitle:"Safety Check-In", risk:"Risk", trust2:"Trust", saveCheck:"Save Check-In", clear:"Clear",
-        resTitle:"My Resources", resAdd:"Add Resource", phTitle:"Title (e.g., Shelter)", phDesc:"Description", phLink:"Link (https://…)", del:"Delete",
-        profileTitle:"Profile", displayName:"Display Name", namePh:"Your name (optional)", saveProfile:"Save Profile",
-        changePIN:"Change PIN", export:"Export Data", exportBtn:"Export JSON",
-        footer:"Privacy-first support", clearData:"Clear Data",
-        q1:"Are you currently safe where you are?",
-        q2:"Has someone threatened you recently?",
-        q3:"Have you experienced physical harm in past month?",
-        q4:"Are you worried about your partner’s access to your phone?",
-        q5:"Is anyone preventing you from leaving?",
-        q6:"Do you have children at risk?",
-        q7:"Do you feel isolated from help?",
-        q8:"Would you like immediate local resources?"
-      },
-      es: {
-        sub: "Reloj y cronómetro",
-        exit: "Inicio",
-        tabClock: "Reloj", tabStop: "Cronómetro", start:"Iniciar", lap:"Vuelta", reset:"Reiniciar",
-        pinEnter:"Introduce el PIN", pinChange:"Cambiar PIN", pinCurrent:"PIN actual",
-        pinNew:"Nuevo PIN (mín. 4)", pinConfirmNew:"Confirmar PIN",
-        confirm:"Confirmar", cancel:"Cancelar",
-        pinDefaultNote:"PIN predeterminado: 1111. Cámbialo en Perfil.",
-        errBadPin:"PIN incorrecto.", errShortPin:"El PIN nuevo debe tener al menos 4 dígitos.", errNoMatch:"Los PIN no coinciden.",
-        signedIn:"Sesión iniciada como", trust:"Confianza", lock:"Bloquear",
-        tabs: { home:"Inicio", check:"Revisión", res:"Recursos", profile:"Perfil" },
-        welcome:"Bienvenido/a", introA:"Hola", introB:"Tu nivel de confianza es", percent:"%",
-        goCheck:"Ir a Revisión", saveAll:"Guardar", autoHide:"Al cambiar de app, esta pantalla se oculta automáticamente.",
-        checkTitle:"Revisión de seguridad", risk:"Riesgo", trust2:"Confianza", saveCheck:"Guardar revisión", clear:"Limpiar",
-        resTitle:"Mis recursos", resAdd:"Agregar recurso", phTitle:"Título (p. ej., Refugio)", phDesc:"Descripción", phLink:"Enlace (https://…)", del:"Eliminar",
-        profileTitle:"Perfil", displayName:"Nombre a mostrar", namePh:"Tu nombre (opcional)", saveProfile:"Guardar perfil",
-        changePIN:"Cambiar PIN", export:"Exportar datos", exportBtn:"Exportar JSON",
-        footer:"Soporte con privacidad primero", clearData:"Borrar datos",
-        q1:"¿Estás seguro/a donde estás ahora?",
-        q2:"¿Alguien te ha amenazado recientemente?",
-        q3:"¿Has sufrido daño físico en el último mes?",
-        q4:"¿Te preocupa que tu pareja tenga acceso a tu teléfono?",
-        q5:"¿Alguien te impide salir?",
-        q6:"¿Tienes hijos/as en riesgo?",
-        q7:"¿Te sientes aislado/a de la ayuda?",
-        q8:"¿Te gustaría ver recursos locales inmediatos?"
-      }
-    };
-
-    // ====== helpers ======
-    const $ = id => document.getElementById(id);
-    const loadJSON = (k, f)=>{ try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? f; } catch { return f; } };
-    const saveJSON = (k, v)=> localStorage.setItem(k, JSON.stringify(v));
-    const getPIN = ()=> localStorage.getItem(LS.pin) || DEFAULT_PIN;
-    const setPIN = (p)=> localStorage.setItem(LS.pin, p);
-    const getLang = ()=> localStorage.getItem(LS.lang) || ((navigator.language||"en").toLowerCase().startsWith("es") ? "es" : "en");
-    const setLang = l => localStorage.setItem(LS.lang, l);
-
-    // ====== state ======
-    let unlocked = false;
-    let profile = loadJSON(LS.profile, { name:"Anonymous", trust:100 });
-    let answers  = loadJSON(LS.answers, {});
-    let resources= loadJSON(LS.resources, []);
-    let lang = getLang();
-
-    // ====== refs ======
-    const decoyView = $("decoyView");
-    const realApp = $("realApp");
-    const decoyTitle = $("decoyTitle");
-    const hdrSub = $("hdrSub");
-    const quickExitBtn = $("quickExitBtn");
-    const btnExitLabel = $("btnExitLabel");
-    const footerNote = $("footerNote");
-    const langEN = $("langEN"); const langES = $("langES");
-    const decoyTabClock = $("decoyTabClock");
-    const decoyTabStopwatch = $("decoyTabStopwatch");
-    const clockPane = $("clockPane"); const stopwatchPane = $("stopwatchPane");
-    const liveClock = $("liveClock"); const liveDate  = $("liveDate");
-    const swDisplay = $("swDisplay"); const swStart = $("swStart"); const swLap = $("swLap"); const swReset = $("swReset");
-    const lblStart = $("lblStart"); const lblLap = $("lblLap"); const lblReset = $("lblReset");
-    const swLaps  = $("swLaps");
-
-    // PIN
-    const pinModal = $("pinModal"); const pinModalTitle = $("pinModalTitle");
-    const pinForm = $("pinForm"); const pinInput = $("pinInput"); const pinError = $("pinError"); const pinCancelBtn = $("pinCancelBtn");
-    const pinChangeFields = $("pinChangeFields"); const oldPin = $("oldPin"); const newPin = $("newPin"); const newPin2 = $("newPin2"); const pinConfirmBtn = $("pinConfirmBtn"); const pinNote = $("pinNote");
-
-    // Inside app
-    const lockBtn = $("lockBtn");
-    const signedInAs = $("signedInAs");
-    const profileName = $("profileName");
-    const trustLabel  = $("trustLabel");
-    const trustLabel2 = $("trustLabel2");
-    const trustBadge  = $("trustBadge");
-    const btnLock = $("btnLock");
-
-    const tabBtnHome = $("tabBtnHome"); const tabBtnCheck = $("tabBtnCheck"); const tabBtnRes = $("tabBtnRes"); const tabBtnProfile = $("tabBtnProfile");
-    const tabViews = { home:$("tab-home"), checkin:$("tab-checkin"), resources:$("tab-resources"), profile:$("tab-profile") };
-
-    const homeTitle = $("homeTitle"); const homeIntro = $("homeIntro"); const goToCheckIn = $("goToCheckIn"); const saveAll = $("saveAll"); const btnGoCheck = $("btnGoCheck"); const btnSaveAll = $("btnSaveAll"); const autoHideNote = $("autoHideNote");
-
-    const questionsBox = $("questions"); const checkTitle = $("checkTitle"); const riskLabel = $("riskLabel"); const riskPct = $("riskPct"); const trustPct = $("trustPct"); const saveCheckIn = $("saveCheckIn"); const clearCheckIn = $("clearCheckIn"); const btnSaveCheck = $("btnSaveCheck"); const btnClear = $("btnClear");
-
-    const resTitle = $("resTitle"); const resForm = $("resourceForm"); const resTitleInput = $("resTitleInput"); const resDesc = $("resDesc"); const resUrl = $("resUrl"); const btnAddResource = $("btnAddResource"); const resourceList = $("resourceList");
-
-    const profileTitle = $("profileTitle"); const lblDisplayName = $("lblDisplayName"); const displayNameInput = $("displayNameInput"); const saveProfile = $("saveProfile"); const btnSaveProfile = $("btnSaveProfile"); const lblChangePIN = $("lblChangePIN"); const btnChangePIN = $("btnChangePIN");
-    const lblExport = $("lblExport"); const exportJson = $("exportJson"); const btnExport = $("btnExport"); const clearData = $("clearData"); const lblClear = $("lblClear"); const btnClearData = $("btnClearData");
-
-    // ====== i18n apply ======
-    function applyLang(){
-      const S = STR[lang];
-      hdrSub.textContent = S.sub; btnExitLabel.textContent = S.exit;
-      decoyTabClock.textContent = S.tabClock; decoyTabStopwatch.textContent = S.tabStop;
-      lblStart.textContent = S.start; lblLap.textContent = S.lap; lblReset.textContent = S.reset;
-
-      pinModalTitle.textContent = S.pinEnter; pinConfirmBtn.textContent = S.confirm; pinCancelBtn.textContent = S.cancel;
-      oldPin.placeholder = S.pinCurrent; newPin.placeholder = S.pinNew; newPin2.placeholder = S.pinConfirmNew; pinNote.textContent = S.pinDefaultNote;
-
-      signedInAs.textContent = S.signedIn; trustLabel.textContent = S.trust; trustLabel2.textContent = S.trust2; btnLock.textContent = S.lock;
-
-      tabBtnHome.textContent = S.tabs.home; tabBtnCheck.textContent = S.tabs.check; tabBtnRes.textContent = S.tabs.res; tabBtnProfile.textContent = S.tabs.profile;
-
-      homeTitle.textContent = S.welcome;
-      homeIntro.innerHTML = `${S.introA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.introB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
-
-      btnGoCheck.textContent = S.goCheck; btnSaveAll.textContent = S.saveAll; autoHideNote.textContent = S.autoHide;
-
-      checkTitle.textContent = S.checkTitle; riskLabel.textContent = S.risk; btnSaveCheck.textContent = S.saveCheck; btnClear.textContent = S.clear;
-
-      resTitle.textContent = S.resTitle; resTitleInput.placeholder = S.phTitle; resDesc.placeholder = S.phDesc; resUrl.placeholder = S.phLink; btnAddResource.textContent = S.resAdd;
-
-      profileTitle.textContent = S.profileTitle; lblDisplayName.textContent = S.displayName; displayNameInput.placeholder = S.namePh;
-      btnSaveProfile.textContent = S.saveProfile; lblChangePIN.textContent = S.changePIN; btnChangePIN.textContent = S.changePIN;
-      lblExport.textContent = S.export; btnExport.textContent = S.exportBtn; footerNote.textContent = S.footer; lblClear.textContent = S.clearData; btnClearData.textContent = S.clearData;
-
-      langEN.classList.toggle("lang-active", lang==="en");
-      langES.classList.toggle("lang-active", lang==="es");
+  // ===== i18n =====
+  const STR = {
+    en:{ sub:"Clock", exit:"Home", tabClock:"Clock", tabStop:"Stopwatch", start:"Start", lap:"Lap", reset:"Reset",
+         pinEnter:"Enter PIN", pinChange:"Change PIN", pinCurrent:"Current PIN", pinNew:"New PIN (min 4)", pinConfirmNew:"Confirm New PIN",
+         confirm:"Confirm", cancel:"Cancel", pinDefaultNote:"Default PIN: 1111. Change in Profile.", errBadPin:"Incorrect PIN.",
+         errShortPin:"New PIN must be at least 4 digits.", errNoMatch:"PINs do not match.", signedIn:"Signed in as", trust:"Trust", lock:"Lock",
+         tabs:{home:"Home", check:"Check-In", res:"Resources", profile:"Profile"},
+         welcome:"Welcome", introA:"Hi", introB:"Your trust score is", percent:"%", goCheck:"Go to Check-In", saveAll:"Save",
+         autoHide:"Switching apps will auto-hide this screen.", checkTitle:"Safety Check-In", risk:"Risk", trust2:"Trust",
+         saveCheck:"Save Check-In", clear:"Clear", resTitle:"My Resources", resAdd:"Add Resource", phTitle:"Title (e.g., Shelter)",
+         phDesc:"Description", phLink:"Link (https://…)", del:"Delete", profileTitle:"Profile", displayName:"Display Name",
+         namePh:"Your name (optional)", saveProfile:"Save Profile", changePIN:"Change PIN", export:"Export Data", exportBtn:"Export JSON",
+         footer:"Privacy-first support", clearData:"Clear Data",
+         q1:"Are you currently safe where you are?",
+         q2:"Has someone threatened you recently?",
+         q3:"Have you experienced physical harm in past month?",
+         q4:"Are you worried about your partner’s access to your phone?",
+         q5:"Is anyone preventing you from leaving?",
+         q6:"Do you have children at risk?",
+         q7:"Do you feel isolated from help?",
+         q8:"Would you like immediate local resources?"
+    },
+    es:{ sub:"Reloj", exit:"Inicio", tabClock:"Reloj", tabStop:"Cronómetro", start:"Iniciar", lap:"Vuelta", reset:"Reiniciar",
+         pinEnter:"Introduce el PIN", pinChange:"Cambiar PIN", pinCurrent:"PIN actual", pinNew:"Nuevo PIN (mín. 4)", pinConfirmNew:"Confirmar PIN",
+         confirm:"Confirmar", cancel:"Cancelar", pinDefaultNote:"PIN predeterminado: 1111. Cámbialo en Perfil.", errBadPin:"PIN incorrecto.",
+         errShortPin:"El PIN nuevo debe tener al menos 4 dígitos.", errNoMatch:"Los PIN no coinciden.", signedIn:"Sesión iniciada como", trust:"Confianza", lock:"Bloquear",
+         tabs:{home:"Inicio", check:"Revisión", res:"Recursos", profile:"Perfil"},
+         welcome:"Bienvenido/a", introA:"Hola", introB:"Tu nivel de confianza es", percent:"%", goCheck:"Ir a Revisión", saveAll:"Guardar",
+         autoHide:"Al cambiar de app, esta pantalla se oculta automáticamente.", checkTitle:"Revisión de seguridad", risk:"Riesgo", trust2:"Confianza",
+         saveCheck:"Guardar revisión", clear:"Limpiar", resTitle:"Mis recursos", resAdd:"Agregar recurso", phTitle:"Título (p. ej., Refugio)",
+         phDesc:"Descripción", phLink:"Enlace (https://…)", del:"Eliminar", profileTitle:"Perfil", displayName:"Nombre a mostrar",
+         namePh:"Tu nombre (opcional)", saveProfile:"Guardar perfil", changePIN:"Cambiar PIN", export:"Exportar datos", exportBtn:"Exportar JSON",
+         footer:"Soporte con privacidad primero", clearData:"Borrar datos",
+         q1:"¿Estás seguro/a donde estás ahora?",
+         q2:"¿Alguien te ha amenazado recientemente?",
+         q3:"¿Has sufrido daño físico en el último mes?",
+         q4:"¿Te preocupa que tu pareja tenga acceso a tu teléfono?",
+         q5:"¿Alguien te impide salir?",
+         q6:"¿Tienes hijos/as en riesgo?",
+         q7:"¿Te sientes aislado/a de la ayuda?",
+         q8:"¿Te gustaría ver recursos locales inmediatos?"
     }
+  };
 
-    // ====== Quick Exit ======
-    quickExitBtn.addEventListener("click", ()=> location.href="https://www.google.com/");
+  // ===== Helpers =====
+  const $=id=>document.getElementById(id);
+  const loadJSON=(k,f)=>{ try { const v=JSON.parse(localStorage.getItem(k)); return v??f; } catch { return f; } };
+  const saveJSON=(k,v)=> localStorage.setItem(k, JSON.stringify(v));
+  const getPIN=()=> localStorage.getItem(LS.pin)||DEFAULT_PIN;
+  const setPIN=p=> localStorage.setItem(LS.pin,p);
+  const getLang=()=> localStorage.getItem(LS.lang)||((navigator.language||"en").toLowerCase().startsWith("es")?"es":"en");
+  const setLang=l=> localStorage.setItem(LS.lang,l);
+  const getTheme=()=> localStorage.getItem(LS.theme)||"aurora";
+  const setTheme=t=> localStorage.setItem(LS.theme,t);
 
-    // ====== Decoy: Clock ======
-    function pad(n){ return String(n).padStart(2,"0"); }
-    function renderClock(){
-      const d = new Date();
-      const h = pad(d.getHours()), m = pad(d.getMinutes()), s = pad(d.getSeconds());
-      liveClock.textContent = `${h}:${m}:${s}`;
-      const opts = { weekday:'short', month:'short', day:'numeric' };
-      liveDate.textContent = d.toLocaleDateString(lang==='es'?'es-ES':'en-US', opts);
-    }
-    setInterval(renderClock, 1000); renderClock();
+  // ===== State =====
+  let unlocked=false;
+  let profile=loadJSON(LS.profile,{name:"Anonymous",trust:100});
+  let answers=loadJSON(LS.answers,{});
+  let resources=loadJSON(LS.resources,[]);
+  let lang=getLang();
 
-    // ====== Decoy: Stopwatch ======
-    let swRunning = false, swStartT = 0, swElapsed = 0, swRAF = null;
-    function fmtMillis(ms){
-      const total = Math.floor(ms/10); // centiseconds
-      const cs = total % 100;
-      const sec = Math.floor(total/100)%60;
-      const min = Math.floor(total/6000)%60;
-      const hr  = Math.floor(total/360000);
-      const hh = hr>0 ? String(hr).padStart(2,"0")+":" : "";
-      return `${hh}${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}.${String(cs).padStart(2,"0")}`;
-    }
-    function swTick(){
-      const ms = swElapsed + (swRunning ? (performance.now()-swStartT) : 0);
-      swDisplay.textContent = fmtMillis(ms);
-      if (swRunning) swRAF = requestAnimationFrame(swTick);
-    }
-    function swToggle(){
-      if (!swRunning){ swRunning = true; swStartT = performance.now(); lblStart.textContent = (lang==='es'?'Pausar':'Pause'); swTick(); }
-      else { swRunning = false; swElapsed += (performance.now()-swStartT); cancelAnimationFrame(swRAF); lblStart.textContent = (lang==='es'?'Iniciar':'Start'); swTick(); }
-    }
-    function swAddLap(){
-      const li = document.createElement("li");
-      li.textContent = swDisplay.textContent;
-      swLaps.prepend(li);
-    }
-    function swResetAll(){
-      swRunning=false; cancelAnimationFrame(swRAF); swElapsed=0; swDisplay.textContent="00:00.00"; lblStart.textContent = STR[lang].start; swLaps.innerHTML="";
-    }
-    swStart.addEventListener("click", swToggle);
-    swLap.addEventListener("click", swAddLap);
-    swReset.addEventListener("click", swResetAll);
+  // ===== Decoy: Theme Picker =====
+  const themeDots=[...document.querySelectorAll(".theme-dot")];
+  function applyTheme(t){
+    document.body.classList.remove("theme-aurora","theme-neon","theme-amoled");
+    document.body.classList.add(`theme-${t}`);
+  }
+  applyTheme(getTheme());
+  themeDots.forEach(dot=>dot.addEventListener("click",()=>{ const t=dot.dataset.t; setTheme(t); applyTheme(t); }));
 
-    // Switch decoy tabs
-    function setDecoyTab(which){
-      const activeClock = which==='clock';
-      decoyTabClock.classList.toggle("bg-blue-600", activeClock);
-      decoyTabClock.classList.toggle("text-white", activeClock);
-      decoyTabClock.classList.toggle("btn-ghost", !activeClock);
-      decoyTabStopwatch.classList.toggle("bg-blue-600", !activeClock);
-      decoyTabStopwatch.classList.toggle("text-white", !activeClock);
-      decoyTabStopwatch.classList.toggle("btn-ghost", activeClock);
-      clockPane.classList.toggle("hidden-soft", !activeClock);
-      stopwatchPane.classList.toggle("hidden-soft", activeClock);
-    }
-    decoyTabClock.addEventListener("click", ()=> setDecoyTab('clock'));
-    decoyTabStopwatch.addEventListener("click", ()=> setDecoyTab('stopwatch'));
-    setDecoyTab('clock');
+  // ===== Header & Lang =====
+  const hdrSub=$("hdrSub"), quickExitBtn=$("quickExitBtn"), btnExitLabel=$("btnExitLabel");
+  const langEN=$("langEN"), langES=$("langES");
+  function applyLang(){
+    const S=STR[lang];
+    hdrSub.textContent=S.sub; btnExitLabel.textContent=S.exit;
+    $("decoyTabClock").textContent=S.tabClock; $("decoyTabStopwatch").textContent=S.tabStop;
+    $("lblStart").textContent=S.start; $("lblLap").textContent=S.lap; $("lblReset").textContent=S.reset;
 
-    // ====== Long-press to Unlock (on digits) ======
-    const LP_MS = 800;
-    function openPIN(mode="enter"){
-      const S = STR[lang];
-      pinError.textContent=""; pinInput.value=""; oldPin.value = newPin.value = newPin2.value = "";
-      pinChangeFields.classList.add("hidden-soft");
-      pinModalTitle.textContent = (mode==="change") ? S.pinChange : S.pinEnter;
-      if (mode==="change") pinChangeFields.classList.remove("hidden-soft");
-      pinModal.classList.remove("hidden-soft");
-      setTimeout(()=>pinInput.focus(), 50);
-      pinForm.dataset.mode = mode;
-      try { navigator.vibrate && navigator.vibrate(15); } catch {}
+    // Modal
+    $("pinModalTitle").textContent=S.pinEnter; $("pinConfirmBtn").textContent=S.confirm; $("pinCancelBtn").textContent=S.cancel;
+    $("oldPin").placeholder=S.pinCurrent; $("newPin").placeholder=S.pinNew; $("newPin2").placeholder=S.pinConfirmNew;
+    $("pinNote").textContent=S.pinDefaultNote;
+
+    // Inside
+    $("signedInAs").textContent=S.signedIn; $("trustLabel").textContent=S.trust; $("trustLabel2").textContent=S.trust2; $("btnLock").textContent=S.lock;
+    $("tabBtnHome").textContent=S.tabs.home; $("tabBtnCheck").textContent=S.tabs.check; $("tabBtnRes").textContent=S.tabs.res; $("tabBtnProfile").textContent=S.tabs.profile;
+    $("homeTitle").textContent=S.welcome;
+    $("homeIntro").innerHTML = `${S.introA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.introB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
+    $("btnGoCheck").textContent=S.goCheck; $("btnSaveAll").textContent=S.saveAll; $("autoHideNote").textContent=S.autoHide;
+    $("checkTitle").textContent=S.checkTitle; $("riskLabel").textContent=S.risk; $("btnSaveCheck").textContent=S.saveCheck; $("btnClear").textContent=S.clear;
+    $("resTitle").textContent=S.resTitle; $("resTitleInput").placeholder=S.phTitle; $("resDesc").placeholder=S.phDesc; $("resUrl").placeholder=S.phLink; $("btnAddResource").textContent=S.resAdd;
+    $("profileTitle").textContent=S.profileTitle; $("lblDisplayName").textContent=S.displayName; $("displayNameInput").placeholder=S.namePh; $("btnSaveProfile").textContent=S.saveProfile;
+    $("lblChangePIN").textContent=S.changePIN; $("btnChangePIN").textContent=S.changePIN;
+    $("lblExport").textContent=S.export; $("btnExport").textContent=S.exportBtn; $("footerNote").textContent=S.footer; $("lblClear").textContent=S.clearData; $("btnClearData").textContent=S.clearData;
+
+    langEN.classList.toggle("lang-active", lang==="en");
+    langES.classList.toggle("lang-active", lang==="es");
+  }
+  langEN.addEventListener("click",()=>{ lang="en"; setLang(lang); applyLang(); buildQuestions(); });
+  langES.addEventListener("click",()=>{ lang="es"; setLang(lang); applyLang(); buildQuestions(); });
+
+  // ===== Quick Exit =====
+  quickExitBtn.addEventListener("click", ()=> location.href="https://www.google.com/");
+
+  // ===== Decoy Tabs =====
+  function setDecoyTab(which){
+    const isClock=which==='clock';
+    $("decoyTabClock").classList.toggle("bg-blue-600", isClock);
+    $("decoyTabClock").classList.toggle("text-white", isClock);
+    $("decoyTabClock").classList.toggle("btn-ghost", !isClock);
+    $("decoyTabStopwatch").classList.toggle("bg-blue-600", !isClock);
+    $("decoyTabStopwatch").classList.toggle("text-white", !isClock);
+    $("decoyTabStopwatch").classList.toggle("btn-ghost", isClock);
+    $("clockPane").classList.toggle("hidden-soft", !isClock);
+    $("stopwatchPane").classList.toggle("hidden-soft", isClock);
+  }
+  $("decoyTabClock").addEventListener("click", ()=> setDecoyTab('clock'));
+  $("decoyTabStopwatch").addEventListener("click", ()=> setDecoyTab('stopwatch'));
+  setDecoyTab('clock');
+
+  // ===== Flip Clock =====
+  const flipHH=$("hh"), flipMM=$("mm"), flipSS=$("ss"), liveDate=$("liveDate");
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function updateFlip(group, prev, next){
+    const a=group.children[0], b=group.children[1];
+    if(prev[0]!==next[0]) { a.textContent=next[0]; a.classList.add("tick"); setTimeout(()=>a.classList.remove("tick"), 300); }
+    if(prev[1]!==next[1]) { b.textContent=next[1]; b.classList.add("tick"); setTimeout(()=>b.classList.remove("tick"), 300); }
+  }
+  let last="000000";
+  function renderClock(){
+    const d=new Date(); const h=pad2(d.getHours()), m=pad2(d.getMinutes()), s=pad2(d.getSeconds());
+    const now=h+m+s, prev=last; last=now;
+    updateFlip(flipHH, prev.slice(0,2), h);
+    updateFlip(flipMM, prev.slice(2,4), m);
+    updateFlip(flipSS, prev.slice(4,6), s);
+    const opts={ weekday:'short', month:'short', day:'numeric' };
+    liveDate.textContent = d.toLocaleDateString(lang==='es'?'es-ES':'en-US', opts);
+  }
+  setInterval(renderClock, 1000); renderClock();
+
+  // Long-press unlock on digits
+  const LP_MS=800;
+  function openPIN(mode="enter"){
+    const S=STR[lang];
+    $("pinError").textContent=""; $("pinInput").value=""; $("oldPin").value=$("newPin").value=$("newPin2").value="";
+    $("pinChangeFields").classList.add("hidden-soft");
+    $("pinModalTitle").textContent=(mode==="change")?S.pinChange:S.pinEnter;
+    if(mode==="change") $("pinChangeFields").classList.remove("hidden-soft");
+    $("pinModal").classList.remove("hidden-soft");
+    setTimeout(()=>$("pinInput").focus(),50);
+    $("pinForm").dataset.mode=mode;
+    try{ navigator.vibrate&&navigator.vibrate(15);}catch{}
+  }
+  function closePIN(){ $("pinModal").classList.add("hidden-soft"); }
+  function armLongPress(el){
+    let t=null;
+    const start=()=>{ t=setTimeout(()=>openPIN("enter"), LP_MS); };
+    const cancel=()=>{ clearTimeout(t); t=null; };
+    ["pointerdown","touchstart","mousedown"].forEach(e=> el.addEventListener(e,start));
+    ["pointerup","pointerleave","touchend","touchcancel","mouseup","mouseleave"].forEach(e=> el.addEventListener(e,cancel));
+  }
+  armLongPress($("flipClock"));
+  armLongPress($("swDisplay"));
+  $("pinCancelBtn").addEventListener("click", closePIN);
+  $("pinModal").addEventListener("click",(e)=>{ if(e.target===$("pinModal")) closePIN(); });
+  $("pinForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const mode=$("pinForm").dataset.mode||"enter";
+    const S=STR[lang];
+    if(mode==="enter"){
+      if($("pinInput").value===getPIN()){ closePIN(); unlockReal(); }
+      else { $("pinError").textContent=S.errBadPin; }
+    } else {
+      if($("oldPin").value!==getPIN()){ $("pinError").textContent=S.errBadPin; return; }
+      if(($("newPin").value||"").length<4){ $("pinError").textContent=S.errShortPin; return; }
+      if($("newPin").value!==$("newPin2").value){ $("pinError").textContent=S.errNoMatch; return; }
+      setPIN($("newPin").value); closePIN();
     }
-    function closePIN(){ pinModal.classList.add("hidden-soft"); }
-    function armLongPress(el){
-      let t=null;
-      const start = ()=> { t = setTimeout(()=> openPIN("enter"), LP_MS); };
-      const cancel = ()=> { clearTimeout(t); t=null; };
-      ["pointerdown","touchstart","mousedown"].forEach(e=> el.addEventListener(e,start));
-      ["pointerup","pointerleave","touchend","touchcancel","mouseup","mouseleave"].forEach(e=> el.addEventListener(e,cancel));
-    }
-    armLongPress(liveClock);
-    armLongPress(swDisplay);
-    pinCancelBtn.addEventListener("click", closePIN);
-    pinForm.addEventListener("submit",(e)=>{
-      e.preventDefault();
-      const mode = pinForm.dataset.mode || "enter";
-      const S = STR[lang];
-      if (mode==="enter"){
-        if (pinInput.value === getPIN()){ closePIN(); unlockReal(); }
-        else { pinError.textContent = S.errBadPin; }
-      } else {
-        if (oldPin.value !== getPIN()){ pinError.textContent = S.errBadPin; return; }
-        if ((newPin.value||"").length < 4){ pinError.textContent = S.errShortPin; return; }
-        if (newPin.value !== newPin2.value){ pinError.textContent = S.errNoMatch; return; }
-        setPIN(newPin.value); closePIN();
-      }
+  });
+
+  // ===== Stopwatch =====
+  let swRunning=false, swStartT=0, swElapsed=0, swRAF=null;
+  function fmtMillis(ms){ const cs=Math.floor(ms/10)%100, sec=Math.floor(ms/1000)%60, min=Math.floor(ms/60000)%60, hr=Math.floor(ms/3600000);
+    const hh=hr>0?(String(hr).padStart(2,"0")+":"):""; return `${hh}${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}.${String(cs).padStart(2,"0")}`; }
+  function swTick(){ const ms=swElapsed+(swRunning?(performance.now()-swStartT):0); $("swDisplay").textContent=fmtMillis(ms); if(swRunning) swRAF=requestAnimationFrame(swTick); }
+  function swToggle(){ if(!swRunning){ swRunning=true; swStartT=performance.now(); $("lblStart").textContent=(lang==='es'?'Pausar':'Pause'); swTick(); }
+    else{ swRunning=false; swElapsed+=(performance.now()-swStartT); cancelAnimationFrame(swRAF); $("lblStart").textContent=(lang==='es'?'Iniciar':'Start'); swTick(); } }
+  function swAddLap(){ const li=document.createElement("li"); li.textContent=$("swDisplay").textContent; $("swLaps").prepend(li); }
+  function swResetAll(){ swRunning=false; cancelAnimationFrame(swRAF); swElapsed=0; $("swDisplay").textContent="00:00.00"; $("lblStart").textContent=STR[lang].start; $("swLaps").innerHTML=""; }
+  $("swStart").addEventListener("click", swToggle); $("swLap").addEventListener("click", swAddLap); $("swReset").addEventListener("click", swResetAll);
+
+  // ===== Inside App Lock/Unlock & Auto-hide =====
+  function unlockReal(){ unlocked=true; $("decoyView").classList.add("hidden-soft"); $("realApp").classList.remove("hidden-soft"); setTab('home'); refreshUI(); }
+  function lockToDecoy(){ unlocked=false; $("realApp").classList.add("hidden-soft"); $("decoyView").classList.remove("hidden-soft"); }
+  $("lockBtn").addEventListener("click", lockToDecoy);
+  document.addEventListener("visibilitychange", ()=>{ if(document.hidden && unlocked) lockToDecoy(); });
+
+  // ===== Tabs =====
+  const tabViews={ home:$("tab-home"), checkin:$("tab-checkin"), resources:$("tab-resources"), profile:$("tab-profile") };
+  function setTab(name){
+    const btns={ home:$("tabBtnHome"), checkin:$("tabBtnCheck"), resources:$("tabBtnRes"), profile:$("tabBtnProfile") };
+    Object.keys(btns).forEach(k=>{ const b=btns[k], a=k===name; b.classList.toggle("bg-blue-600",a); b.classList.toggle("text-white",a); b.classList.toggle("btn-ghost",!a); });
+    Object.entries(tabViews).forEach(([k,el])=> el.classList.toggle("hidden-soft", k!==name));
+  }
+  $("tabBtnHome").addEventListener("click", ()=>setTab('home'));
+  $("tabBtnCheck").addEventListener("click", ()=>setTab('checkin'));
+  $("tabBtnRes").addEventListener("click", ()=>setTab('resources'));
+  $("tabBtnProfile").addEventListener("click", ()=>setTab('profile'));
+  $("goToCheckIn").addEventListener("click", ()=>setTab('checkin'));
+
+  // ===== Questions & Scoring =====
+  const QUESTIONS=[ {id:"q1",key:"q1",invert:true},{id:"q2",key:"q2"},{id:"q3",key:"q3"},{id:"q4",key:"q4"},{id:"q5",key:"q5"},{id:"q6",key:"q6"},{id:"q7",key:"q7"},{id:"q8",key:"q8"} ];
+  function buildQuestions(){
+    const box=$("questions"); box.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+      const row=document.createElement("div"); row.className="p-3 card";
+      const label=document.createElement("div"); label.className="text-sm mb-2"; label.textContent=`${i+1}. ${STR[lang][q.key]}`;
+      const wrap=document.createElement("div"); wrap.className="flex gap-2";
+      const yes=document.createElement("button"); yes.type="button"; yes.className="btn btn-ghost flex-1"; yes.textContent=(lang==='es'?'Sí':'Yes');
+      const no =document.createElement("button"); no.type="button"; no.className ="btn btn-ghost flex-1"; no.textContent="No";
+      wrap.append(yes,no); row.append(label,wrap); box.append(row);
+      function mark(){ yes.classList.toggle("bg-green-600", answers[q.id]==="yes"); yes.classList.toggle("text-white", answers[q.id]==="yes");
+                       no .classList.toggle("bg-rose-600",  answers[q.id]==="no");  no .classList.toggle("text-white",  answers[q.id]==="no"); }
+      yes.addEventListener("click", ()=>{ answers[q.id]="yes"; mark(); updateScores(); saveJSON(LS.answers,answers); });
+      no .addEventListener("click", ()=>{ answers[q.id]="no";  mark(); updateScores(); saveJSON(LS.answers,answers); });
+      mark();
     });
+  }
+  function computeRiskTrust(){
+    let risky=0; QUESTIONS.forEach(q=>{ const a=(answers[q.id]||"").toLowerCase(); if(!a) return; if(q.invert){ if(a==="no") risky++; } else { if(a==="yes") risky++; } });
+    const risk=Math.round((risky/QUESTIONS.length)*100); const trust=100-risk; return {risk,trust};
+  }
+  function updateScores(){
+    const {risk,trust}=computeRiskTrust();
+    $("riskPct").textContent=`${risk}%`; $("trustPct").textContent=`${trust}%`; $("trustBadge").textContent=`${trust}%`;
+    const ht=document.getElementById("homeTrust"); if(ht) ht.textContent=`${trust}`;
+    profile.trust=trust;
+  }
+  $("saveCheckIn").addEventListener("click", ()=>{ saveJSON(LS.answers,answers); updateScores(); });
+  $("clearCheckIn").addEventListener("click", ()=>{ answers={}; saveJSON(LS.answers,answers); buildQuestions(); updateScores(); });
 
-    // ====== Inside app behavior ======
-    function unlockReal(){ unlocked = true; decoyView.classList.add("hidden-soft"); realApp.classList.remove("hidden-soft"); setTab('home'); refreshUI(); }
-    function lockToDecoy(){ unlocked = false; realApp.classList.add("hidden-soft"); decoyView.classList.remove("hidden-soft"); }
-    lockBtn.addEventListener("click", lockToDecoy);
-    document.addEventListener("visibilitychange", ()=> { if (document.hidden && unlocked) lockToDecoy(); });
-
-    function setTab(name){
-      const btns = {home:tabBtnHome, checkin:tabBtnCheck, resources:tabBtnRes, profile:tabBtnProfile};
-      Object.keys(btns).forEach(k=>{
-        const b = btns[k]; const active = k===name;
-        b.classList.toggle("bg-blue-600", active);
-        b.classList.toggle("text-white", active);
-        b.classList.toggle("btn-ghost", !active);
-      });
-      Object.entries(tabViews).forEach(([k,el])=> el.classList.toggle("hidden-soft", k!==name));
-    }
-    tabBtnHome.addEventListener("click", ()=> setTab('home'));
-    tabBtnCheck.addEventListener("click", ()=> setTab('checkin'));
-    tabBtnRes.addEventListener("click", ()=> setTab('resources'));
-    tabBtnProfile.addEventListener("click", ()=> setTab('profile'));
-    goToCheckIn.addEventListener("click", ()=> setTab('checkin'));
-
-    // ====== Check-in ======
-    const QUESTIONS = [
-      { id:"q1", key:"q1", invert:true },
-      { id:"q2", key:"q2" },
-      { id:"q3", key:"q3" },
-      { id:"q4", key:"q4" },
-      { id:"q5", key:"q5" },
-      { id:"q6", key:"q6" },
-      { id:"q7", key:"q7" },
-      { id:"q8", key:"q8" }
-    ];
-    function buildQuestions(){
-      questionsBox.innerHTML="";
-      QUESTIONS.forEach((q,i)=>{
-        const row = document.createElement("div"); row.className="p-3 card";
-        const label = document.createElement("div"); label.className="text-sm mb-2"; label.textContent = `${i+1}. ${STR[lang][q.key]}`;
-        const wrap = document.createElement("div"); wrap.className="flex gap-2";
-        const yes = document.createElement("button"); yes.type="button"; yes.className="btn btn-ghost flex-1"; yes.textContent = lang==='es'?'Sí':'Yes';
-        const no  = document.createElement("button");  no.type="button";  no.className="btn btn-ghost flex-1";  no.textContent  = "No";
-        wrap.append(yes,no); row.append(label,wrap); questionsBox.append(row);
-        const cur = (answers[q.id]||"").toLowerCase();
-        if(cur==="yes") yes.classList.add("bg-green-600","text-white");
-        if(cur==="no")  no.classList.add("bg-rose-600","text-white");
-        function mark(){
-          yes.classList.toggle("bg-green-600", answers[q.id]==="yes");
-          yes.classList.toggle("text-white",  answers[q.id]==="yes");
-          no.classList .toggle("bg-rose-600",  answers[q.id]==="no");
-          no.classList .toggle("text-white",   answers[q.id]==="no");
-        }
-        yes.addEventListener("click", ()=>{ answers[q.id]="yes"; mark(); updateScores(); saveJSON(LS.answers,answers); });
-        no .addEventListener("click",  ()=>{ answers[q.id]="no";  mark(); updateScores(); saveJSON(LS.answers,answers); });
-      });
-    }
-    function computeRiskTrust(){
-      let risky=0;
-      QUESTIONS.forEach(q=>{
-        const a = (answers[q.id]||"").toLowerCase();
-        if(!a) return;
-        if(q.invert){ if(a==="no") risky++; } else { if(a==="yes") risky++; }
-      });
-      const risk  = Math.round((risky/QUESTIONS.length)*100);
-      const trust = 100 - risk;
-      return { risk, trust };
-    }
-    function updateScores(){
-      const { risk, trust } = computeRiskTrust();
-      riskPct.textContent = `${risk}%`; trustPct.textContent = `${trust}%`; trustBadge.textContent = `${trust}%`;
-      (document.getElementById("homeTrust")||{}).textContent = `${trust}`;
-      profile.trust = trust;
-    }
-    saveCheckIn.addEventListener("click", ()=> { saveJSON(LS.answers,answers); updateScores(); });
-    clearCheckIn.addEventListener("click", ()=> { answers={}; saveJSON(LS.answers,answers); buildQuestions(); updateScores(); });
-
-    // ====== Resources ======
-    function renderResources(){
-      resourceList.innerHTML="";
-      (resources||[]).forEach((r,i)=>{
-        const li = document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
-        const txt = document.createElement("div");
-        const t = document.createElement("div"); t.className="font-semibold"; t.textContent=r.title||"Untitled";
-        const d = document.createElement("div"); d.className="text-sm text-gray-300"; d.textContent=r.desc||"";
-        const u = document.createElement("a"); u.className="text-blue-400 underline text-sm"; u.href=r.url||"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent=r.url||"";
-        txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
-        const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent=STR[lang].del;
-        del.addEventListener("click", ()=>{ resources.splice(i,1); saveJSON(LS.resources,resources); renderResources(); });
-        li.append(txt,del); resourceList.append(li);
-      });
-    }
-    resForm.addEventListener("submit",(e)=>{
-      e.preventDefault();
-      const item = { title:resTitleInput.value.trim(), desc:resDesc.value.trim(), url:resUrl.value.trim() };
-      if(!item.title) return;
-      resources.push(item); saveJSON(LS.resources,resources);
-      resTitleInput.value = resDesc.value = resUrl.value = ""; renderResources();
+  // ===== Resources =====
+  function renderResources(){
+    const list=$("resourceList"); list.innerHTML="";
+    (resources||[]).forEach((r,i)=>{
+      const li=document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
+      const txt=document.createElement("div");
+      const t=document.createElement("div"); t.className="font-semibold"; t.textContent=r.title||"Untitled";
+      const d=document.createElement("div"); d.className="text-sm text-gray-300"; d.textContent=r.desc||"";
+      const u=document.createElement("a"); u.className="text-blue-400 underline text-sm"; u.href=r.url||"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent=r.url||"";
+      txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
+      const del=document.createElement("button"); del.className="btn btn-ghost"; del.textContent=STR[lang].del;
+      del.addEventListener("click", ()=>{ resources.splice(i,1); saveJSON(LS.resources,resources); renderResources(); });
+      li.append(txt,del); list.append(li);
     });
+  }
+  $("resourceForm").addEventListener("submit",(e)=>{
+    e.preventDefault();
+    const item={ title:$("resTitleInput").value.trim(), desc:$("resDesc").value.trim(), url:$("resUrl").value.trim() };
+    if(!item.title) return;
+    resources.push(item); saveJSON(LS.resources,resources);
+    $("resTitleInput").value=$("resDesc").value=$("resUrl").value=""; renderResources();
+  });
 
-    // ====== Profile / Data ======
-    function refreshUI(){
-      profileName.textContent = profile.name || "Anonymous";
-      const S = STR[lang];
-      homeIntro.innerHTML = `${S.introA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.introB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
-      displayNameInput.value = profile.name || "";
-      buildQuestions(); updateScores(); renderResources();
-    }
-    saveProfile.addEventListener("click", ()=>{ profile.name = displayNameInput.value.trim() || "Anonymous"; saveJSON(LS.profile, profile); refreshUI(); });
-    exportJson.addEventListener("click", ()=>{
-      const payload = {
-        version: APP_VERSION,
-        profile: loadJSON(LS.profile,{name:"Anonymous",trust:100}),
-        answers: loadJSON(LS.answers,{}),
-        resources: loadJSON(LS.resources,[])
-      };
-      const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href=url; a.download="timeout-data.json"; document.body.append(a); a.click();
-      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },0);
-    });
-    clearData.addEventListener("click", ()=>{
-      try {
-        localStorage.removeItem(LS.profile);
-        localStorage.removeItem(LS.answers);
-        localStorage.removeItem(LS.resources);
-        localStorage.removeItem(LS.pin);
-      } catch {}
-      profile = { name:"Anonymous", trust:100 }; answers = {}; resources = [];
-      lockToDecoy();
-    });
-    saveAll.addEventListener("click", ()=>{ saveJSON(LS.profile, profile); saveJSON(LS.answers, answers); saveJSON(LS.resources, resources); });
-
-    // ====== Language switch ======
-    function switchLang(to){ lang = to; setLang(lang); applyLang(); buildQuestions(); }
-    langEN.addEventListener("click", ()=> switchLang("en"));
-    langES.addEventListener("click", ()=> switchLang("es"));
-
-    // ====== Screen Wake Lock (keep tablet screen on) ======
-    let wakeLock = null;
-    async function requestWakeLock(){
-      try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await navigator.wakeLock.request('screen');
-          wakeLock.addEventListener('release', ()=>{ /* released */ });
-        }
-      } catch(e){ /* not supported or denied */ }
-    }
-    function releaseWakeLock(){ try{ wakeLock && wakeLock.release(); wakeLock=null; } catch{} }
-    document.addEventListener('visibilitychange', ()=> {
-      if (!document.hidden) { requestWakeLock(); } else { releaseWakeLock(); }
-      if (document.hidden && unlocked) lockToDecoy();
-    });
-    requestWakeLock();
-
-    // ====== PWA: Inline manifest + service worker (offline support) ======
-    (function setupPWA(){
-      // Manifest (inline)
-      const manifest = {
-        name: "TimeOut",
-        short_name: "TimeOut",
-        start_url: ".",
-        display: "standalone",
-        background_color: "#0a0c11",
-        theme_color: "#0a0c11",
-        icons: []
-      };
-      const mBlob = new Blob([JSON.stringify(manifest)], {type:"application/json"});
-      const mURL = URL.createObjectURL(mBlob);
-      const link = document.createElement('link'); link.rel='manifest'; link.href=mURL; document.head.appendChild(link);
-
-      // Service Worker (inline via Blob)
-      const swCode = `
-        const CACHE = 'timeout-cache-v135';
-        const CORE = ['/', self.registration.scope, 'index.html'];
-        self.addEventListener('install', e=>{
-          e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.catch?[]:CORE)).catch(()=>{}));
-          self.skipWaiting();
-        });
-        self.addEventListener('activate', e=>{
-          e.waitUntil(caches.keys().then(keys=>Promise.all(keys.map(k=>k===CACHE?null:caches.delete(k)))));
-          self.clients.claim();
-        });
-        self.addEventListener('fetch', e=>{
-          const req = e.request;
-          if (req.method !== 'GET') return;
-          e.respondWith(
-            caches.match(req).then(cached=>{
-              const fetchPromise = fetch(req).then(res=>{
-                const copy = res.clone();
-                caches.open(CACHE).then(c=>c.put(req, copy)).catch(()=>{});
-                return res;
-              }).catch(()=>cached);
-              return cached || fetchPromise;
-            })
-          );
-        });
-      `;
-      const swURL = URL.createObjectURL(new Blob([swCode], {type:'text/javascript'}));
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register(swURL).catch(()=>{});
-      }
-    })();
-
-    // ====== Init ======
-    if (!localStorage.getItem(LS.pin)) setPIN(DEFAULT_PIN);
-    applyLang();
+  // ===== Profile & Data =====
+  function refreshUI(){
+    $("profileName").textContent=profile.name||"Anonymous";
+    const S=STR[lang];
+    $("homeIntro").innerHTML = `${S.introA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.introB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
+    $("displayNameInput").value=profile.name||"";
     buildQuestions(); updateScores(); renderResources();
-    pinModal.addEventListener("click",(e)=>{ if(e.target===pinModal) closePIN(); });
-    document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && unlocked) lockToDecoy(); });
-  </script>
+  }
+  $("saveProfile").addEventListener("click", ()=>{ profile.name=$("displayNameInput").value.trim()||"Anonymous"; saveJSON(LS.profile,profile); refreshUI(); });
+  $("exportJson").addEventListener("click", ()=>{
+    const payload={ version:APP_VERSION, profile:loadJSON(LS.profile,{name:"Anonymous",trust:100}), answers:loadJSON(LS.answers,{}), resources:loadJSON(LS.resources,[]) };
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download="timeout-data.json"; document.body.append(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },0);
+  });
+  $("clearData").addEventListener("click", ()=>{
+    try{ localStorage.removeItem(LS.profile); localStorage.removeItem(LS.answers); localStorage.removeItem(LS.resources); localStorage.removeItem(LS.pin); }catch{}
+    profile={name:"Anonymous",trust:100}; answers={}; resources=[]; lockToDecoy();
+  });
+  $("saveAll").addEventListener("click", ()=>{ saveJSON(LS.profile,profile); saveJSON(LS.answers,answers); saveJSON(LS.resources,resources); });
+
+  // ===== PIN change open from Profile =====
+  $("openChangePin").addEventListener("click", ()=> openPIN("change"));
+
+  // ===== Init =====
+  if(!localStorage.getItem(LS.pin)) setPIN(DEFAULT_PIN);
+  applyLang(); buildQuestions(); updateScores(); renderResources();
+
+  // Close via ESC
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && unlocked) lockToDecoy(); });
+</script>
 </body>
 </html>
