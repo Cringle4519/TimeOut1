@@ -1,142 +1,1162 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TimeOut</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>TimeOut — Privacy-first Safety App</title>
+  <meta name="theme-color" content="#07090d" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background:#0d1117; color:#eaeaea; font-family:sans-serif; }
-    .hidden { display:none; }
-    .tab-btn { padding:0.5rem 1rem; cursor:pointer; }
-    .tab-btn.active { border-bottom:2px solid #38bdf8; }
-    .card { background:#1f2937; border-radius:0.5rem; padding:1rem; margin-top:1rem; }
-    .btn { padding:0.5rem 0.75rem; border-radius:0.25rem; }
-    .btn-primary { background:#38bdf8; color:#000; }
-    .btn-ghost { background:transparent; border:1px solid #555; }
-    .small { font-size:0.85rem; opacity:0.85; }
+    :root{--maxw:480px}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:#06070a;color:#e6eef8;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    .container{max-width:var(--maxw);margin:0 auto;padding:16px}
+    .card{background:rgba(10,14,24,.68);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,.03);backdrop-filter:blur(6px)}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    h1{font-weight:700;font-size:20px;margin:0}
+    .pill{background:#081226;padding:.15rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.04);font-size:12px;color:#9fb0d9}
+    .theme-dot{width:16px;height:16px;border-radius:999px;border:1px solid rgba(255,255,255,.06);cursor:pointer}
+    .btn{border-radius:10px;padding:.5rem .8rem;font-weight:700;cursor:pointer}
+    .btn-primary{background:#2563eb;color:white;border:0}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.06);color:inherit}
+    .small{font-size:13px;color:#9fb0d9}
+    .flipwrap{display:inline-grid;grid-auto-flow:column;gap:.18rem;user-select:none}
+    .digit{width:56px;height:80px;border-radius:12px;background:linear-gradient(180deg,#071428,#071025);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:44px;letter-spacing:.02em;text-shadow:0 0 8px rgba(59,130,246,.28);border:1px solid rgba(255,255,255,.02);overflow:hidden}
+    .sep{width:14px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#9fb5ff;font-size:40px;text-shadow:0 0 8px rgba(99,102,241,.25)}
+    .tick{animation:tick .62s ease}
+    @keyframes tick{0%{transform:rotateX(0)}49%{transform:rotateX(-86deg)}50%{transform:rotateX(86deg)}100%{transform:rotateX(0)}}
+    .hidden-soft{display:none!important}
+    .tab-btn{padding:.45rem .75rem;border-radius:999px;border:1px solid rgba(255,255,255,.03)}
+    .tab-btn.active{background:#2563eb;color:white;border:0}
+    input.card{background:transparent;border:1px solid rgba(255,255,255,.04);padding:.6rem;border-radius:8px;color:inherit}
+    .chip{padding:.2rem .5rem;border-radius:999px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.02)}
+    footer.small-note{text-align:center;color:#93a7c7;margin-top:12px;font-size:12px}
+    .danger{color:#ff6b6b}
+    @media (max-width:480px){ .digit{width:48px;height:72px;font-size:38px} }
   </style>
 </head>
-<body class="p-4">
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div>
+        <h1 id="decoyTitle" class="select-none">TimeOut</h1>
+        <div class="small"><span id="hdrSub">Clock</span> • <span class="pill">v1.3.5</span></div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2" title="Theme">
+          <div class="theme-dot" data-t="aurora" aria-label="Aurora" style="background:linear-gradient(135deg,#22c55e,#2563eb)"></div>
+          <div class="theme-dot" data-t="neon" aria-label="Neon" style="background:linear-gradient(135deg,#06b6d4,#8b5cf6)"></div>
+          <div class="theme-dot" data-t="amoled" aria-label="AMOLED" style="background:#000"></div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="langBtn" class="btn btn-ghost chip">EN</button>
+        </div>
+        <button id="quickExitBtn" class="btn btn-ghost">Home</button>
+      </div>
+    </header>
 
-  <!-- Decoy Landing -->
-  <div id="decoy" class="text-center">
-    <h1 id="decoyTitle" class="text-2xl font-bold">TimeOut</h1>
-    <div id="clock" class="mt-6 text-5xl font-mono">25:00</div>
-    <div class="mt-4 flex justify-center space-x-2">
-      <button id="quickExit" class="btn btn-ghost">Quick Exit</button>
-      <button id="panic" class="btn btn-ghost">Lock</button>
-    </div>
-    <div class="mt-2 small">v1.3.5</div>
-  </div>
+    <!-- DECOY VIEW -->
+    <section id="decoyView" class="card">
+      <div class="flex items-center justify-center gap-2 mb-3">
+        <button id="decoyTabClock" class="tab-btn active">Clock</button>
+        <button id="decoyTabStopwatch" class="tab-btn">Stopwatch</button>
+        <button id="decoySkinCalc" class="tab-btn">Calculator</button>
+        <button id="decoySkinNotes" class="tab-btn">Notes</button>
+        <button id="decoySkinWeather" class="tab-btn">Weather</button>
+      </div>
 
-  <!-- PIN Modal -->
-  <div id="pinModal" class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center">
-    <div class="bg-gray-800 p-6 rounded-xl w-80">
-      <h2 class="text-lg font-bold mb-4">Enter PIN</h2>
-      <input id="pinInput" type="password" class="w-full p-2 mb-4 text-black rounded" placeholder="PIN"/>
-      <button id="pinSubmit" class="btn btn-primary w-full">Unlock</button>
-    </div>
-  </div>
+      <!-- CLOCK SKIN -->
+      <div id="skinClock" class="text-center">
+        <div id="flipClock" class="inline-flex items-center justify-center select-none" style="gap:.18rem;">
+          <div class="flipwrap" id="hh"><div class="digit">0</div><div class="digit">0</div></div>
+          <div class="sep">:</div>
+          <div class="flipwrap" id="mm"><div class="digit">0</div><div class="digit">0</div></div>
+          <div class="sep">:</div>
+          <div class="flipwrap" id="ss"><div class="digit">0</div><div class="digit">0</div></div>
+        </div>
+        <div id="liveDate" class="small mt-2">—</div>
+        <p class="small mt-3">Long-press title or digits to unlock the app.</p>
+      </div>
 
-  <!-- Main App -->
-  <div id="app" class="hidden">
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-xl font-bold">TimeOut App</h1>
-      <button id="lockBtn" class="btn btn-ghost">Lock</button>
-    </div>
-    <div class="flex space-x-4 mb-4">
-      <button class="tab-btn active" data-tab="home">Home</button>
-      <button class="tab-btn" data-tab="checkin">Check-In</button>
-      <button class="tab-btn" data-tab="resources">Resources</button>
-      <button class="tab-btn" data-tab="profile">Profile</button>
-    </div>
-    <div id="tab-home" class="tab">
-      <div class="card">Welcome <span id="userName">User</span></div>
-    </div>
-    <div id="tab-checkin" class="tab hidden">
-      <h2 class="font-bold mb-2">Check-In</h2>
-      <div id="questions"></div>
-      <button id="saveCheckIn" class="btn btn-primary mt-2">Save Answers</button>
-      <button id="demoLoadBtn" class="btn btn-ghost mt-2">Load Demo Answers</button>
-      <div id="scores" class="mt-3"></div>
-      <div id="checkFeedback"></div>
-    </div>
-    <div id="tab-resources" class="tab hidden">
-      <div class="card">Resources (placeholder)</div>
-    </div>
-    <div id="tab-profile" class="tab hidden">
-      <div class="card">
-        <label class="block mb-2">Change PIN</label>
-        <input id="newPin" type="password" class="w-full p-2 mb-2 text-black rounded" placeholder="New PIN"/>
-        <button id="savePin" class="btn btn-primary">Save PIN</button>
+      <!-- STOPWATCH SKIN -->
+      <div id="skinStopwatch" class="text-center hidden-soft">
+        <div id="swDisplay" class="font-extrabold text-4xl my-3">00:00.00</div>
+        <div class="flex items-center justify-center gap-2">
+          <button id="swStart" class="btn btn-primary">Start</button>
+          <button id="swLap" class="btn btn-ghost">Lap</button>
+          <button id="swReset" class="btn btn-ghost">Reset</button>
+        </div>
+        <ul id="swLaps" class="mt-3 text-sm text-gray-300 max-h-36 overflow-auto"></ul>
+      </div>
+
+      <!-- CALC SKIN -->
+      <div id="skinCalc" class="hidden-soft mt-3">
+        <div class="card mb-3 text-right" id="calcDisplay" style="font-size:1.4rem;padding:.7rem">123 + 456</div>
+        <div class="grid grid-cols-4 gap-2">
+          <button class="btn btn-ghost">7</button><button class="btn btn-ghost">8</button><button class="btn btn-ghost">9</button><button class="btn btn-ghost">÷</button>
+          <button class="btn btn-ghost">4</button><button class="btn btn-ghost">5</button><button class="btn btn-ghost">6</button><button class="btn btn-ghost">×</button>
+          <button class="btn btn-ghost">1</button><button class="btn btn-ghost">2</button><button class="btn btn-ghost">3</button><button class="btn btn-ghost">-</button>
+          <button class="btn btn-ghost">0</button><button class="btn btn-ghost">.</button><button class="btn btn-ghost">=</button><button class="btn btn-ghost">+</button>
+        </div>
+        <p class="small mt-3">Long-press the display to unlock (hidden).</p>
+      </div>
+
+      <!-- NOTES SKIN -->
+      <div id="skinNotes" class="hidden-soft mt-3">
+        <div class="card p-3" id="fakeNoteContent">Grocery: milk, eggs, bread. Call Mom later.</div>
+        <p class="small mt-3">Long-press note area to unlock (hidden).</p>
+      </div>
+
+      <!-- WEATHER SKIN -->
+      <div id="skinWeather" class="hidden-soft mt-3 text-center">
+        <div class="card p-4">
+          <div class="text-4xl font-bold" id="weatherTemp">72°</div>
+          <div class="small mt-1" id="weatherCity">Sunny • Your City</div>
+        </div>
+        <p class="small mt-3">Long-press weather card to unlock (hidden).</p>
+      </div>
+    </section>
+
+    <!-- PIN / CHANGE PIN MODAL -->
+    <div id="pinModal" class="fixed inset-0 bg-black/80 hidden-soft flex items-center justify-center p-4">
+      <div class="card w-full max-w-md p-4">
+        <h3 id="pinModalTitle" class="text-lg font-semibold mb-2">Enter PIN</h3>
+        <form id="pinForm" class="space-y-3">
+          <input id="pinInput" inputmode="numeric" maxlength="32" class="w-full card text-center font-bold text-xl" placeholder="••••" autocomplete="off" />
+          <div id="pinChangeFields" class="hidden-soft space-y-2">
+            <input id="oldPin" maxlength="32" inputmode="numeric" class="w-full card text-center" placeholder="Current PIN" />
+            <input id="newPin" maxlength="64" inputmode="text" class="w-full card text-center" placeholder="New PIN or passphrase (min 4)" />
+            <input id="newPin2" maxlength="64" inputmode="text" class="w-full card text-center" placeholder="Confirm new" />
+          </div>
+          <div class="flex gap-2">
+            <button id="pinConfirmBtn" class="btn btn-primary flex-1" type="submit">Confirm</button>
+            <button id="pinCancelBtn" class="btn btn-ghost flex-1" type="button">Cancel</button>
+          </div>
+          <div id="pinError" class="small danger min-h-[1rem]"></div>
+          <div class="small text-gray-400">Default PIN: <strong>2580</strong>. Change in Profile.</div>
+        </form>
       </div>
     </div>
+
+    <!-- DISCLAIMER (first-run after unlock) -->
+    <div id="firstRunDisc" class="fixed inset-0 bg-black/80 hidden-soft flex items-center justify-center p-4">
+      <div class="card max-w-lg">
+        <h3 class="text-lg font-semibold mb-2">Important Safety Notice</h3>
+        <div class="small mb-3">
+          <p>This tool helps with planning and private check-ins. It is <strong>not</strong> a guarantee of safety or emergency response.</p>
+          <p>If you are in immediate danger call local emergency services. Use duress PIN and auto-wipe with caution. Data stored locally can be encrypted but no system is 100% secure.</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="acceptDisclaimer" class="btn btn-primary">I Understand</button>
+          <button id="declineDisclaimer" class="btn btn-ghost">Not Now</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REAL APP -->
+    <section id="realApp" class="hidden-soft mt-3">
+      <div class="card mb-3">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small">Signed in as</div>
+            <div id="profileName" class="font-semibold text-lg">Anonymous</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="text-align:right">
+              <div class="small">Trust</div>
+              <div id="trustBadge" class="font-bold text-2xl">100%</div>
+            </div>
+            <button id="lockBtn" class="btn btn-ghost">Lock</button>
+          </div>
+        </div>
+      </div>
+
+      <nav class="mb-3">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="tabHomeBtn" class="tab-btn active">Home</button>
+          <button id="tabCheckBtn" class="tab-btn">Check-In</button>
+          <button id="tabPlanBtn" class="tab-btn">Safety Plan</button>
+          <button id="tabResBtn" class="tab-btn">Resources</button>
+          <button id="tabProfileBtn" class="tab-btn">Profile</button>
+        </div>
+      </nav>
+
+      <!-- HOME -->
+      <div id="tab-home" class="card">
+        <h3 class="text-lg font-semibold">Welcome</h3>
+        <p class="small mt-2">Hi <span id="homeName">Anonymous</span>. Your trust score is <span id="homeTrust">100</span>%.</p>
+        <div class="mt-3 grid grid-cols-2 gap-2">
+          <button id="goToCheckIn" class="btn btn-primary">Go to Check-In</button>
+          <button id="saveAll" class="btn btn-ghost">Save</button>
+        </div>
+      </div>
+
+      <!-- CHECK-IN -->
+      <div id="tab-checkin" class="card hidden-soft mt-3">
+        <h3 class="text-lg font-semibold mb-2" id="checkTitle">Safety Check-In</h3>
+        <div id="questions" class="space-y-3"></div>
+        <div class="flex gap-2 mt-3">
+          <button id="saveCheckIn" class="btn btn-primary flex-1">Save Check-In</button>
+          <button id="clearCheckIn" class="btn btn-ghost flex-1">Clear</button>
+        </div>
+        <div class="mt-3 flex justify-between">
+          <div>
+            <div class="small">Risk</div>
+            <div id="riskPct" class="font-bold text-2xl text-rose-400">0%</div>
+          </div>
+          <div style="text-align:right">
+            <div class="small">Trust</div>
+            <div id="trustPct" class="font-bold text-2xl text-green-400">100%</div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex gap-2">
+          <button id="demoLoadBtn" class="btn btn-ghost">Load Demo Answers</button>
+          <button id="talkBtn" class="btn btn-ghost">Talk to the App</button>
+        </div>
+
+        <div id="checkFeedback" class="mt-4"></div>
+      </div>
+
+      <!-- PLAN -->
+      <div id="tab-plan" class="card hidden-soft mt-3">
+        <h3 class="text-lg font-semibold">Safety Plans</h3>
+        <div id="planList" class="mt-2 space-y-2"></div>
+        <div class="mt-2 flex gap-2">
+          <button id="btnNewPlan" class="btn btn-primary">New Plan</button>
+          <button id="btnTemplates" class="btn btn-ghost">Templates</button>
+          <button id="btnQuickGenerate" class="btn btn-ghost">Quick Generate</button>
+        </div>
+      </div>
+
+      <!-- RESOURCES -->
+      <div id="tab-resources" class="card hidden-soft mt-3">
+        <h3 class="text-lg font-semibold">My Resources</h3>
+        <form id="resourceForm" class="grid grid-cols-1 gap-2 mt-3 mb-3">
+          <input id="resTitleInput" class="card" placeholder="Title (e.g., Shelter)" />
+          <input id="resDesc" class="card" placeholder="Description" />
+          <input id="resUrl" class="card" placeholder="Link or phone (https:// or 1-800...)" />
+          <div class="flex gap-2">
+            <button id="btnAddResource" class="btn btn-primary flex-1">Add Resource</button>
+            <button id="btnCopyHotline" class="btn btn-ghost flex-1">Copy Hotline</button>
+          </div>
+        </form>
+        <ul id="resourceList" class="space-y-2"></ul>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="tab-profile" class="card hidden-soft mt-3">
+        <h3 class="text-lg font-semibold">Profile & Security</h3>
+        <div class="mt-3 grid gap-2">
+          <label class="small">Display Name</label>
+          <input id="displayNameInput" class="card" placeholder="Your name (optional)" />
+          <button id="saveProfile" class="btn btn-primary">Save Profile</button>
+        </div>
+
+        <hr class="my-4 border-gray-700" />
+
+        <h4 class="font-semibold">Security</h4>
+        <div class="mt-2 grid gap-2">
+          <div class="flex items-center gap-2">
+            <label class="small">Change PIN</label>
+            <input id="profileChangePin" class="card" placeholder="New PIN (min 4)" />
+            <button id="profileChangePinBtn" class="btn btn-ghost">Change</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="small">Set Duress PIN</label>
+            <input id="profileDuressPin" class="card" placeholder="Duress PIN" />
+            <button id="profileSetDuress" class="btn btn-ghost">Set</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="small">Auto-wipe after failed attempts</label>
+            <select id="autoWipeSelect" class="card w-28"><option value="0">Off</option><option value="3">3</option><option value="5">5</option></select>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="small">Shake-to-lock</label>
+            <input id="toggleShake" type="checkbox" />
+          </div>
+        </div>
+
+        <hr class="my-4 border-gray-700" />
+
+        <div class="grid gap-2">
+          <button id="exportJson" class="btn btn-ghost">Export Encrypted JSON</button>
+          <input id="importJsonFile" type="file" class="mt-1" />
+          <button id="importJsonBtn" class="btn btn-ghost">Import Encrypted JSON</button>
+          <button id="clearData" class="btn btn-ghost danger">Clear Data (Wipe)</button>
+        </div>
+
+        <div id="devPanel" class="mt-3 hidden-soft">
+          <h4 class="font-semibold">Developer</h4>
+          <pre id="devState" class="small" style="white-space:pre-wrap;max-height:160px;overflow:auto;background:rgba(255,255,255,.02);padding:.6rem;border-radius:8px;"></pre>
+        </div>
+      </div>
+
+      <footer class="small-note">TimeOut • Privacy-first support • v1.3.5</footer>
+    </section>
   </div>
 
-<script>
-const $=id=>document.getElementById(id);
-let pin="2580", duress="1111", unlocked=false;
-let answers={}, trust=100;
+  <!-- Firebase modular SDK (v11.6.1) -->
+  <script type="module">
+    // Firebase imports (v11.6.1)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// Decoy clock
-let time=1500; function tick(){const m=Math.floor(time/60),s=time%60; $("clock").textContent=`${m}:${s.toString().padStart(2,"0")}`; time--; if(time<0) time=1500;}
-setInterval(tick,1000);
+    // Firebase config (embedded verbatim as provided earlier)
+    const firebaseConfig = {
+      apiKey: "AIzaSyC3Ga-GhV8xQztnbef7ybPFu4BRtLANtuk",
+      authDomain: "unbrokenpath-630b0.firebaseapp.com",
+      projectId: "unbrokenpath-630b0",
+      storageBucket: "unbrokenpath-630b0.firebasestorage.app",
+      messagingSenderId: "147188865145",
+      appId: "1:147188865145:web:ff1f35a732bf89b31e1ca8",
+      measurementId: "G-0Y8G7SS1BV"
+    };
 
-// Long-press unlock
-let pressTimer;
-$("decoyTitle").addEventListener("mousedown",()=>{pressTimer=setTimeout(()=>{$("pinModal").classList.remove("hidden");},800);});
-["mouseup","mouseleave"].forEach(e=>$("decoyTitle").addEventListener(e,()=>clearTimeout(pressTimer)));
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-// PIN submit
-$("pinSubmit").onclick=()=>{
-  const val=$("pinInput").value;
-  if(val===pin){ unlockApp(); }
-  else if(val===duress){ unlockFake(); }
-  else { alert("Wrong PIN"); }
-};
-function unlockApp(){ $("decoy").classList.add("hidden"); $("pinModal").classList.add("hidden"); $("app").classList.remove("hidden"); unlocked=true; }
-function unlockFake(){ alert("Duress mode: fake screen"); $("pinModal").classList.add("hidden"); }
+    // sign in anonymously
+    signInAnonymously(auth).catch((err)=> console.warn("Firebase anon signin failed:", err));
+    let currentUid = null;
+    onAuthStateChanged(auth, user => {
+      if(user){ currentUid = user.uid; console.log("Firebase UID", currentUid); }
+    });
 
-// Quick Exit
-$("quickExit").onclick=()=>location.href="https://google.com";
-// Lock
-$("panic").onclick=$("lockBtn").onclick=()=>{ $("app").classList.add("hidden"); $("decoy").classList.remove("hidden"); unlocked=false; };
+    // export functions for saving mirror data
+    window.saveProfileMirror = async function(profile){
+      if(!currentUid) return;
+      try{
+        const ref = doc(db, "artifacts/timeout-app/public/data/profiles/" + currentUid);
+        await setDoc(ref, { publicName: profile.name || "Anonymous", trustScore: profile.trust || 100, appVersion: "v1.3.5", updatedAt: serverTimestamp() }, { merge: true });
+      }catch(e){ console.warn("profile mirror failed", e); }
+    };
 
-// Tabs
-document.querySelectorAll(".tab-btn").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"));$("tab-"+btn.dataset.tab).classList.remove("hidden");});
+    window.saveCheckinToFirestore = async function(payload){
+      if(!currentUid) return;
+      try{
+        const col = collection(db, "artifacts/timeout-app/private/data/checkins");
+        await addDoc(col, { userId: currentUid, answers: payload.answers, profile: payload.profile, createdAt: serverTimestamp(), appVersion: "v1.3.5" });
+      }catch(e){ console.warn("save checkin failed", e); }
+    };
+  </script>
 
-// Check-In
-const QUESTIONS=[
-{id:"q1",text:"Are you currently safe where you are?"},
-{id:"q2",text:"Has someone threatened you recently?"},
-{id:"q3",text:"Have you experienced physical harm in past month?"},
-{id:"q4",text:"Are you worried about your partner’s access to your phone?"},
-{id:"q5",text:"Is anyone preventing you from leaving?"},
-{id:"q6",text:"Do you have children at risk?"},
-{id:"q7",text:"Do you feel isolated from help?"},
-{id:"q8",text:"Would you like immediate local resources?"}
-];
-function renderQuestions(){ $("questions").innerHTML=""; QUESTIONS.forEach(q=>{const d=document.createElement("div");d.className="card";d.innerHTML=`<div>${q.text}</div>
-  <button class="btn btn-ghost" onclick="setAns('${q.id}','yes')">Yes</button>
-  <button class="btn btn-ghost" onclick="setAns('${q.id}','no')">No</button>`; $("questions").append(d); });}
-renderQuestions();
-function setAns(id,val){answers[id]=val;}
+  <!-- App core (non-module) -->
+  <script>
+  /* ====== App core (single-file) ====== */
 
-// Save + Scores + Feedback
-$("saveCheckIn").onclick=()=>{ showScores(); showFeedback(); };
-$("demoLoadBtn").onclick=()=>{ answers={q1:"no",q2:"yes",q3:"no",q4:"yes",q5:"no",q6:"no",q7:"yes",q8:"yes"}; showScores(); showFeedback(); };
-
-function showScores(){ const risk=Object.values(answers).filter(v=>v==="yes").length*12.5; trust=100-risk; $("scores").innerHTML=`Risk: ${risk}% | Trust: ${trust}%`; }
-function showFeedback(){ 
-  const risk=100-trust, lang="en"; let tier="green"; if(risk>=66) tier="red"; else if(risk>=26) tier="yellow";
-  const FEEDBACK={
-    green:{title:"You're doing okay",body:"Low risk right now. Keep connected and update your plan."},
-    yellow:{title:"Some concerns",body:"There are warning signs. Update your plan, talk to someone you trust."},
-    red:{title:"High risk",body:"Danger signs detected. If in danger, call emergency services."}
+  // Utilities
+  const $ = id => document.getElementById(id);
+  const APP_VER = "v1.3.5";
+  const LS = {
+    meta: "timeout_meta",
+    enc: "timeout_enc",
+    pinCheck: "timeout_pin_check",
+    duressCheck: "timeout_duress_check",
+    profile: "timeout_profile",
+    answers: "timeout_answers",
+    resources: "timeout_resources",
+    plans: "timeout_plans",
+    disclaimer: "timeout_disclaimer_accepted",
+    autoWipe: "timeout_autowipe",
+    schedules: "timeout_schedules"
   };
-  $("checkFeedback").innerHTML=`<div class="card"><div class="font-bold">${FEEDBACK[tier].title}</div><div>${FEEDBACK[tier].body}</div></div>`;
-}
-</script>
+
+  // Default state
+  let unlocked = false;
+  let unlockedPassword = null;
+  let core = {
+    profile: { name: "Anonymous", trust: 100 },
+    answers: {},
+    resources: [],
+    plans: [],
+    settings: { shakeLock: false, autoWipe: 0 }
+  };
+  let failedAttempts = 0;
+
+  // --- Crypto helpers (Web Crypto AES-GCM + PBKDF2) ---
+  function randBytes(len){ const b = new Uint8Array(len); crypto.getRandomValues(b); return b; }
+  function toB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+  function fromB64(s){ const bin = atob(s); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return arr; }
+  async function deriveKey(password, salt, iterations=150000){
+    const enc = new TextEncoder();
+    const pwKey = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name:"PBKDF2", salt, iterations, hash:"SHA-256" }, pwKey, { name:"AES-GCM", length:256 }, false, ["encrypt","decrypt"]);
+  }
+  async function encryptWithPassword(obj, password){
+    const salt = randBytes(16);
+    const iv = randBytes(12);
+    const key = await deriveKey(password, salt);
+    const data = new TextEncoder().encode(JSON.stringify(obj));
+    const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, data);
+    return { header:{ salt: toB64(salt.buffer), iv: toB64(iv.buffer), version:1 }, ciphertext: toB64(ct) };
+  }
+  async function decryptWithPassword(blob, password){
+    const salt = fromB64(blob.header.salt);
+    const iv = fromB64(blob.header.iv);
+    const key = await deriveKey(password, salt);
+    const ct = fromB64(blob.ciphertext);
+    const plain = await crypto.subtle.decrypt({ name:"AES-GCM", iv }, key, ct);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  // PIN check save/verify (store encrypted constant rather than raw PIN)
+  async function createPinCheck(pin){
+    const salt = randBytes(12);
+    const key = await deriveKey(pin, salt, 100000);
+    const iv = randBytes(12);
+    const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, new TextEncoder().encode("timeout-check"));
+    return { salt: toB64(salt.buffer), iv: toB64(iv.buffer), ct: toB64(ct) };
+  }
+  async function verifyPinCheck(pin, stored){
+    try{
+      const salt = fromB64(stored.salt), iv = fromB64(stored.iv);
+      const key = await deriveKey(pin, salt, 100000);
+      const plain = await crypto.subtle.decrypt({ name:"AES-GCM", iv }, key, fromB64(stored.ct));
+      return new TextDecoder().decode(plain) === "timeout-check";
+    }catch(e){ return false; }
+  }
+
+  // Storage wrappers (encrypted core)
+  async function saveEncryptedCore(password){
+    const pkg = await encryptWithPassword(core, password);
+    localStorage.setItem(LS.enc, JSON.stringify(pkg));
+  }
+  function getEncryptedBlob(){ try{ return JSON.parse(localStorage.getItem(LS.enc)); }catch{return null;} }
+  async function loadEncryptedCore(password){
+    const blob = getEncryptedBlob();
+    if(!blob) return null;
+    return decryptWithPassword(blob, password);
+  }
+
+  // Initialize default PIN/enc if missing
+  (async function initDefaults(){
+    if(!localStorage.getItem(LS.pinCheck)){
+      const defaultPin = "2580";
+      const pk = await createPinCheck(defaultPin);
+      localStorage.setItem(LS.pinCheck, JSON.stringify(pk));
+      // create encrypted package with default
+      await saveEncryptedCore(defaultPin).catch(()=>{/*ignore*/});
+    }
+    // duress default
+    if(!localStorage.getItem(LS.duressCheck)){
+      const dk = await createPinCheck("1111");
+      localStorage.setItem(LS.duressCheck, JSON.stringify(dk));
+    }
+  })();
+
+  // --- UI: Decoy flip clock ---
+  const flipHH = $("hh"), flipMM = $("mm"), flipSS = $("ss"), liveDate = $("liveDate");
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  let lastClock = "000000";
+  function updateFlip(group, prev, next){
+    const a = group.children[0], b = group.children[1];
+    if(prev[0] !== next[0]) { a.textContent = next[0]; a.classList.add("tick"); setTimeout(()=>a.classList.remove("tick"),320); }
+    if(prev[1] !== next[1]) { b.textContent = next[1]; b.classList.add("tick"); setTimeout(()=>b.classList.remove("tick"),320); }
+  }
+  function renderClock(){
+    const d = new Date(); const h = pad2(d.getHours()), m = pad2(d.getMinutes()), s = pad2(d.getSeconds());
+    const now = h+m+s, prev = lastClock; lastClock = now;
+    updateFlip(flipHH, prev.slice(0,2), h);
+    updateFlip(flipMM, prev.slice(2,4), m);
+    updateFlip(flipSS, prev.slice(4,6), s);
+    const opts = { weekday:'short', month:'short', day:'numeric' };
+    liveDate.textContent = d.toLocaleDateString(undefined, opts);
+  }
+  setInterval(renderClock,1000); renderClock();
+
+  // Stopwatch
+  let swRunning=false, swStart=0, swElapsed=0, swRAF=null;
+  function fmtMillis(ms){ const cent = Math.floor(ms/10)%100, sec = Math.floor(ms/1000)%60, min = Math.floor(ms/60000)%60, hr=Math.floor(ms/3600000); const hh = hr>0?String(hr).padStart(2,'0')+':':''; return `${hh}${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${String(cent).padStart(2,'0')}`; }
+  function swTick(){ const ms = swElapsed + (swRunning ? (performance.now()-swStart) : 0); $("swDisplay").textContent = fmtMillis(ms); if(swRunning) swRAF = requestAnimationFrame(swTick); }
+  $("swStart").addEventListener("click", ()=>{ if(!swRunning){ swRunning=true; swStart=performance.now(); $("swStart").textContent="Pause"; swTick(); } else { swRunning=false; swElapsed += performance.now()-swStart; cancelAnimationFrame(swRAF); $("swStart").textContent="Start"; }});
+  $("swLap").addEventListener("click", ()=>{ const li = document.createElement("li"); li.textContent = $("swDisplay").textContent; $("swLaps").prepend(li); });
+  $("swReset").addEventListener("click", ()=>{ swRunning=false; cancelAnimationFrame(swRAF); swElapsed=0; $("swDisplay").textContent="00:00.00"; $("swStart").textContent="Start"; $("swLaps").innerHTML=""; });
+
+  // Decoy skin switching
+  function setSkin(s){
+    ["skinClock","skinStopwatch","skinCalc","skinNotes","skinWeather"].forEach(id=>$(id).classList.add("hidden-soft"));
+    if(s==="clock") $("skinClock").classList.remove("hidden-soft");
+    if(s==="stopwatch") $("skinStopwatch").classList.remove("hidden-soft");
+    if(s==="calc") $("skinCalc").classList.remove("hidden-soft");
+    if(s==="notes") $("skinNotes").classList.remove("hidden-soft");
+    if(s==="weather") $("skinWeather").classList.remove("hidden-soft");
+    const m = JSON.parse(localStorage.getItem(LS.meta) || "{}"); m.skin = s; localStorage.setItem(LS.meta, JSON.stringify(m));
+  }
+  $("decoyTabClock").addEventListener("click", ()=> setSkin("clock"));
+  $("decoyTabStopwatch").addEventListener("click", ()=> setSkin("stopwatch"));
+  $("decoySkinCalc").addEventListener("click", ()=> setSkin("calc"));
+  $("decoySkinNotes").addEventListener("click", ()=> setSkin("notes"));
+  $("decoySkinWeather").addEventListener("click", ()=> setSkin("weather"));
+  setSkin((JSON.parse(localStorage.getItem(LS.meta) || "{}").skin) || "clock");
+
+  // Long-press unlocking handler
+  const LP_MS = 800;
+  function armLongPress(el){
+    let t = null;
+    const start = (e)=> { if(e?.button===2) return; t = setTimeout(()=> openPINModal(), LP_MS); };
+    const cancel = ()=> { clearTimeout(t); t=null; };
+    ["pointerdown","touchstart","mousedown"].forEach(ev => el.addEventListener(ev,start));
+    ["pointerup","pointerleave","touchend","touchcancel","mouseup","mouseleave"].forEach(ev => el.addEventListener(ev,cancel));
+  }
+  armLongPress($("decoyTitle"));
+  armLongPress($("flipClock"));
+  armLongPress($("fakeNoteContent"));
+  armLongPress(document.querySelector(".card"));
+
+  // PIN Modal
+  function openPINModal(mode="enter"){ $("pinError").textContent=""; $("pinInput").value=""; $("oldPin").value=$("newPin").value=$("newPin2").value=""; if(mode==="change"){ $("pinChangeFields").classList.remove("hidden-soft"); $("pinModalTitle").textContent = langData[lang].pinChange; } else { $("pinChangeFields").classList.add("hidden-soft"); $("pinModalTitle").textContent = langData[lang].pinEnter; } $("pinForm").dataset.mode = mode; $("pinModal").classList.remove("hidden-soft"); setTimeout(()=> $("pinInput").focus(),50); }
+  function closePINModal(){ $("pinModal").classList.add("hidden-soft"); }
+
+  $("pinCancelBtn").addEventListener("click", closePINModal);
+  $("pinForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const mode = $("pinForm").dataset.mode || "enter";
+    const val = $("pinInput").value.trim();
+    if(mode==="enter"){
+      if(!val){ $("pinError").textContent = langData[lang].errBadPin; return; }
+      const pinCheckRaw = localStorage.getItem(LS.pinCheck);
+      if(!pinCheckRaw){ $("pinError").textContent = "No PIN set"; return; }
+      const pinCheck = JSON.parse(pinCheckRaw);
+      const ok = await verifyPinCheck(val, pinCheck);
+      if(ok){
+        try {
+          const decrypted = await loadEncryptedCore(val);
+          core = decrypted || core;
+          unlocked = true; unlockedPassword = val; failedAttempts = 0; localStorage.removeItem("timeout_failed");
+          closePINModal(); showRealApp();
+          refreshUI();
+        } catch(err){ $("pinError").textContent = langData[lang].errBadPin; recordFailedAttempt(); }
+      } else {
+        const dRaw = localStorage.getItem(LS.duressCheck);
+        if(dRaw){
+          const duress = JSON.parse(dRaw);
+          const isDuress = await verifyPinCheck(val, duress);
+          if(isDuress){
+            closePINModal(); openDuressFake(); return;
+          }
+        }
+        $("pinError").textContent = langData[lang].errBadPin; recordFailedAttempt();
+      }
+    } else { // change
+      const old = $("oldPin").value.trim();
+      const newp = $("newPin").value.trim();
+      const new2 = $("newPin2").value.trim();
+      if(!old || !newp || newp.length < 4){ $("pinError").textContent = langData[lang].errShortPin; return; }
+      if(newp !== new2){ $("pinError").textContent = langData[lang].errNoMatch; return; }
+      const pinCheckRaw = localStorage.getItem(LS.pinCheck);
+      if(!pinCheckRaw){ $("pinError").textContent = "No PIN set"; return; }
+      const ok = await verifyPinCheck(old, JSON.parse(pinCheckRaw));
+      if(!ok){ $("pinError").textContent = langData[lang].errBadPin; return; }
+      const newCheck = await createPinCheck(newp);
+      localStorage.setItem(LS.pinCheck, JSON.stringify(newCheck));
+      if(unlocked && unlockedPassword){
+        // re-encrypt with new password
+        await saveEncryptedCore(newp);
+        unlockedPassword = newp;
+      }
+      closePINModal();
+      alert(langData[lang].pinChangedMsg);
+    }
+  });
+
+  async function recordFailedAttempt(){
+    failedAttempts = Number(localStorage.getItem("timeout_failed") || 0) + 1;
+    localStorage.setItem("timeout_failed", String(failedAttempts));
+    const limit = Number(localStorage.getItem(LS.autoWipe) || 0);
+    if(limit>0 && failedAttempts >= limit){
+      // auto-wipe
+      clearAllLocal();
+      alert("Local data wiped (auto-wipe triggered).");
+      lockToDecoy();
+    }
+  }
+
+  function openDuressFake(){
+    // fake notes area visible; do not reveal real app
+    alert("Duress PIN entered — showing fake notes.");
+    // keep decoy shown; optionally show editable fake note overlay
+  }
+
+  // Lock/unlock UI
+  function showRealApp(){
+    $("decoyView").classList.add("hidden-soft");
+    $("realApp").classList.remove("hidden-soft");
+    setTab('home');
+    // If disclaimer not accepted, show it
+    if(!localStorage.getItem(LS.disclaimer)){
+      $("firstRunDisc").classList.remove("hidden-soft");
+    }
+  }
+  function lockToDecoy(){
+    unlocked=false; unlockedPassword=null;
+    core = core || core; // keep memory clear if needed
+    $("realApp").classList.add("hidden-soft");
+    $("decoyView").classList.remove("hidden-soft");
+    setTab('home');
+  }
+  $("lockBtn").addEventListener("click", lockToDecoy);
+  $("quickExitBtn").addEventListener("click", ()=> location.href = "https://www.google.com/");
+
+  // First-run disclaimer handlers
+  $("acceptDisclaimer").addEventListener("click", ()=> {
+    localStorage.setItem(LS.disclaimer, "1");
+    $("firstRunDisc").classList.add("hidden-soft");
+    $("realApp").classList.remove("hidden-soft");
+  });
+  $("declineDisclaimer").addEventListener("click", ()=> {
+    $("firstRunDisc").classList.add("hidden-soft");
+    lockToDecoy();
+  });
+
+  // Tabs inside real app
+  function setTab(name){
+    const map = { home: $("tabHomeBtn"), checkin: $("tabCheckBtn"), plan: $("tabPlanBtn"), resources: $("tabResBtn"), profile: $("tabProfileBtn") };
+    Object.keys(map).forEach(k=>{ map[k].classList.toggle("active", k===name); });
+    $("tab-home").classList.toggle("hidden-soft", name!=='home');
+    $("tab-checkin").classList.toggle("hidden-soft", name!=='checkin');
+    $("tab-plan").classList.toggle("hidden-soft", name!=='plan');
+    $("tab-resources").classList.toggle("hidden-soft", name!=='resources');
+    $("tab-profile").classList.toggle("hidden-soft", name!=='profile');
+  }
+  $("tabHomeBtn").addEventListener("click", ()=> setTab('home'));
+  $("tabCheckBtn").addEventListener("click", ()=> setTab('checkin'));
+  $("tabPlanBtn").addEventListener("click", ()=> setTab('plan'));
+  $("tabResBtn").addEventListener("click", ()=> setTab('resources'));
+  $("tabProfileBtn").addEventListener("click", ()=> setTab('profile'));
+  $("goToCheckIn").addEventListener("click", ()=> setTab('checkin'));
+
+  // Questions & scoring
+  const QUESTIONS = [
+    {id:"q1",key:"Are you currently safe where you are?", invert:true},
+    {id:"q2",key:"Has someone threatened you recently?"},
+    {id:"q3",key:"Have you experienced physical harm in past month?"},
+    {id:"q4",key:"Are you worried about your partner’s access to your phone?"},
+    {id:"q5",key:"Is anyone preventing you from leaving?"},
+    {id:"q6",key:"Do you have children at risk?"},
+    {id:"q7",key:"Do you feel isolated from help?"},
+    {id:"q8",key:"Would you like immediate local resources?"}
+  ];
+  const langData = {
+    en:{
+      pinEnter:"Enter PIN", pinChange:"Change PIN", errBadPin:"Incorrect PIN.", errShortPin:"New PIN must be at least 4 characters.", errNoMatch:"PINs do not match.", pinChangedMsg:"PIN changed successfully."
+    },
+    es:{
+      pinEnter:"Introduce el PIN", pinChange:"Cambiar PIN", errBadPin:"PIN incorrecto.", errShortPin:"El PIN nuevo debe tener al menos 4 caracteres.", errNoMatch:"Los PIN no coinciden.", pinChangedMsg:"PIN cambiado con éxito."
+    }
+  };
+  let lang = localStorage.getItem("timeout_lang") || "en";
+  function applyLang(){
+    $("langBtn").textContent = (lang==="en" ? "EN" : "ES");
+    $("hdrSub").textContent = (lang==="en" ? "Clock" : "Reloj");
+    $("pinModalTitle").textContent = (lang==="en" ? langData.en.pinEnter : langData.es.pinEnter);
+    buildQuestions();
+    renderResources();
+    renderPlans();
+    refreshUI();
+  }
+  $("langBtn").addEventListener("click", ()=> { lang = (lang==="en"?"es":"en"); localStorage.setItem("timeout_lang", lang); applyLang(); });
+
+  function buildQuestions(){
+    const box = $("questions"); box.innerHTML = "";
+    QUESTIONS.forEach((q,i)=>{
+      const row = document.createElement("div"); row.className = "card";
+      const label = document.createElement("div"); label.className = "font-semibold small mb-2"; label.textContent = `${i+1}. ${q.key}`;
+      const wrap = document.createElement("div"); wrap.style.display="flex"; wrap.style.gap="8px";
+      const yes = document.createElement("button"); yes.className="btn btn-ghost flex-1"; yes.textContent = (lang==="en"?"Yes":"Sí");
+      const no = document.createElement("button"); no.className="btn btn-ghost flex-1"; no.textContent = (lang==="en"?"No":"No");
+      yes.addEventListener("click", ()=>{ core.answers[q.id]="yes"; mark(); updateScores(); saveCoreEncryptedIfUnlocked(); });
+      no.addEventListener("click", ()=>{ core.answers[q.id]="no"; mark(); updateScores(); saveCoreEncryptedIfUnlocked(); });
+      function mark(){ yes.classList.toggle("bg-green-600", core.answers[q.id]==="yes"); yes.classList.toggle("text-white", core.answers[q.id]==="yes"); no.classList.toggle("bg-rose-600", core.answers[q.id]==="no"); no.classList.toggle("text-white", core.answers[q.id]==="no"); }
+      if(core.answers[q.id]) mark();
+      row.appendChild(label); wrap.appendChild(yes); wrap.appendChild(no); row.appendChild(wrap); box.appendChild(row);
+    });
+  }
+
+  function computeRiskTrust(){
+    let risky = 0;
+    QUESTIONS.forEach(q=>{
+      const a = (core.answers[q.id]||"").toLowerCase();
+      if(!a) return;
+      if(q.invert){ if(a==="no") risky++; } else { if(a==="yes") risky++; }
+    });
+    const risk = Math.round((risky/QUESTIONS.length)*100);
+    const trust = 100 - risk;
+    return { risk, trust };
+  }
+
+  const FEEDBACK = {
+    en:{
+      green:{title:"Small concerns — you’re doing okay", body:"Your answers show low immediate risk. Keep doing what’s working: stay connected to trusted people, update your safety plan occasionally, and use these resources to stay prepared. If things change, do another check-in."},
+      yellow:{title:"Some concerns — consider extra steps", body:"Your responses indicate some concerning signs. It may help to update your safety plan, tell a trusted person, or book a call with a support worker. Below are practical steps you can take right now."},
+      red:{title:"High risk — prioritize safety now", body:"Your answers suggest you might be at serious risk. If you are in immediate danger, call local emergency services now. If you cannot call, consider sending your encrypted summary to someone you trust, or use a shelter hotline."}
+    },
+    es:{
+      green:{title:"Pocas preocupaciones — estás bien por ahora", body:"Tus respuestas muestran bajo riesgo inmediato. Mantente conectada/o con personas de confianza, actualiza tu plan de seguridad y usa estos recursos para estar preparada/o. Si cambia la situación, vuelve a hacer la revisión."},
+      yellow:{title:"Algunas preocupaciones — considera pasos extra", body:"Tus respuestas indican señales preocupantes. Podría ayudar actualizar tu plan de seguridad, decirle a alguien de confianza o pedir una cita con un/a trabajador/a de apoyo. A continuación verás pasos prácticos que puedes tomar ahora."},
+      red:{title:"Alto riesgo — prioriza tu seguridad", body:"Tus respuestas sugieren que podrías estar en riesgo serio. Si estás en peligro inmediato, llama a los servicios de emergencia locales. Si no puedes llamar, considera enviar tu resumen cifrado a alguien de confianza o contactar una línea de refugio."}
+    }
+  };
+
+  const Q_PROMPTS = {
+    en:{
+      q1_yes:"Good — keep any escape routes clear and know where you’d go if you needed to leave quickly.",
+      q1_no:"You may be at immediate risk. Consider a quick safety step (pack a bag, move to a public place, contact a trusted person).",
+      q2_yes:"Threats increase risk. Consider writing down dates/times and safe documentation.",
+      q2_no:"That’s a positive sign. Keep monitoring and note anything that changes.",
+      q3_yes:"I’m sorry. If you need medical care or to document injuries for legal help, get to a safe place and seek a trusted clinic or advocate.",
+      q3_no:"Good. Keep safety steps in your plan to reduce future risk.",
+      q4_yes:"If your phone can be checked, avoid keeping sensitive messages or photos. Use quick-wipe and export features.",
+      q4_no:"That’s helpful — consider protective steps like screen lock.",
+      q5_yes:"This is a serious control behavior. Plan discreet exit options (trusted contacts, transport methods, where to go).",
+      q5_no:"Good — keep plans ready in case the situation changes.",
+      q6_yes:"Safety planning should include children: meeting places, who will care for them, and paperwork.",
+      q6_no:"Focus on your own evacuation and safety — still keep a simple plan ready.",
+      q7_yes:"Isolation increases danger. Reach out to one trusted contact or consider local support groups or hotlines.",
+      q7_no:"Good — maintain those connections and let someone know how they can support you.",
+      q8_yes:"Open the resources tab. Use 'copy' rather than direct calls if call logs are a concern.",
+      q8_no:"Okay — the resources tab stays available whenever you want it."
+    },
+    es:{
+      q1_yes:"Bien — mantén vías de salida libres y sabe a dónde irías si tuvieras que irte rápido.",
+      q1_no:"Podrías estar en peligro inmediato. Considera un paso rápido (preparar una mochila, ir a un lugar público, contactar a una persona de confianza).",
+      q2_yes:"Las amenazas aumentan el riesgo. Anota fechas/horas y detalles en tu plan privado.",
+      q2_no:"Es una buena señal. Sigue observando y anota cualquier cambio.",
+      q3_yes:"Lo siento. Si necesitas atención médica o documentar lesiones para ayuda legal, busca un lugar seguro y acude a una clínica o defensor/a.",
+      q3_no:"Bien. Mantén pasos de seguridad en tu plan.",
+      q4_yes:"Si revisan tu teléfono, evita guardar mensajes o fotos sensibles. Usa el borrado rápido y las exportaciones cifradas.",
+      q4_no:"Eso ayuda — considera tener bloqueo de pantalla.",
+      q5_yes:"Esto es una conducta de control grave. Planea salidas discretas y contactos de confianza.",
+      q5_no:"Bien. Mantén planes listos por si la situación cambia.",
+      q6_yes:"Incluye a los niños en el plan: lugares de encuentro y cuidadores de confianza.",
+      q6_no:"Enfócate en tu propia salida y seguridad — aun así mantiene un plan simple listo.",
+      q7_yes:"El aislamiento aumenta el peligro. Contacta a una persona de confianza o busca grupos de apoyo locales.",
+      q7_no:"Bien — mantén esas conexiones.",
+      q8_yes:"Abre la pestaña de recursos. Usa 'copiar' si te preocupa el historial de llamadas.",
+      q8_no:"De acuerdo — la pestaña de recursos estará disponible cuando la necesites."
+    }
+  };
+
+  function updateScoresAndFeedback(){
+    const { risk, trust } = computeRiskTrust();
+    $("riskPct").textContent = `${risk}%`;
+    $("trustPct").textContent = `${trust}%`;
+    $("trustBadge").textContent = `${trust}%`;
+    core.profile.trust = trust;
+    saveCoreLocallyMetadata();
+    renderFeedback();
+  }
+
+  function renderFeedback(){
+    const { risk } = computeRiskTrust();
+    let tier = "green";
+    if(risk >= 66) tier = "red";
+    else if(risk >= 26) tier = "yellow";
+    const f = FEEDBACK[lang][tier];
+    const fb = $("checkFeedback"); fb.innerHTML = "";
+    const wrap = document.createElement("div"); wrap.className = "card";
+    const title = document.createElement("div"); title.className = "font-semibold"; title.textContent = f.title;
+    const body = document.createElement("div"); body.className = "small mt-2"; body.textContent = f.body;
+    wrap.appendChild(title); wrap.appendChild(body);
+
+    const actions = document.createElement("div"); actions.style.marginTop = "10px"; actions.style.display = "flex"; actions.style.gap = "8px";
+    const copyHotline = document.createElement("button"); copyHotline.className = "btn btn-ghost"; copyHotline.textContent = (lang==="en"?"Copy local hotline":"Copiar línea local");
+    copyHotline.addEventListener("click", ()=> { navigator.clipboard?.writeText("1-800-555-1212"); alert((lang==="en"?"Number copied: ":"Número copiado: ") + "1-800-555-1212"); });
+    const quickPlanBtn = document.createElement("button"); quickPlanBtn.className = "btn btn-primary"; quickPlanBtn.textContent = (lang==="en"?"Create quick plan":"Crear plan rápido");
+    quickPlanBtn.addEventListener("click", createQuickPlanFromAnswers);
+    const exportBtn = document.createElement("button"); exportBtn.className = "btn btn-ghost"; exportBtn.textContent = (lang==="en"?"Export summary":"Exportar resumen");
+    exportBtn.addEventListener("click", ()=> exportEncryptedSnapshotPrompt());
+    if(tier==="green"){ actions.append(copyHotline); actions.append(exportBtn); }
+    else if(tier==="yellow"){ actions.append(quickPlanBtn); actions.append(copyHotline); }
+    else { actions.append(copyHotline); actions.append(exportBtn); }
+
+    wrap.appendChild(actions);
+
+    // per-question micro prompts
+    const promptsWrap = document.createElement("div"); promptsWrap.style.marginTop = "12px";
+    QUESTIONS.forEach((q)=>{
+      const a = core.answers[q.id];
+      if(!a) return;
+      const row = document.createElement("div"); row.className = "p-2 card"; row.style.marginBottom = "8px";
+      const qEl = document.createElement("div"); qEl.className = "font-semibold small"; qEl.textContent = q.key;
+      const pEl = document.createElement("div"); pEl.className = "small"; pEl.style.marginTop = "6px";
+      const key = `${q.id}_${a==="yes"?"yes":"no"}`;
+      pEl.textContent = Q_PROMPTS[lang][key] || "";
+      row.appendChild(qEl); row.appendChild(pEl); promptsWrap.appendChild(row);
+    });
+    if(Object.keys(core.answers||{}).length===0){
+      const empty = document.createElement("div"); empty.className="small"; empty.textContent = (lang==="en"?"No answers yet.":"Aún no hay respuestas.");
+      promptsWrap.appendChild(empty);
+    }
+
+    fb.appendChild(wrap); fb.appendChild(promptsWrap);
+  }
+
+  // Demo loader
+  $("demoLoadBtn").addEventListener("click", ()=>{
+    core.answers = { q1:"no", q2:"yes", q3:"no", q4:"yes", q5:"no", q6:"no", q7:"yes", q8:"yes" };
+    buildQuestions();
+    updateScoresAndFeedback();
+    setTab('checkin');
+  });
+
+  // Quick plan generator
+  function createQuickPlanFromAnswers(){
+    const plan = {
+      id: "plan_"+Date.now(),
+      title: (lang==="en"?"Quick Plan":"Plan Rápido")+" "+new Date().toLocaleString(),
+      summary: "Auto-generated quick plan",
+      items: {
+        safePlace: (core.answers.q1==="no") ? (lang==="en"?"Public place / friend's home": "Lugar público / casa de confianza") : (lang==="en"?"Home — keep exits clear":"Casa — mantén salidas claras"),
+        contact: (lang==="en"?"Trusted contact: [name/number]":"Contacto de confianza: [nombre/número]"),
+        bag: (lang==="en"?"ID, cash, keys, phone charger":"ID, dinero, llaves, cargador")
+      }
+    };
+    core.plans = core.plans || [];
+    core.plans.push(plan);
+    saveCoreEncryptedIfUnlocked();
+    renderPlans();
+    alert(lang==="en"?"Quick plan created.":"Plan rápido creado.");
+  }
+
+  // Plans UI
+  function renderPlans(){
+    const list = $("planList"); list.innerHTML = "";
+    (core.plans || []).forEach((p,i)=>{
+      const el = document.createElement("div"); el.className = "p-3 card flex items-center justify-between gap-2";
+      const txt = document.createElement("div"); txt.innerHTML = `<div class="font-semibold">${p.title}</div><div class="small">${p.summary||""}</div>`;
+      const actions = document.createElement("div");
+      const open = document.createElement("button"); open.className = "btn btn-ghost"; open.textContent = (lang==="en"?"Open":"Abrir"); open.addEventListener("click", ()=> openPlanEditor(i));
+      const del = document.createElement("button"); del.className = "btn btn-ghost"; del.textContent = (lang==="en"?"Delete":"Eliminar"); del.addEventListener("click", ()=> { core.plans.splice(i,1); saveCoreEncryptedIfUnlocked(); renderPlans(); });
+      actions.append(open, del);
+      el.append(txt, actions); list.appendChild(el);
+    });
+  }
+  function openPlanEditor(index){
+    const p = core.plans[index];
+    const title = prompt((lang==="en"?"Plan title:":"Título del plan:"), p.title||"");
+    if(title===null) return;
+    const summary = prompt((lang==="en"?"Short summary:":"Resumen corto:"), p.summary||"");
+    core.plans[index] = { ...p, title, summary };
+    saveCoreEncryptedIfUnlocked();
+    renderPlans();
+  }
+  $("btnNewPlan").addEventListener("click", ()=> {
+    const title = prompt((lang==="en"?"New plan title:":"Título del plan:"));
+    if(!title) return;
+    core.plans = core.plans || [];
+    core.plans.push({ id:"plan_"+Date.now(), title, summary:"", items:{} });
+    saveCoreEncryptedIfUnlocked();
+    renderPlans();
+  });
+  $("btnTemplates").addEventListener("click", ()=>{
+    const tplList = [
+      { id:"tpl1", title:"Grab-and-Go Bag", fields:["List items to pack","Hidden location for bag"] },
+      { id:"tpl2", title:"Trusted Contacts", fields:["Name & phone","Alternate contact"] },
+      { id:"tpl3", title:"Safe Exit Plan", fields:["Nearest safe place","Transport options"] }
+    ];
+    let msg = tplList.map((t,i)=>`${i+1}. ${t.title}`).join("\n");
+    const sel = prompt((lang==="en"?"Templates:\n":"Plantillas:\n") + msg + "\n" + (lang==="en"?"Enter number to use:":"Ingrese número para usar:"));
+    const n = Number(sel);
+    if(n>0 && n<=tplList.length){
+      const tpl = tplList[n-1];
+      const pTitle = prompt((lang==="en"?"Plan title:":"Título del plan:"), tpl.title);
+      if(!pTitle) return;
+      core.plans = core.plans || [];
+      core.plans.push({ id:"plan_"+Date.now(), title: pTitle, summary: tpl.fields.join(", "), items:{} });
+      saveCoreEncryptedIfUnlocked();
+      renderPlans();
+    }
+  });
+  $("btnQuickGenerate").addEventListener("click", createQuickPlanFromAnswers);
+
+  // Resources CRUD
+  function renderResources(){
+    const list = $("resourceList"); list.innerHTML = "";
+    (core.resources || []).forEach((r,i)=>{
+      const li = document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
+      const txt = document.createElement("div"); const t = document.createElement("div"); t.className="font-semibold"; t.textContent = r.title||"Untitled";
+      const d = document.createElement("div"); d.className="small text-gray-300"; d.textContent = r.desc||"";
+      const u = document.createElement("a"); u.className="text-blue-400 underline small"; u.href = r.url||"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent = r.url||"";
+      txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
+      const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent = (lang==="en"?"Delete":"Eliminar");
+      del.addEventListener("click", ()=> { core.resources.splice(i,1); saveCoreEncryptedIfUnlocked(); renderResources(); });
+      li.append(txt,del); list.appendChild(li);
+    });
+  }
+  $("btnAddResource").addEventListener("click", (e)=>{
+    e.preventDefault();
+    const it = { title:$("resTitleInput").value.trim(), desc:$("resDesc").value.trim(), url:$("resUrl").value.trim() };
+    if(!it.title) { alert((lang==="en"?"Title required":"Título requerido")); return; }
+    core.resources = core.resources || [];
+    core.resources.push(it);
+    saveCoreEncryptedIfUnlocked(); renderResources();
+    $("resTitleInput").value=$("resDesc").value=$("resUrl").value="";
+  });
+  $("btnCopyHotline").addEventListener("click", ()=> { navigator.clipboard?.writeText("1-800-555-1212"); alert((lang==="en"?"Copied example hotline":"Línea de ejemplo copiada")+": 1-800-555-1212"); });
+
+  // Export / Import (encrypted)
+  async function exportEncryptedSnapshotPrompt(){
+    if(!unlockedPassword){ alert((lang==="en"?"Unlock the app to export securely.":"Desbloquea la app para exportar de forma segura.")); return; }
+    const pass = prompt((lang==="en"?"Enter export passphrase (required to import):":"Introduce una contraseña para exportar (se requerirá para importar):"));
+    if(!pass) return;
+    const snapshot = { profile: core.profile, answers: core.answers, resources: core.resources, plans: core.plans, version: APP_VER };
+    const blob = await encryptWithPassword(snapshot, pass);
+    const file = new Blob([JSON.stringify(blob)], { type: "application/json" });
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a"); a.href = url; a.download = "timeout-export.json"; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1000);
+  }
+  $("exportJson").addEventListener("click", exportEncryptedSnapshotPrompt);
+
+  $("importJsonBtn").addEventListener("click", async ()=>{
+    const f = $("importJsonFile").files[0];
+    if(!f) { alert((lang==="en"?"Select a file first.":"Selecciona un archivo primero.")); return; }
+    const txt = await f.text();
+    try{
+      const blob = JSON.parse(txt);
+      const pass = prompt((lang==="en"?"Enter import passphrase:":"Introduce la contraseña para importar:"));
+      if(!pass) return;
+      const data = await decryptWithPassword(blob, pass);
+      const choice = confirm((lang==="en"?"Replace local data? Cancel to merge.":"¿Reemplazar datos locales? Cancelar para fusionar."));
+      if(choice) core = data;
+      else {
+        core = Object.assign(core, data);
+        core.resources = [...(core.resources||[]), ...(data.resources||[])];
+        core.plans = [...(core.plans||[]), ...(data.plans||[])];
+      }
+      saveCoreEncryptedIfUnlocked();
+      buildQuestions(); renderResources(); renderPlans(); updateScoresAndFeedback();
+      alert((lang==="en"?"Import successful.":"Importación exitosa."));
+    }catch(e){ alert((lang==="en"?"Import failed or wrong passphrase.":"Importación fallida o contraseña incorrecta.")); }
+  });
+
+  // Clear data (wipe)
+  function clearAllLocal(){
+    localStorage.removeItem(LS.enc);
+    localStorage.removeItem(LS.pinCheck);
+    localStorage.removeItem(LS.duressCheck);
+    localStorage.removeItem(LS.profile);
+    localStorage.removeItem(LS.answers);
+    localStorage.removeItem(LS.resources);
+    localStorage.removeItem(LS.plans);
+    localStorage.removeItem(LS.disclaimer);
+    localStorage.removeItem(LS.autoWipe);
+    localStorage.removeItem("timeout_failed");
+    core = { profile:{name:"Anonymous", trust:100}, answers:{}, resources:[], plans:[], settings:{} };
+    unlocked = false; unlockedPassword = null;
+  }
+  $("clearData").addEventListener("click", ()=> {
+    if(confirm((lang==="en"?"Clear ALL local data? This is irreversible.":"¿Borrar TODOS los datos locales? Esto es irreversible."))){
+      clearAllLocal();
+      lockToDecoy();
+      alert((lang==="en"?"Local data cleared.":"Datos locales borrados."));
+    }
+  });
+
+  // Save core to encrypted local store if unlocked
+  async function saveCoreEncryptedIfUnlocked(){
+    if(!unlocked || !unlockedPassword) return;
+    await saveEncryptedCore(unlockedPassword);
+    saveCoreLocallyMetadata();
+    // mirror to Firestore if available
+    try{ if(window.saveProfileMirror) saveProfileMirror(core.profile); } catch(e){}
+  }
+  // small non-sensitive metadata save
+  function saveCoreLocallyMetadata(){
+    localStorage.setItem(LS.profile, JSON.stringify(core.profile||{}));
+    localStorage.setItem(LS.answers, JSON.stringify(core.answers||{}));
+    localStorage.setItem(LS.resources, JSON.stringify(core.resources||[]));
+    localStorage.setItem(LS.plans, JSON.stringify(core.plans||[]));
+  }
+
+  // Load local metadata at startup (if any)
+  (function loadLocalMeta(){
+    try{ const p = JSON.parse(localStorage.getItem(LS.profile)||"null"); if(p) core.profile = p; }catch{}
+    try{ core.answers = JSON.parse(localStorage.getItem(LS.answers) || "{}"); }catch{}
+    try{ core.resources = JSON.parse(localStorage.getItem(LS.resources) || "[]"); }catch{}
+    try{ core.plans = JSON.parse(localStorage.getItem(LS.plans) || "[]"); }catch{}
+    core.settings = core.settings || {};
+    core.settings.shakeLock = localStorage.getItem("shakeLock") === "1";
+    core.settings.autoWipe = Number(localStorage.getItem(LS.autoWipe) || 0);
+  })();
+
+  // render resources/plans from core
+  function renderResources(){ renderResourcesUI(); }
+  function renderResourcesUI(){
+    const list = $("resourceList"); list.innerHTML = "";
+    (core.resources || []).forEach((r,i)=>{
+      const li = document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
+      const txt = document.createElement("div"); const t = document.createElement("div"); t.className="font-semibold"; t.textContent = r.title||"Untitled";
+      const d = document.createElement("div"); d.className="small text-gray-300"; d.textContent = r.desc||"";
+      const u = document.createElement("a"); u.className="text-blue-400 underline small"; u.href = r.url||"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent = r.url||"";
+      txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
+      const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent = (lang==="en"?"Delete":"Eliminar");
+      del.addEventListener("click", ()=> { core.resources.splice(i,1); saveCoreEncryptedIfUnlocked(); renderResourcesUI(); });
+      li.append(txt,del); list.appendChild(li);
+    });
+  }
+
+  function renderPlans(){ const list = $("planList"); list.innerHTML = ""; (core.plans||[]).forEach((p,i)=>{ const el = document.createElement("div"); el.className="p-3 card flex items-center justify-between gap-2"; const txt = document.createElement("div"); txt.innerHTML = `<div class="font-semibold">${p.title||"Plan"}</div><div class="small">${p.summary||""}</div>`; const actions = document.createElement("div"); const open = document.createElement("button"); open.className="btn btn-ghost"; open.textContent=(lang==="en"?"Open":"Abrir"); open.addEventListener("click", ()=> openPlanEditor(i)); const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent=(lang==="en"?"Delete":"Eliminar"); del.addEventListener("click", ()=>{ core.plans.splice(i,1); saveCoreEncryptedIfUnlocked(); renderPlans(); }); actions.append(open,del); el.append(txt,actions); list.appendChild(el); }); }
+
+  // Hook up plan/resource UI events
+  $("btnAddResource")?.addEventListener("click",(e)=>{ e.preventDefault(); const it = { title: $("resTitleInput").value.trim(), desc:$("resDesc").value.trim(), url:$("resUrl").value.trim() }; if(!it.title){ alert((lang==="en"?"Title required":"Se requiere título")); return; } core.resources.push(it); saveCoreEncryptedIfUnlocked(); renderResourcesUI(); $("resTitleInput").value=$("resDesc").value=$("resUrl").value=""; });
+
+  // Save profile
+  $("saveProfile")?.addEventListener("click", ()=>{ core.profile.name = $("displayNameInput").value.trim() || "Anonymous"; saveCoreEncryptedIfUnlocked(); refreshUI(); alert((lang==="en"?"Profile saved.":"Perfil guardado.")); });
+
+  // Change PIN and set duress
+  $("profileChangePinBtn")?.addEventListener("click", async ()=> {
+    const np = $("profileChangePin").value.trim();
+    if(!np || np.length < 4){ alert((lang==="en"?"PIN must be at least 4 digits.":"El PIN debe tener al menos 4 dígitos.")); return; }
+    const chk = await createPinCheck(np);
+    localStorage.setItem(LS.pinCheck, JSON.stringify(chk));
+    if(unlockedPassword) { await saveEncryptedCore(np); unlockedPassword = np; }
+    $("profileChangePin").value = "";
+    alert((lang==="en"?"PIN changed.":"PIN cambiado."));
+  });
+  $("profileSetDuress")?.addEventListener("click", async ()=>{
+    const dp = $("profileDuressPin").value.trim();
+    if(!dp){ alert((lang==="en"?"Enter duress PIN.":"Introduce PIN de coacción.")); return; }
+    const chk = await createPinCheck(dp);
+    localStorage.setItem(LS.duressCheck, JSON.stringify(chk));
+    $("profileDuressPin").value = "";
+    alert((lang==="en"?"Duress PIN set.":"PIN de coacción establecido."));
+  });
+
+  // Auto-wipe select
+  $("autoWipeSelect")?.addEventListener("change", ()=> { localStorage.setItem(LS.autoWipe, $("autoWipeSelect").value); });
+
+  // Shake to lock
+  let lastShake = 0;
+  if(window.DeviceMotionEvent){
+    window.addEventListener('devicemotion', (e)=>{
+      if(!($("toggleShake")?.checked)) return;
+      const acc = e.accelerationIncludingGravity;
+      if(!acc) return;
+      const s = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+      if(s > 30){ const now = Date.now(); if(now - lastShake > 1500){ lastShake = now; lockToDecoy(); } }
+    });
+  }
+
+  // Visibility change auto-hide
+  document.addEventListener("visibilitychange", ()=> { if(document.hidden && unlocked) lockToDecoy(); });
+
+  // Dev panel toggle
+  $("toggleDev")?.addEventListener("change", ()=> { if($("toggleDev").checked) $("devPanel").classList.remove("hidden-soft"); else $("devPanel").classList.add("hidden-soft"); });
+
+  // Debug state printing
+  function printDevState(){ $("devState").textContent = JSON.stringify({ core, meta: JSON.parse(localStorage.getItem(LS.meta)||"{}"), enc: !!getEncryptedBlob() }, null, 2); }
+
+  // Expose debug helper
+  window.__timeout = {
+    unlockWith: async (p)=> {
+      const ok = await verifyPinCheck(p, JSON.parse(localStorage.getItem(LS.pinCheck)||"null"));
+      if(ok){ const data = await loadEncryptedCore(p); core = data||core; unlocked = true; unlockedPassword = p; refreshUI(); showRealApp(); return true; } return false;
+    }
+  };
+
+  // Save & mirror check-in
+  $("saveCheckIn").addEventListener("click", async ()=>{
+    saveCoreEncryptedIfUnlocked();
+    updateScoresAndFeedback();
+    try{
+      if(window.saveCheckinToFirestore){
+        await window.saveCheckinToFirestore({ answers: core.answers, profile: core.profile });
+      }
+    }catch(e){}
+    alert((lang==="en"?"Check-in saved.":"Revisión guardada."));
+  });
+
+  // Export encrypted snapshot button in profile is handled above; import handled above.
+
+  // Load demo answers already wired
+
+  // Build questions and initial UI
+  function buildQuestions(){
+    const box = $("questions"); box.innerHTML = "";
+    QUESTIONS.forEach((q,i)=>{
+      const row = document.createElement("div"); row.className="card";
+      const label = document.createElement("div"); label.className="font-semibold small mb-2"; label.textContent = `${i+1}. ${q.key}`;
+      const wrap = document.createElement("div"); wrap.style.display="flex"; wrap.style.gap="8px";
+      const yes = document.createElement("button"); yes.className="btn btn-ghost flex-1"; yes.textContent = (lang==="en"?"Yes":"Sí");
+      const no = document.createElement("button"); no.className="btn btn-ghost flex-1"; no.textContent = "No";
+      yes.addEventListener("click", ()=>{ core.answers[q.id]="yes"; mark(q); saveCoreEncryptedIfUnlocked(); updateScoresAndFeedback(); });
+      no.addEventListener("click", ()=>{ core.answers[q.id]="no"; mark(q); saveCoreEncryptedIfUnlocked(); updateScoresAndFeedback(); });
+      function mark(q){ yes.classList.toggle("bg-green-600", core.answers[q.id]==="yes"); yes.classList.toggle("text-white", core.answers[q.id]==="yes"); no.classList.toggle("bg-rose-600", core.answers[q.id]==="no"); no.classList.toggle("text-white", core.answers[q.id]==="no"); }
+      if(core.answers[q.id]) mark(q);
+      row.appendChild(label); wrap.appendChild(yes); wrap.appendChild(no); row.appendChild(wrap); box.appendChild(row);
+    });
+  }
+
+  // UI refresh
+  function refreshUI(){
+    $("profileName").textContent = core.profile.name || "Anonymous";
+    $("homeName").textContent = core.profile.name || "Anonymous";
+    $("homeTrust").textContent = core.profile.trust || 100;
+    $("displayNameInput") && ($("displayNameInput").value = core.profile.name || "");
+    buildQuestions();
+    renderResourcesUI();
+    renderPlans();
+    updateScoresAndFeedback();
+    printDevState();
+  }
+
+  // Save core encrypted if unlocked helper reused earlier
+  async function saveEncryptedCore(password){
+    const pkg = await encryptWithPassword(core, password);
+    localStorage.setItem(LS.enc, JSON.stringify(pkg));
+  }
+
+  // Save small metadata
+  function saveCoreLocally(){ localStorage.setItem(LS.profile, JSON.stringify(core.profile||{})); localStorage.setItem(LS.answers, JSON.stringify(core.answers||{})); localStorage.setItem(LS.resources, JSON.stringify(core.resources||[])); localStorage.setItem(LS.plans, JSON.stringify(core.plans||[])); }
+
+  // On init, load some stuff
+  (async function init(){
+    // load meta (skin)
+    try{ const meta = JSON.parse(localStorage.getItem(LS.meta)||"{}"); if(meta.skin) setSkin(meta.skin); }catch{}
+    // load profile/answers/resources/plans (unencrypted metadata)
+    try{ core.profile = JSON.parse(localStorage.getItem(LS.profile)) || core.profile; }catch{}
+    try{ core.answers = JSON.parse(localStorage.getItem(LS.answers)) || core.answers; }catch{}
+    try{ core.resources = JSON.parse(localStorage.getItem(LS.resources)) || core.resources; }catch{}
+    try{ core.plans = JSON.parse(localStorage.getItem(LS.plans)) || core.plans; }catch{}
+    // apply lang
+    lang = localStorage.getItem("timeout_lang")||"en"; applyLang();
+    // wire up simple UI events
+    $("saveAll").addEventListener("click", ()=> { if(unlocked) saveCoreEncryptedIfUnlocked(); else alert((lang==="en"?"Unlock to save securely.":"Desbloquea para guardar de forma segura.")); });
+    $("clearCheckIn").addEventListener("click", ()=>{ core.answers={}; saveCoreEncryptedIfUnlocked(); buildQuestions(); updateScoresAndFeedback(); $("checkFeedback").innerHTML=""; });
+    $("btnCopyHotline").addEventListener("click", ()=> { navigator.clipboard?.writeText("1-800-555-1212"); alert((lang==="en"?"Copied example hotline":"Línea de ejemplo copiada")+": 1-800-555-1212"); });
+    $("saveProfile") && $("saveProfile").addEventListener("click", ()=> { core.profile.name = $("displayNameInput").value.trim() || "Anonymous"; saveCoreEncryptedIfUnlocked(); refreshUI(); });
+    $("profileChangePinBtn") && $("profileChangePinBtn").addEventListener("click", async ()=> { const np = $("profileChangePin").value.trim(); if(!np||np.length<4){ alert((lang==="en"?"PIN must be at least 4 digits.":"El PIN debe tener al menos 4 dígitos.")); return; } const chk = await createPinCheck(np); localStorage.setItem(LS.pinCheck, JSON.stringify(chk)); if(unlockedPassword) { await saveEncryptedCore(np); unlockedPassword = np; } $("profileChangePin").value=""; alert((lang==="en"?"PIN changed.":"PIN cambiado."));});
+    $("profileSetDuress") && $("profileSetDuress").addEventListener("click", async ()=> { const dp = $("profileDuressPin").value.trim(); if(!dp){ alert((lang==="en"?"Enter duress PIN.":"Introduce PIN de coacción.")); return; } const chk = await createPinCheck(dp); localStorage.setItem(LS.duressCheck, JSON.stringify(chk)); $("profileDuressPin").value=""; alert((lang==="en"?"Duress PIN set.":"PIN de coacción establecido.")); });
+    $("btnAddResource") && $("btnAddResource").addEventListener("click", (e)=>{ e.preventDefault(); const it={ title:$("resTitleInput").value.trim(), desc:$("resDesc").value.trim(), url:$("resUrl").value.trim() }; if(!it.title){ alert((lang==="en"?"Title required":"Título requerido")); return; } core.resources = core.resources||[]; core.resources.push(it); saveCoreEncryptedIfUnlocked(); renderResourcesUI(); $("resTitleInput").value=$("resDesc").value=$("resUrl").value=""; });
+    renderResourcesUI(); renderPlans(); buildQuestions(); updateScoresAndFeedback();
+  })();
+
+  // Save check-in to Firestore mirror (attempt)
+  async function mirrorProfileAndCheckin(){
+    try{
+      if(window.saveProfileMirror) await window.saveProfileMirror(core.profile);
+      if(window.saveCheckinToFirestore) await window.saveCheckinToFirestore({ answers: core.answers, profile: core.profile });
+    }catch(e){ /* ignore */ }
+  }
+
+  // When saving checkin, call mirror
+  $("saveCheckIn") && $("saveCheckIn").addEventListener("click", async ()=>{ await saveCoreEncryptedIfUnlocked(); await mirrorProfileAndCheckin(); alert((lang==="en"?"Saved and mirrored (if available).":"Guardado y reflejado (si está disponible).")); });
+
+  // small helpers
+  function saveCoreEncryptedIfUnlocked(){ return unlocked && unlockedPassword ? saveEncryptedCore(unlockedPassword) : (saveCoreLocally(), Promise.resolve()); }
+  function saveCoreLocally(){ localStorage.setItem(LS.profile, JSON.stringify(core.profile)); localStorage.setItem(LS.answers, JSON.stringify(core.answers)); localStorage.setItem(LS.resources, JSON.stringify(core.resources)); localStorage.setItem(LS.plans, JSON.stringify(core.plans)); }
+
+  // export/import helper for encrypted data (used earlier)
+  // done via exportEncryptedSnapshotPrompt / importJsonBtn above
+
+  // final note: keep console debug info updated
+  setInterval(()=>{ if(!document.querySelector("#devPanel")?.classList.contains("hidden-soft")) printDevState(); }, 1500);
+
+  </script>
 </body>
 </html>
