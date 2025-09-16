@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TimeOut – Focus</title>
+  <title>TimeOut Focus</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <meta name="theme-color" content="#0b0b0f" />
   <style>
@@ -25,35 +25,40 @@
     .pin-input { letter-spacing:.35em; text-align:center; font-weight:700; }
     .pill { border:1px solid #374151; background:#0b0b0f; border-radius:999px; padding:.2rem .6rem; font-size:.75rem; color:#9ca3af; }
     .grad { background: radial-gradient(120% 60% at 50% -10%, rgba(37,99,235,.22), transparent 60%), radial-gradient(80% 60% at 120% 10%, rgba(34,197,94,.10), transparent 60%); }
+    .lang-toggle button { font-weight:700; font-size:.8rem; padding:.35rem .55rem; border-radius:8px; }
+    .lang-active { background:#1f2937; border:1px solid #374151; }
   </style>
 </head>
 <body>
   <div class="container px-4 py-3">
     <!-- HEADER -->
     <header class="flex items-center justify-between mb-3">
-      <div>
+      <div class="min-w-0">
         <h1 id="decoyTitle" class="text-xl font-bold select-none">TimeOut Focus</h1>
-        <p class="text-xs text-gray-400">Stay on task • <span class="pill">v1.3.5</span></p>
+        <p class="text-xs text-gray-400"><span id="hdrSub">Stay on task</span> • <span class="pill">v1.3.5</span></p>
       </div>
       <div class="flex items-center gap-2">
-        <button id="quickExitBtn" class="btn btn-ghost" title="Quick Exit to Google"><span class="hidden sm:inline">Quick Exit</span><span class="sm:hidden">Exit</span></button>
-        <button id="panicBtn" class="btn btn-danger" title="Clear local data & return to decoy">Panic</button>
+        <!-- Language toggle -->
+        <div class="lang-toggle flex gap-1 mr-1" aria-label="Language">
+          <button id="langEN" class="">EN</button>
+          <button id="langES" class="">ES</button>
+        </div>
+        <button id="quickExitBtn" class="btn btn-ghost" title="Quick Exit"><span id="btnExitLabel" class="hidden sm:inline">Exit</span><span class="sm:hidden">Exit</span></button>
+        <button id="panicBtn" class="btn btn-danger" title="Panic/Clear"><span id="btnPanicLabel">Panic</span></button>
       </div>
     </header>
 
     <!-- DECOY VIEW -->
     <section id="decoyView" class="card p-5 grad">
       <div class="flex flex-col items-center">
-        <div class="text-xs text-gray-300 mb-2">Focus Timer</div>
+        <div id="decoyCaption" class="text-xs text-gray-300 mb-2">Focus Timer</div>
         <div id="timerDisplay" class="text-7xl font-extrabold tabular-nums leading-none select-none">28:25</div>
         <div class="mt-4 flex gap-2">
-          <button id="timerStart" class="btn btn-primary">Start</button>
-          <button id="timerPause" class="btn btn-ghost">Pause</button>
-          <button id="timerReset" class="btn btn-ghost">Reset</button>
+          <button id="timerStart" class="btn btn-primary"><span id="btnStart">Start</span></button>
+          <button id="timerPause" class="btn btn-ghost"><span id="btnPause">Pause</span></button>
+          <button id="timerReset" class="btn btn-ghost"><span id="btnReset">Reset</span></button>
         </div>
-        <div class="mt-5 text-[11px] text-gray-400 text-center">
-          Long-press the <span class="font-semibold">title</span> or the <span class="font-semibold">big time</span> ~0.8s to unlock.
-        </div>
+        <!-- no visible hint about long-press to keep it inconspicuous -->
       </div>
     </section>
 
@@ -69,11 +74,11 @@
             <input id="newPin2" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card pin-input" placeholder="Confirm New PIN" />
           </div>
           <div class="flex gap-2">
-            <button class="btn btn-primary flex-1" type="submit">Confirm</button>
+            <button class="btn btn-primary flex-1" type="submit" id="pinConfirmBtn">Confirm</button>
             <button id="pinCancelBtn" class="btn btn-ghost flex-1" type="button">Cancel</button>
           </div>
           <div id="pinError" class="text-rose-400 text-sm min-h-[1.25rem]"></div>
-          <div class="text-[11px] text-gray-400">Default PIN: <span class="font-semibold">1111</span>. Change it in Profile → Change PIN.</div>
+          <div id="pinNote" class="text-[11px] text-gray-400">Default PIN: <span class="font-semibold">1111</span>. Change in Profile.</div>
         </form>
       </div>
     </div>
@@ -83,93 +88,93 @@
       <div class="mt-4 card p-4">
         <div class="flex items-center justify-between">
           <div class="min-w-0">
-            <div class="text-xs text-gray-400">Signed in as</div>
+            <div id="signedInAs" class="text-xs text-gray-400">Signed in as</div>
             <div id="profileName" class="text-lg font-semibold truncate">Anonymous</div>
           </div>
           <div class="flex items-center gap-2">
             <div class="text-right">
-              <div class="text-xs text-gray-400">Trust</div>
+              <div id="trustLabel" class="text-xs text-gray-400">Trust</div>
               <div id="trustBadge" class="text-2xl font-bold">100%</div>
             </div>
-            <button id="lockBtn" class="btn btn-ghost" title="Back to Focus">Lock</button>
+            <button id="lockBtn" class="btn btn-ghost" title="Back to Focus"><span id="btnLock">Lock</span></button>
           </div>
         </div>
       </div>
 
       <nav class="mt-3">
         <div class="flex gap-2">
-          <button data-tab="home" class="tab-btn bg-blue-600 text-white">Home</button>
-          <button data-tab="checkin" class="tab-btn card">Check-In</button>
-          <button data-tab="resources" class="tab-btn card">Resources</button>
-          <button data-tab="profile" class="tab-btn card">Profile</button>
+          <button data-tab="home" class="tab-btn bg-blue-600 text-white" id="tabBtnHome">Home</button>
+          <button data-tab="checkin" class="tab-btn card" id="tabBtnCheck">Check-In</button>
+          <button data-tab="resources" class="tab-btn card" id="tabBtnRes">Resources</button>
+          <button data-tab="profile" class="tab-btn card" id="tabBtnProfile">Profile</button>
         </div>
       </nav>
 
       <!-- HOME -->
       <div id="tab-home" class="mt-3 card p-4">
-        <h3 class="text-lg font-semibold mb-2">Welcome</h3>
-        <p class="text-sm text-gray-300">Hi <span id="homeName">Anonymous</span>. Your trust score is <span id="homeTrust">100</span>%.</p>
+        <h3 id="homeTitle" class="text-lg font-semibold mb-2">Welcome</h3>
+        <p class="text-sm text-gray-300" id="homeIntro">Hi <span id="homeName">Anonymous</span>. Your trust score is <span id="homeTrust">100</span>%.</p>
         <div class="mt-4 grid grid-cols-2 gap-2">
-          <button id="goToCheckIn" class="btn btn-primary">Go to Check-In</button>
-          <button id="saveAll" class="btn btn-ghost">Save</button>
+          <button id="goToCheckIn" class="btn btn-primary"><span id="btnGoCheck">Go to Check-In</span></button>
+          <button id="saveAll" class="btn btn-ghost"><span id="btnSaveAll">Save</span></button>
         </div>
-        <p class="mt-4 text-xs text-gray-500">Switching apps will auto-hide this screen.</p>
+        <p class="mt-4 text-xs text-gray-500" id="autoHideNote">Switching apps will auto-hide this screen.</p>
       </div>
 
       <!-- CHECK-IN -->
       <div id="tab-checkin" class="mt-3 card p-4 hidden-soft">
-        <h3 class="text-lg font-semibold mb-3">Safety Check-In</h3>
+        <h3 id="checkTitle" class="text-lg font-semibold mb-3">Safety Check-In</h3>
         <div id="questions" class="space-y-3"></div>
         <div class="mt-4 flex items-center justify-between">
           <div>
-            <div class="text-xs text-gray-400">Risk</div>
+            <div id="riskLabel" class="text-xs text-gray-400">Risk</div>
             <div id="riskPct" class="text-2xl font-bold text-rose-400">0%</div>
           </div>
           <div class="text-right">
-            <div class="text-xs text-gray-400">Trust</div>
+            <div id="trustLabel2" class="text-xs text-gray-400">Trust</div>
             <div id="trustPct" class="text-2xl font-bold text-green-400">100%</div>
           </div>
         </div>
         <div class="mt-4 flex gap-2">
-          <button id="saveCheckIn" class="btn btn-primary flex-1">Save Check-In</button>
-          <button id="clearCheckIn" class="btn btn-ghost flex-1">Clear</button>
+          <button id="saveCheckIn" class="btn btn-primary flex-1"><span id="btnSaveCheck">Save Check-In</span></button>
+          <button id="clearCheckIn" class="btn btn-ghost flex-1"><span id="btnClear">Clear</span></button>
         </div>
       </div>
 
       <!-- RESOURCES -->
       <div id="tab-resources" class="mt-3 card p-4 hidden-soft">
-        <h3 class="text-lg font-semibold mb-3">My Resources</h3>
+        <h3 id="resTitle" class="text-lg font-semibold mb-3">My Resources</h3>
         <form id="resourceForm" class="grid grid-cols-1 gap-2 mb-3">
-          <input id="resTitle" class="card px-3 py-2" placeholder="Title (e.g., Shelter)" />
+          <input id="resTitleInput" class="card px-3 py-2" placeholder="Title (e.g., Shelter)" />
           <input id="resDesc" class="card px-3 py-2" placeholder="Description" />
           <input id="resUrl" class="card px-3 py-2" placeholder="Link (https://…)" />
-          <button class="btn btn-primary">Add Resource</button>
+          <button class="btn btn-primary" id="btnAddResource">Add Resource</button>
         </form>
         <ul id="resourceList" class="space-y-2"></ul>
       </div>
 
       <!-- PROFILE -->
       <div id="tab-profile" class="mt-3 card p-4 hidden-soft">
-        <h3 class="text-lg font-semibold mb-3">Profile</h3>
+        <h3 id="profileTitle" class="text-lg font-semibold mb-3">Profile</h3>
         <div class="grid grid-cols-1 gap-2">
-          <label class="text-sm">Display Name</label>
+          <label class="text-sm" id="lblDisplayName">Display Name</label>
           <input id="displayNameInput" class="card px-3 py-2" placeholder="Your name (optional)" />
-          <button id="saveProfile" class="btn btn-primary">Save Profile</button>
+          <button id="saveProfile" class="btn btn-primary"><span id="btnSaveProfile">Save Profile</span></button>
         </div>
         <hr class="my-4 border-gray-800" />
         <div class="grid grid-cols-1 gap-2">
-          <label class="text-sm">Change PIN</label>
-          <button id="openChangePin" class="btn btn-ghost">Change PIN</button>
+          <label class="text-sm" id="lblChangePIN">Change PIN</label>
+          <button id="openChangePin" class="btn btn-ghost"><span id="btnChangePIN">Change PIN</span></button>
         </div>
         <hr class="my-4 border-gray-800" />
         <div class="grid grid-cols-1 gap-2">
-          <label class="text-sm">Export Data</label>
-          <button id="exportJson" class="btn btn-ghost">Export JSON</button>
+          <label class="text-sm" id="lblExport">Export Data</label>
+          <button id="exportJson" class="btn btn-ghost"><span id="btnExport">Export JSON</span></button>
         </div>
       </div>
 
       <footer class="py-6 text-center text-xs text-gray-500">
-        TimeOut • Privacy-first support • <span class="pill">v1.3.5</span>
+        TimeOut • <span id="footerNote">Privacy-first support</span> • <span class="pill">v1.3.5</span>
       </footer>
     </section>
   </div>
@@ -177,23 +182,125 @@
   <script>
     // ====== SIMPLE CONFIG ======
     const APP_VERSION = "v1.3.5";
-    const DEFAULT_PIN = "1111"; // <- per your request
+    const DEFAULT_PIN = "1111";
     const LS = {
       profile: "timeout_profile",
       answers: "timeout_answers",
       resources: "timeout_resources",
-      pin: "timeout_pin"
+      pin: "timeout_pin",
+      lang: "timeout_lang"
     };
-    const QUESTIONS = [
-      { id:"q1", text:"Are you currently safe where you are?", invert:true },
-      { id:"q2", text:"Has someone threatened you recently?" },
-      { id:"q3", text:"Have you experienced physical harm in past month?" },
-      { id:"q4", text:"Are you worried about your partner’s access to your phone?" },
-      { id:"q5", text:"Is anyone preventing you from leaving?" },
-      { id:"q6", text:"Do you have children at risk?" },
-      { id:"q7", text:"Do you feel isolated from help?" },
-      { id:"q8", text:"Would you like immediate local resources?" }
-    ];
+
+    // ====== i18n DICTIONARY ======
+    const STR = {
+      en: {
+        appSub: "Stay on task",
+        exit: "Exit",
+        panic: "Panic",
+        decoyCaption: "Focus Timer",
+        start: "Start", pause: "Pause", reset: "Reset",
+        pinEnter: "Enter PIN",
+        pinChange: "Change PIN",
+        pinCurrent: "Current PIN",
+        pinNew: "New PIN (min 4)",
+        pinConfirmNew: "Confirm New PIN",
+        confirm: "Confirm", cancel: "Cancel",
+        pinDefaultNote: "Default PIN: 1111. Change in Profile.",
+        errBadPin: "Incorrect PIN.",
+        errShortPin: "New PIN must be at least 4 digits.",
+        errNoMatch: "PINs do not match.",
+        signedInAs: "Signed in as",
+        trust: "Trust",
+        lock: "Lock",
+        tabs: { home: "Home", check: "Check-In", res: "Resources", profile: "Profile" },
+        welcome: "Welcome",
+        homeIntroA: "Hi", homeIntroB: "Your trust score is", percent: "%",
+        goCheck: "Go to Check-In",
+        saveAll: "Save",
+        autoHide: "Switching apps will auto-hide this screen.",
+        checkTitle: "Safety Check-In",
+        risk: "Risk",
+        trust2: "Trust",
+        saveCheck: "Save Check-In",
+        clear: "Clear",
+        resTitle: "My Resources",
+        resAdd: "Add Resource",
+        resPhTitle: "Title (e.g., Shelter)",
+        resPhDesc: "Description",
+        resPhLink: "Link (https://…)",
+        del: "Delete",
+        profileTitle: "Profile",
+        displayName: "Display Name",
+        namePh: "Your name (optional)",
+        saveProfile: "Save Profile",
+        changePIN: "Change PIN",
+        export: "Export Data",
+        exportBtn: "Export JSON",
+        footerNote: "Privacy-first support",
+        // Questions:
+        q1: "Are you currently safe where you are?",
+        q2: "Has someone threatened you recently?",
+        q3: "Have you experienced physical harm in past month?",
+        q4: "Are you worried about your partner’s access to your phone?",
+        q5: "Is anyone preventing you from leaving?",
+        q6: "Do you have children at risk?",
+        q7: "Do you feel isolated from help?",
+        q8: "Would you like immediate local resources?"
+      },
+      es: {
+        appSub: "Mantente enfocado",
+        exit: "Salir",
+        panic: "Pánico",
+        decoyCaption: "Temporizador de enfoque",
+        start: "Iniciar", pause: "Pausar", reset: "Reiniciar",
+        pinEnter: "Introduce el PIN",
+        pinChange: "Cambiar PIN",
+        pinCurrent: "PIN actual",
+        pinNew: "Nuevo PIN (mín. 4)",
+        pinConfirmNew: "Confirmar PIN",
+        confirm: "Confirmar", cancel: "Cancelar",
+        pinDefaultNote: "PIN predeterminado: 1111. Cámbialo en Perfil.",
+        errBadPin: "PIN incorrecto.",
+        errShortPin: "El PIN nuevo debe tener al menos 4 dígitos.",
+        errNoMatch: "Los PIN no coinciden.",
+        signedInAs: "Sesión iniciada como",
+        trust: "Confianza",
+        lock: "Bloquear",
+        tabs: { home: "Inicio", check: "Revisión", res: "Recursos", profile: "Perfil" },
+        welcome: "Bienvenido/a",
+        homeIntroA: "Hola", homeIntroB: "Tu nivel de confianza es", percent: "%",
+        goCheck: "Ir a Revisión",
+        saveAll: "Guardar",
+        autoHide: "Al cambiar de app, esta pantalla se oculta automáticamente.",
+        checkTitle: "Revisión de seguridad",
+        risk: "Riesgo",
+        trust2: "Confianza",
+        saveCheck: "Guardar revisión",
+        clear: "Limpiar",
+        resTitle: "Mis recursos",
+        resAdd: "Agregar recurso",
+        resPhTitle: "Título (p. ej., Refugio)",
+        resPhDesc: "Descripción",
+        resPhLink: "Enlace (https://…)",
+        del: "Eliminar",
+        profileTitle: "Perfil",
+        displayName: "Nombre a mostrar",
+        namePh: "Tu nombre (opcional)",
+        saveProfile: "Guardar perfil",
+        changePIN: "Cambiar PIN",
+        export: "Exportar datos",
+        exportBtn: "Exportar JSON",
+        footerNote: "Soporte con privacidad primero",
+        q1: "¿Estás seguro/a donde estás ahora?",
+        q2: "¿Alguien te ha amenazado recientemente?",
+        q3: "¿Has sufrido daño físico en el último mes?",
+        q4: "¿Te preocupa que tu pareja tenga acceso a tu teléfono?",
+        q5: "¿Alguien te impide salir?",
+        q6: "¿Tienes hijos/as en riesgo?",
+        q7: "¿Te sientes aislado/a de la ayuda?",
+        q8: "¿Te gustaría ver recursos locales inmediatos?"
+      }
+    };
 
     // ====== HELPERS ======
     const $ = (id)=>document.getElementById(id);
@@ -201,6 +308,12 @@
     const saveJSON = (k, v)=> localStorage.setItem(k, JSON.stringify(v));
     const getPIN = ()=> localStorage.getItem(LS.pin) || DEFAULT_PIN;
     const setPIN = (p)=> localStorage.setItem(LS.pin, p);
+    const getLang = ()=>{
+      const saved = localStorage.getItem(LS.lang);
+      if (saved) return saved;
+      return (navigator.language||"en").toLowerCase().startsWith("es") ? "es" : "en";
+    };
+    const setLang = (l)=> localStorage.setItem(LS.lang, l);
 
     // ====== STATE ======
     let unlocked = false;
@@ -208,19 +321,30 @@
     let answers = loadJSON(LS.answers, {});
     let resources = loadJSON(LS.resources, []);
     let longPressTimer = null;
+    let lang = getLang();
 
     // ====== REFS ======
+    // header + decoy
     const decoyView = $("decoyView");
     const realApp = $("realApp");
     const quickExitBtn = $("quickExitBtn");
     const panicBtn = $("panicBtn");
-    const lockBtn = $("lockBtn");
     const decoyTitle = $("decoyTitle");
+    const hdrSub = $("hdrSub");
+    const btnExitLabel = $("btnExitLabel");
+    const btnPanicLabel = $("btnPanicLabel");
+    const decoyCaption = $("decoyCaption");
     const timerDisplay = $("timerDisplay");
     const timerStart = $("timerStart");
     const timerPause = $("timerPause");
     const timerReset = $("timerReset");
+    const btnStart = $("btnStart");
+    const btnPause = $("btnPause");
+    const btnReset = $("btnReset");
+    const langEN = $("langEN");
+    const langES = $("langES");
 
+    // pin modal
     const pinModal = $("pinModal");
     const pinForm = $("pinForm");
     const pinInput = $("pinInput");
@@ -232,36 +356,130 @@
     const newPin = $("newPin");
     const newPin2 = $("newPin2");
     const pinModalTitle = $("pinModalTitle");
+    const pinConfirmBtn = $("pinConfirmBtn");
+    const pinNote = $("pinNote");
 
-    const tabs = [...document.querySelectorAll("[data-tab]")];
-    const tabViews = {
-      home: $("tab-home"),
-      checkin: $("tab-checkin"),
-      resources: $("tab-resources"),
-      profile: $("tab-profile")
-    };
+    // real app
+    const lockBtn = $("lockBtn");
+    const signedInAs = $("signedInAs");
     const profileName = $("profileName");
+    const trustLabel = $("trustLabel");
+    const trustBadge = $("trustBadge");
+    const btnLock = $("btnLock");
+    const tabBtnHome = $("tabBtnHome");
+    const tabBtnCheck = $("tabBtnCheck");
+    const tabBtnRes = $("tabBtnRes");
+    const tabBtnProfile = $("tabBtnProfile");
+
+    const tabViews = { home:$("tab-home"), checkin:$("tab-checkin"), resources:$("tab-resources"), profile:$("tab-profile") };
+    const tabs = [tabBtnHome, tabBtnCheck, tabBtnRes, tabBtnProfile];
+
+    // home
+    const homeTitle = $("homeTitle");
+    const homeIntro = $("homeIntro");
     const homeName = $("homeName");
     const homeTrust = $("homeTrust");
-    const trustBadge = $("trustBadge");
-    const goToCheckIn = $("goToCheckIn");
-    const saveAll = $("saveAll");
+    const btnGoCheck = $("btnGoCheck");
+    const btnSaveAll = $("btnSaveAll");
+    const autoHideNote = $("autoHideNote");
 
+    // check-in
+    const checkTitle = $("checkTitle");
     const questionsBox = $("questions");
+    const riskLabel = $("riskLabel");
+    const trustLabel2 = $("trustLabel2");
     const riskPct = $("riskPct");
     const trustPct = $("trustPct");
     const saveCheckIn = $("saveCheckIn");
     const clearCheckIn = $("clearCheckIn");
+    const btnSaveCheck = $("btnSaveCheck");
+    const btnClear = $("btnClear");
 
-    const resForm = $("resourceForm");
+    // resources
     const resTitle = $("resTitle");
+    const resForm = $("resourceForm");
+    const resTitleInput = $("resTitleInput");
     const resDesc = $("resDesc");
     const resUrl = $("resUrl");
-    const resList = $("resourceList");
+    const btnAddResource = $("btnAddResource");
+    const resourceList = $("resourceList");
 
+    // profile
+    const profileTitle = $("profileTitle");
+    const lblDisplayName = $("lblDisplayName");
     const displayNameInput = $("displayNameInput");
     const saveProfile = $("saveProfile");
+    const btnSaveProfile = $("btnSaveProfile");
+    const lblChangePIN = $("lblChangePIN");
+    const btnChangePIN = $("btnChangePIN");
+    const lblExport = $("lblExport");
     const exportJson = $("exportJson");
+    const btnExport = $("btnExport");
+    const footerNote = $("footerNote");
+
+    // ====== i18n APPLY ======
+    function applyLang() {
+      const S = STR[lang];
+      hdrSub.textContent = S.appSub;
+      btnExitLabel.textContent = S.exit;
+      btnPanicLabel.textContent = S.panic;
+      decoyCaption.textContent = S.decoyCaption;
+      btnStart.textContent = S.start; btnPause.textContent = S.pause; btnReset.textContent = S.reset;
+
+      pinModalTitle.textContent = S.pinEnter;
+      oldPin.placeholder = S.pinCurrent;
+      newPin.placeholder = S.pinNew;
+      newPin2.placeholder = S.pinConfirmNew;
+      pinConfirmBtn.textContent = S.confirm;
+      pinCancelBtn.textContent = S.cancel;
+      pinNote.textContent = S.pinDefaultNote;
+
+      signedInAs.textContent = S.signedInAs;
+      trustLabel.textContent = S.trust;
+      btnLock.textContent = S.lock;
+
+      tabBtnHome.textContent = S.tabs.home;
+      tabBtnCheck.textContent = S.tabs.check;
+      tabBtnRes.textContent = S.tabs.res;
+      tabBtnProfile.textContent = S.tabs.profile;
+
+      homeTitle.textContent = S.welcome;
+      homeIntro.innerHTML = `${S.homeIntroA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.homeIntroB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
+      // rebind refs replaced by innerHTML
+      window.homeName = document.getElementById("homeName");
+      window.homeTrust = document.getElementById("homeTrust");
+
+      btnGoCheck.textContent = S.goCheck;
+      btnSaveAll.textContent = S.saveAll;
+      autoHideNote.textContent = S.autoHide;
+
+      checkTitle.textContent = S.checkTitle;
+      riskLabel.textContent = S.risk;
+      trustLabel2.textContent = S.trust2;
+      btnSaveCheck.textContent = S.saveCheck;
+      btnClear.textContent = S.clear;
+
+      resTitle.textContent = S.resTitle;
+      resTitleInput.placeholder = S.resPhTitle;
+      resDesc.placeholder = S.resPhDesc;
+      resUrl.placeholder = S.resPhLink;
+      btnAddResource.textContent = S.resAdd;
+
+      profileTitle.textContent = S.profileTitle;
+      lblDisplayName.textContent = S.displayName;
+      displayNameInput.placeholder = S.namePh;
+      btnSaveProfile.textContent = S.saveProfile;
+      lblChangePIN.textContent = S.changePIN;
+      btnChangePIN.textContent = S.changePIN;
+      lblExport.textContent = S.export;
+      btnExport.textContent = S.exportBtn;
+
+      footerNote.textContent = S.footerNote;
+
+      // highlight lang toggle
+      langEN.classList.toggle("lang-active", lang==="en");
+      langES.classList.toggle("lang-active", lang==="es");
+    }
 
     // ====== QUICK EXIT / PANIC ======
     quickExitBtn.addEventListener("click", ()=> location.href="https://www.google.com/");
@@ -279,7 +497,7 @@
     });
 
     // ====== TIMER (decoy) ======
-    let timerSeconds = 28*60 + 25; // your “28 25”
+    let timerSeconds = 28*60 + 25;
     let timerInterval = null;
     const fmt = s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
     const renderTimer = ()=> timerDisplay.textContent = fmt(timerSeconds);
@@ -298,16 +516,18 @@
       pinInput.value="";
       oldPin.value = newPin.value = newPin2.value = "";
       pinChangeFields.classList.add("hidden-soft");
-      pinModalTitle.textContent = mode==="change" ? "Change PIN" : "Enter PIN";
+      pinModalTitle.textContent = (mode==="change") ? STR[lang].pinChange : STR[lang].pinEnter;
       if (mode==="change") pinChangeFields.classList.remove("hidden-soft");
       pinModal.classList.remove("hidden-soft");
       setTimeout(()=>pinInput.focus(), 50);
       pinForm.dataset.mode = mode;
+      try { navigator.vibrate && navigator.vibrate(15); } catch {}
     }
     function closePIN(){ pinModal.classList.add("hidden-soft"); }
     function armLongPress(el){
-      const start = ()=> { longPressTimer = setTimeout(()=> openPIN("enter"), LP_MS); };
-      const cancel = ()=> { clearTimeout(longPressTimer); longPressTimer = null; };
+      let t=null;
+      const start = ()=> { t = setTimeout(()=> openPIN("enter"), LP_MS); };
+      const cancel = ()=> { clearTimeout(t); t=null; };
       ["pointerdown","touchstart","mousedown"].forEach(e=> el.addEventListener(e,start));
       ["pointerup","pointerleave","touchend","touchcancel","mouseup","mouseleave"].forEach(e=> el.addEventListener(e,cancel));
     }
@@ -318,13 +538,14 @@
     pinForm.addEventListener("submit",(e)=>{
       e.preventDefault();
       const mode = pinForm.dataset.mode || "enter";
+      const S = STR[lang];
       if (mode==="enter"){
         if (pinInput.value === getPIN()){ closePIN(); unlockReal(); }
-        else { pinError.textContent="Incorrect PIN."; }
+        else { pinError.textContent = S.errBadPin; }
       } else {
-        if (oldPin.value !== getPIN()){ pinError.textContent="Current PIN is incorrect."; return; }
-        if ((newPin.value||"").length < 4){ pinError.textContent="New PIN must be at least 4 digits."; return; }
-        if (newPin.value !== newPin2.value){ pinError.textContent="New PINs do not match."; return; }
+        if (oldPin.value !== getPIN()){ pinError.textContent = S.errBadPin; return; }
+        if ((newPin.value||"").length < 4){ pinError.textContent = S.errShortPin; return; }
+        if (newPin.value !== newPin2.value){ pinError.textContent = S.errNoMatch; return; }
         setPIN(newPin.value);
         closePIN();
       }
@@ -334,31 +555,49 @@
     // ====== LOCK / UNLOCK / AUTOHIDE ======
     function unlockReal(){ unlocked = true; decoyView.classList.add("hidden-soft"); realApp.classList.remove("hidden-soft"); setTab("home"); refreshUI(); }
     function lockToDecoy(){ unlocked = false; realApp.classList.add("hidden-soft"); decoyView.classList.remove("hidden-soft"); }
-    lockBtn.addEventListener("click", lockToDecoy);
+    $("lockBtn").addEventListener("click", lockToDecoy);
     document.addEventListener("visibilitychange", ()=> { if (document.hidden && unlocked) lockToDecoy(); });
 
     // ====== TABS ======
     function setTab(name){
-      tabs.forEach(b=>{
-        const active = b.dataset.tab===name;
+      const btns = { home:tabBtnHome, checkin:tabBtnCheck, resources:tabBtnRes, profile:tabBtnProfile };
+      Object.keys(btns).forEach(k=>{
+        const b = btns[k];
+        const active = k===name;
         b.classList.toggle("bg-blue-600", active);
         b.classList.toggle("text-white", active);
         b.classList.toggle("card", !active);
       });
       Object.entries(tabViews).forEach(([k,el])=> el.classList.toggle("hidden-soft", k!==name));
     }
-    tabs.forEach(b=> b.addEventListener("click", ()=> setTab(b.dataset.tab)));
-    goToCheckIn.addEventListener("click", ()=> setTab("checkin"));
+    tabBtnHome.addEventListener("click", ()=> setTab("home"));
+    tabBtnCheck.addEventListener("click", ()=> setTab("checkin"));
+    tabBtnRes.addEventListener("click", ()=> setTab("resources"));
+    tabBtnProfile.addEventListener("click", ()=> setTab("profile"));
+    $("goToCheckIn").addEventListener("click", ()=> setTab("checkin"));
 
     // ====== CHECK-IN ======
+    const QUESTIONS = [
+      { id:"q1", key:"q1", invert:true },
+      { id:"q2", key:"q2" },
+      { id:"q3", key:"q3" },
+      { id:"q4", key:"q4" },
+      { id:"q5", key:"q5" },
+      { id:"q6", key:"q6" },
+      { id:"q7", key:"q7" },
+      { id:"q8", key:"q8" }
+    ];
+
     function buildQuestions(){
       questionsBox.innerHTML="";
       QUESTIONS.forEach((q,i)=>{
         const row = document.createElement("div"); row.className="p-3 card";
-        const label = document.createElement("div"); label.className="text-sm mb-2"; label.textContent = `${i+1}. ${q.text}`;
+        const label = document.createElement("div"); label.className="text-sm mb-2"; label.textContent = `${i+1}. ${STR[lang][q.key]}`;
         const toggle = document.createElement("div"); toggle.className="toggle flex overflow-hidden";
         const yes = document.createElement("button"); yes.type="button"; yes.className="opt"; yes.textContent="Yes";
         const no  = document.createElement("button"); no.type="button";  no.className="opt";  no.textContent="No";
+        // translate yes/no
+        if (lang==="es"){ yes.textContent="Sí"; no.textContent="No"; }
         toggle.append(yes,no); row.append(label,toggle); questionsBox.append(row);
 
         const cur = (answers[q.id]||"").toLowerCase();
@@ -386,7 +625,7 @@
       riskPct.textContent = `${risk}%`;
       trustPct.textContent = `${trust}%`;
       trustBadge.textContent = `${trust}%`;
-      homeTrust.textContent = `${trust}`;
+      (document.getElementById("homeTrust")||{}).textContent = `${trust}`;
       profile.trust = trust;
     }
     saveCheckIn.addEventListener("click", ()=> { saveJSON(LS.answers,answers); updateScores(); });
@@ -394,7 +633,7 @@
 
     // ====== RESOURCES ======
     function renderResources(){
-      resList.innerHTML="";
+      resourceList.innerHTML="";
       if(!Array.isArray(resources)) resources=[];
       resources.forEach((r,i)=>{
         const li = document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
@@ -403,23 +642,25 @@
         const d = document.createElement("div"); d.className="text-sm text-gray-300"; d.textContent=r.desc||"";
         const u = document.createElement("a"); u.className="text-blue-400 underline text-sm"; u.href=r.url||"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent=r.url||"";
         txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
-        const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent="Delete";
+        const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent= STR[lang].del;
         del.addEventListener("click", ()=>{ resources.splice(i,1); saveJSON(LS.resources,resources); renderResources(); });
-        li.append(txt,del); resList.append(li);
+        li.append(txt,del); resourceList.append(li);
       });
     }
     resForm.addEventListener("submit",(e)=>{
       e.preventDefault();
-      const item = { title:resTitle.value.trim(), desc:resDesc.value.trim(), url:resUrl.value.trim() };
+      const item = { title:resTitleInput.value.trim(), desc:resDesc.value.trim(), url:resUrl.value.trim() };
       if(!item.title) return;
       resources.push(item); saveJSON(LS.resources,resources);
-      resTitle.value = resDesc.value = resUrl.value = ""; renderResources();
+      resTitleInput.value = resDesc.value = resUrl.value = ""; renderResources();
     });
 
     // ====== PROFILE ======
     function refreshUI(){
       profileName.textContent = profile.name || "Anonymous";
-      homeName.textContent = profile.name || "Anonymous";
+      // update intro line safely
+      const S = STR[lang];
+      homeIntro.innerHTML = `${S.homeIntroA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.homeIntroB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
       displayNameInput.value = profile.name || "";
       buildQuestions(); updateScores(); renderResources();
     }
@@ -442,17 +683,28 @@
     });
 
     // ====== SAVE ALL ======
-    saveAll.addEventListener("click", ()=>{
+    btnSaveAll.addEventListener("click", ()=>{
       saveJSON(LS.profile, profile);
       saveJSON(LS.answers, answers);
       saveJSON(LS.resources, resources);
     });
 
+    // ====== LANG EVENTS ======
+    function switchLang(to){
+      lang = to; setLang(lang);
+      applyLang();
+      buildQuestions(); // rebuild yes/no labels too
+    }
+    langEN.addEventListener("click", ()=> switchLang("en"));
+    langES.addEventListener("click", ()=> switchLang("es"));
+
     // ====== INIT ======
     if (!localStorage.getItem(LS.pin)) setPIN(DEFAULT_PIN);
+    applyLang();
     renderResources(); buildQuestions(); updateScores();
     pinModal.addEventListener("click",(e)=>{ if(e.target===pinModal) closePIN(); });
     document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && unlocked) lockToDecoy(); });
+
   </script>
 </body>
 </html>
