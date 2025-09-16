@@ -3,62 +3,78 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>TimeOut Focus</title>
+  <title>TimeOut</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <meta name="theme-color" content="#0b0b0f" />
+  <meta name="theme-color" content="#0a0c11" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <style>
     :root { --maxw: 480px; }
-    body { background:#0b0b0f; color:#e5e7eb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial; }
+    body { background:#0a0c11; color:#e5e7eb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial; }
     .container { max-width: var(--maxw); margin: 0 auto; }
-    .card { background: #111827; border: 1px solid #1f2937; border-radius: 16px; }
+    .card { background: #0f1624; border: 1px solid #1f2a3a; border-radius: 16px; }
     .btn { border-radius: 12px; padding: .65rem .9rem; font-weight: 600; }
     .btn-primary { background:#2563eb; color:white; }
-    .btn-ghost { background:#0b0b0f; border:1px solid #1f2937; color:#e5e7eb; }
-    .btn-danger { background:#b91c1c; color:white; }
-    .tab-btn { padding:.6rem .8rem; border-radius:999px; }
+    .btn-ghost { background:transparent; border:1px solid #233145; color:#e5e7eb; }
+    .tab-btn { padding:.55rem .85rem; border-radius:999px; }
     .hidden-soft { display:none !important; }
-    .toggle { border:1px solid #334155; border-radius:12px; }
-    .toggle .opt { flex:1; padding:.6rem; text-align:center; border-right:1px solid #334155; }
-    .toggle .opt:last-child { border-right:0; }
-    .opt.active-yes { background:#16a34a; color:#fff; }
-    .opt.active-no { background:#dc2626; color:#fff; }
-    .pin-input { letter-spacing:.35em; text-align:center; font-weight:700; }
-    .pill { border:1px solid #374151; background:#0b0b0f; border-radius:999px; padding:.2rem .6rem; font-size:.75rem; color:#9ca3af; }
-    .grad { background: radial-gradient(120% 60% at 50% -10%, rgba(37,99,235,.22), transparent 60%), radial-gradient(80% 60% at 120% 10%, rgba(34,197,94,.10), transparent 60%); }
-    .lang-toggle button { font-weight:700; font-size:.8rem; padding:.35rem .55rem; border-radius:8px; }
-    .lang-active { background:#1f2937; border:1px solid #374151; }
+    .neon { font-feature-settings:"tnum"; letter-spacing:.02em; text-shadow:0 0 6px rgba(56,189,248,.35),0 0 18px rgba(59,130,246,.25); }
+    .glass { background: linear-gradient(180deg, rgba(17,24,39,.65), rgba(17,24,39,.45)); backdrop-filter: blur(6px); border:1px solid rgba(99,102,241,.12); }
+    .glow-border { box-shadow: 0 0 0 1px rgba(59,130,246,.15), inset 0 0 0 1px rgba(255,255,255,.04); }
+    .grad-mesh {
+      background:
+        radial-gradient(40% 50% at 20% 10%, rgba(34,197,94,.14), transparent 60%),
+        radial-gradient(45% 60% at 80% 0%, rgba(37,99,235,.20), transparent 60%),
+        radial-gradient(60% 80% at 50% 120%, rgba(236,72,153,.10), transparent 60%),
+        #0a0c11;
+    }
+    .lang-toggle button { font-weight:700; font-size:.8rem; padding:.35rem .55rem; border-radius:8px; border:1px solid #233145; }
+    .lang-active { background:#0f1624; border-color:#334155; }
+    .pill { border:1px solid #2b3b52; background:#0b1220; border-radius:999px; padding:.2rem .6rem; font-size:.75rem; color:#9ca3af; }
+    .shadow-soft { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .ghost-sep { color:#6b7280; }
   </style>
 </head>
-<body>
+<body class="grad-mesh">
   <div class="container px-4 py-3">
-    <!-- HEADER -->
+    <!-- HEADER (inconspicuous) -->
     <header class="flex items-center justify-between mb-3">
       <div class="min-w-0">
-        <h1 id="decoyTitle" class="text-xl font-bold select-none">TimeOut Focus</h1>
-        <p class="text-xs text-gray-400"><span id="hdrSub">Stay on task</span> • <span class="pill">v1.3.5</span></p>
+        <h1 id="decoyTitle" class="text-xl font-bold select-none">TimeOut</h1>
+        <p class="text-xs text-gray-400"><span id="hdrSub">Clock & Stopwatch</span> • <span class="pill">v1.3.5</span></p>
       </div>
       <div class="flex items-center gap-2">
-        <!-- Language toggle -->
         <div class="lang-toggle flex gap-1 mr-1" aria-label="Language">
-          <button id="langEN" class="">EN</button>
-          <button id="langES" class="">ES</button>
+          <button id="langEN">EN</button>
+          <button id="langES">ES</button>
         </div>
-        <button id="quickExitBtn" class="btn btn-ghost" title="Quick Exit"><span id="btnExitLabel" class="hidden sm:inline">Exit</span><span class="sm:hidden">Exit</span></button>
-        <button id="panicBtn" class="btn btn-danger" title="Panic/Clear"><span id="btnPanicLabel">Panic</span></button>
+        <button id="quickExitBtn" class="btn btn-ghost" title="Home"><span id="btnExitLabel" class="hidden sm:inline">Home</span><span class="sm:hidden">Home</span></button>
       </div>
     </header>
 
-    <!-- DECOY VIEW -->
-    <section id="decoyView" class="card p-5 grad">
-      <div class="flex flex-col items-center">
-        <div id="decoyCaption" class="text-xs text-gray-300 mb-2">Focus Timer</div>
-        <div id="timerDisplay" class="text-7xl font-extrabold tabular-nums leading-none select-none">28:25</div>
-        <div class="mt-4 flex gap-2">
-          <button id="timerStart" class="btn btn-primary"><span id="btnStart">Start</span></button>
-          <button id="timerPause" class="btn btn-ghost"><span id="btnPause">Pause</span></button>
-          <button id="timerReset" class="btn btn-ghost"><span id="btnReset">Reset</span></button>
+    <!-- DECOY: CLOCK / STOPWATCH (no Panic on decoy) -->
+    <section id="decoyView" class="card glass glow-border p-5 shadow-soft">
+      <div class="flex items-center justify-center gap-2 mb-4">
+        <button id="decoyTabClock" class="tab-btn bg-blue-600 text-white">Clock</button>
+        <button id="decoyTabStopwatch" class="tab-btn btn-ghost">Stopwatch</button>
+      </div>
+
+      <!-- CLOCK -->
+      <div id="clockPane" class="text-center">
+        <div id="liveClock" class="neon text-7xl sm:text-8xl font-extrabold tabular-nums leading-none select-none py-3">00:00:00</div>
+        <div id="liveDate" class="text-sm text-gray-300 mt-2">—</div>
+        <p class="text-[11px] text-gray-500 mt-4">Long-press the digits to edit alarm.</p><!-- innocuous hint; still triggers PIN -->
+      </div>
+
+      <!-- STOPWATCH -->
+      <div id="stopwatchPane" class="text-center hidden-soft">
+        <div id="swDisplay" class="neon text-7xl sm:text-8xl font-extrabold tabular-nums leading-none select-none py-3">00:00.00</div>
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <button id="swStart" class="btn btn-primary min-w-[96px]"><span id="lblStart">Start</span></button>
+          <button id="swLap" class="btn btn-ghost min-w-[96px]"><span id="lblLap">Lap</span></button>
+          <button id="swReset" class="btn btn-ghost min-w-[96px]"><span id="lblReset">Reset</span></button>
         </div>
-        <!-- no visible hint about long-press to keep it inconspicuous -->
+        <ul id="swLaps" class="mt-4 text-sm text-gray-300 space-y-1 max-h-36 overflow-auto"></ul>
       </div>
     </section>
 
@@ -67,11 +83,11 @@
       <div class="card w-full sm:max-w-sm p-4">
         <h3 id="pinModalTitle" class="text-lg font-semibold mb-2">Enter PIN</h3>
         <form id="pinForm" class="space-y-3">
-          <input id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-3 card pin-input" placeholder="••••" autocomplete="off" />
+          <input id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-3 card text-center font-bold tracking-[0.35em]" placeholder="••••" autocomplete="off" />
           <div id="pinChangeFields" class="space-y-2 hidden-soft">
-            <input id="oldPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card pin-input" placeholder="Current PIN" />
-            <input id="newPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card pin-input" placeholder="New PIN (min 4)" />
-            <input id="newPin2" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card pin-input" placeholder="Confirm New PIN" />
+            <input id="oldPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card text-center font-bold tracking-[0.35em]" placeholder="Current PIN" />
+            <input id="newPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card text-center font-bold tracking-[0.35em]" placeholder="New PIN (min 4)" />
+            <input id="newPin2" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card text-center font-bold tracking-[0.35em]" placeholder="Confirm New PIN" />
           </div>
           <div class="flex gap-2">
             <button class="btn btn-primary flex-1" type="submit" id="pinConfirmBtn">Confirm</button>
@@ -83,7 +99,7 @@
       </div>
     </div>
 
-    <!-- REAL APP -->
+    <!-- REAL APP (hidden until unlock) -->
     <section id="realApp" class="hidden-soft">
       <div class="mt-4 card p-4">
         <div class="flex items-center justify-between">
@@ -96,17 +112,18 @@
               <div id="trustLabel" class="text-xs text-gray-400">Trust</div>
               <div id="trustBadge" class="text-2xl font-bold">100%</div>
             </div>
-            <button id="lockBtn" class="btn btn-ghost" title="Back to Focus"><span id="btnLock">Lock</span></button>
+            <button id="lockBtn" class="btn btn-ghost" title="Back to TimeOut"><span id="btnLock">Lock</span></button>
           </div>
         </div>
       </div>
 
+      <!-- Tabs -->
       <nav class="mt-3">
         <div class="flex gap-2">
           <button data-tab="home" class="tab-btn bg-blue-600 text-white" id="tabBtnHome">Home</button>
-          <button data-tab="checkin" class="tab-btn card" id="tabBtnCheck">Check-In</button>
-          <button data-tab="resources" class="tab-btn card" id="tabBtnRes">Resources</button>
-          <button data-tab="profile" class="tab-btn card" id="tabBtnProfile">Profile</button>
+          <button data-tab="checkin" class="tab-btn btn-ghost" id="tabBtnCheck">Check-In</button>
+          <button data-tab="resources" class="tab-btn btn-ghost" id="tabBtnRes">Resources</button>
+          <button data-tab="profile" class="tab-btn btn-ghost" id="tabBtnProfile">Profile</button>
         </div>
       </nav>
 
@@ -161,15 +178,21 @@
           <input id="displayNameInput" class="card px-3 py-2" placeholder="Your name (optional)" />
           <button id="saveProfile" class="btn btn-primary"><span id="btnSaveProfile">Save Profile</span></button>
         </div>
-        <hr class="my-4 border-gray-800" />
+        <hr class="my-4 border-[#1f2a3a]" />
         <div class="grid grid-cols-1 gap-2">
           <label class="text-sm" id="lblChangePIN">Change PIN</label>
           <button id="openChangePin" class="btn btn-ghost"><span id="btnChangePIN">Change PIN</span></button>
         </div>
-        <hr class="my-4 border-gray-800" />
+        <hr class="my-4 border-[#1f2a3a]" />
         <div class="grid grid-cols-1 gap-2">
           <label class="text-sm" id="lblExport">Export Data</label>
           <button id="exportJson" class="btn btn-ghost"><span id="btnExport">Export JSON</span></button>
+        </div>
+        <hr class="my-4 border-[#1f2a3a]" />
+        <!-- Panic is hidden from decoy, available here as "Clear Data" -->
+        <div class="grid grid-cols-1 gap-2">
+          <label class="text-sm" id="lblClear">Clear Data</label>
+          <button id="clearData" class="btn btn-ghost"><span id="btnClearData">Clear Data</span></button>
         </div>
       </div>
 
@@ -180,7 +203,7 @@
   </div>
 
   <script>
-    // ====== SIMPLE CONFIG ======
+    // ====== CONFIG ======
     const APP_VERSION = "v1.3.5";
     const DEFAULT_PIN = "1111";
     const LS = {
@@ -191,332 +214,223 @@
       lang: "timeout_lang"
     };
 
-    // ====== i18n DICTIONARY ======
+    // ====== i18n ======
     const STR = {
       en: {
-        appSub: "Stay on task",
-        exit: "Exit",
-        panic: "Panic",
-        decoyCaption: "Focus Timer",
-        start: "Start", pause: "Pause", reset: "Reset",
-        pinEnter: "Enter PIN",
-        pinChange: "Change PIN",
-        pinCurrent: "Current PIN",
-        pinNew: "New PIN (min 4)",
-        pinConfirmNew: "Confirm New PIN",
-        confirm: "Confirm", cancel: "Cancel",
-        pinDefaultNote: "Default PIN: 1111. Change in Profile.",
-        errBadPin: "Incorrect PIN.",
-        errShortPin: "New PIN must be at least 4 digits.",
-        errNoMatch: "PINs do not match.",
-        signedInAs: "Signed in as",
-        trust: "Trust",
-        lock: "Lock",
-        tabs: { home: "Home", check: "Check-In", res: "Resources", profile: "Profile" },
-        welcome: "Welcome",
-        homeIntroA: "Hi", homeIntroB: "Your trust score is", percent: "%",
-        goCheck: "Go to Check-In",
-        saveAll: "Save",
-        autoHide: "Switching apps will auto-hide this screen.",
-        checkTitle: "Safety Check-In",
-        risk: "Risk",
-        trust2: "Trust",
-        saveCheck: "Save Check-In",
-        clear: "Clear",
-        resTitle: "My Resources",
-        resAdd: "Add Resource",
-        resPhTitle: "Title (e.g., Shelter)",
-        resPhDesc: "Description",
-        resPhLink: "Link (https://…)",
-        del: "Delete",
-        profileTitle: "Profile",
-        displayName: "Display Name",
-        namePh: "Your name (optional)",
-        saveProfile: "Save Profile",
-        changePIN: "Change PIN",
-        export: "Export Data",
-        exportBtn: "Export JSON",
-        footerNote: "Privacy-first support",
-        // Questions:
-        q1: "Are you currently safe where you are?",
-        q2: "Has someone threatened you recently?",
-        q3: "Have you experienced physical harm in past month?",
-        q4: "Are you worried about your partner’s access to your phone?",
-        q5: "Is anyone preventing you from leaving?",
-        q6: "Do you have children at risk?",
-        q7: "Do you feel isolated from help?",
-        q8: "Would you like immediate local resources?"
+        sub: "Clock & Stopwatch",
+        exit: "Home",
+        tabClock: "Clock", tabStop: "Stopwatch", start:"Start", lap:"Lap", reset:"Reset",
+        pinEnter:"Enter PIN", pinChange:"Change PIN", pinCurrent:"Current PIN",
+        pinNew:"New PIN (min 4)", pinConfirmNew:"Confirm New PIN",
+        confirm:"Confirm", cancel:"Cancel",
+        pinDefaultNote:"Default PIN: 1111. Change in Profile.",
+        errBadPin:"Incorrect PIN.", errShortPin:"New PIN must be at least 4 digits.", errNoMatch:"PINs do not match.",
+        signedIn:"Signed in as", trust:"Trust", lock:"Lock",
+        tabs: { home:"Home", check:"Check-In", res:"Resources", profile:"Profile" },
+        welcome:"Welcome", introA:"Hi", introB:"Your trust score is", percent:"%",
+        goCheck:"Go to Check-In", saveAll:"Save", autoHide:"Switching apps will auto-hide this screen.",
+        checkTitle:"Safety Check-In", risk:"Risk", trust2:"Trust", saveCheck:"Save Check-In", clear:"Clear",
+        resTitle:"My Resources", resAdd:"Add Resource", phTitle:"Title (e.g., Shelter)", phDesc:"Description", phLink:"Link (https://…)", del:"Delete",
+        profileTitle:"Profile", displayName:"Display Name", namePh:"Your name (optional)", saveProfile:"Save Profile",
+        changePIN:"Change PIN", export:"Export Data", exportBtn:"Export JSON",
+        footer:"Privacy-first support", clearData:"Clear Data",
+        q1:"Are you currently safe where you are?",
+        q2:"Has someone threatened you recently?",
+        q3:"Have you experienced physical harm in past month?",
+        q4:"Are you worried about your partner’s access to your phone?",
+        q5:"Is anyone preventing you from leaving?",
+        q6:"Do you have children at risk?",
+        q7:"Do you feel isolated from help?",
+        q8:"Would you like immediate local resources?"
       },
       es: {
-        appSub: "Mantente enfocado",
-        exit: "Salir",
-        panic: "Pánico",
-        decoyCaption: "Temporizador de enfoque",
-        start: "Iniciar", pause: "Pausar", reset: "Reiniciar",
-        pinEnter: "Introduce el PIN",
-        pinChange: "Cambiar PIN",
-        pinCurrent: "PIN actual",
-        pinNew: "Nuevo PIN (mín. 4)",
-        pinConfirmNew: "Confirmar PIN",
-        confirm: "Confirmar", cancel: "Cancelar",
-        pinDefaultNote: "PIN predeterminado: 1111. Cámbialo en Perfil.",
-        errBadPin: "PIN incorrecto.",
-        errShortPin: "El PIN nuevo debe tener al menos 4 dígitos.",
-        errNoMatch: "Los PIN no coinciden.",
-        signedInAs: "Sesión iniciada como",
-        trust: "Confianza",
-        lock: "Bloquear",
-        tabs: { home: "Inicio", check: "Revisión", res: "Recursos", profile: "Perfil" },
-        welcome: "Bienvenido/a",
-        homeIntroA: "Hola", homeIntroB: "Tu nivel de confianza es", percent: "%",
-        goCheck: "Ir a Revisión",
-        saveAll: "Guardar",
-        autoHide: "Al cambiar de app, esta pantalla se oculta automáticamente.",
-        checkTitle: "Revisión de seguridad",
-        risk: "Riesgo",
-        trust2: "Confianza",
-        saveCheck: "Guardar revisión",
-        clear: "Limpiar",
-        resTitle: "Mis recursos",
-        resAdd: "Agregar recurso",
-        resPhTitle: "Título (p. ej., Refugio)",
-        resPhDesc: "Descripción",
-        resPhLink: "Enlace (https://…)",
-        del: "Eliminar",
-        profileTitle: "Perfil",
-        displayName: "Nombre a mostrar",
-        namePh: "Tu nombre (opcional)",
-        saveProfile: "Guardar perfil",
-        changePIN: "Cambiar PIN",
-        export: "Exportar datos",
-        exportBtn: "Exportar JSON",
-        footerNote: "Soporte con privacidad primero",
-        q1: "¿Estás seguro/a donde estás ahora?",
-        q2: "¿Alguien te ha amenazado recientemente?",
-        q3: "¿Has sufrido daño físico en el último mes?",
-        q4: "¿Te preocupa que tu pareja tenga acceso a tu teléfono?",
-        q5: "¿Alguien te impide salir?",
-        q6: "¿Tienes hijos/as en riesgo?",
-        q7: "¿Te sientes aislado/a de la ayuda?",
-        q8: "¿Te gustaría ver recursos locales inmediatos?"
+        sub: "Reloj y cronómetro",
+        exit: "Inicio",
+        tabClock: "Reloj", tabStop: "Cronómetro", start:"Iniciar", lap:"Vuelta", reset:"Reiniciar",
+        pinEnter:"Introduce el PIN", pinChange:"Cambiar PIN", pinCurrent:"PIN actual",
+        pinNew:"Nuevo PIN (mín. 4)", pinConfirmNew:"Confirmar PIN",
+        confirm:"Confirmar", cancel:"Cancelar",
+        pinDefaultNote:"PIN predeterminado: 1111. Cámbialo en Perfil.",
+        errBadPin:"PIN incorrecto.", errShortPin:"El PIN nuevo debe tener al menos 4 dígitos.", errNoMatch:"Los PIN no coinciden.",
+        signedIn:"Sesión iniciada como", trust:"Confianza", lock:"Bloquear",
+        tabs: { home:"Inicio", check:"Revisión", res:"Recursos", profile:"Perfil" },
+        welcome:"Bienvenido/a", introA:"Hola", introB:"Tu nivel de confianza es", percent:"%",
+        goCheck:"Ir a Revisión", saveAll:"Guardar", autoHide:"Al cambiar de app, esta pantalla se oculta automáticamente.",
+        checkTitle:"Revisión de seguridad", risk:"Riesgo", trust2:"Confianza", saveCheck:"Guardar revisión", clear:"Limpiar",
+        resTitle:"Mis recursos", resAdd:"Agregar recurso", phTitle:"Título (p. ej., Refugio)", phDesc:"Descripción", phLink:"Enlace (https://…)", del:"Eliminar",
+        profileTitle:"Perfil", displayName:"Nombre a mostrar", namePh:"Tu nombre (opcional)", saveProfile:"Guardar perfil",
+        changePIN:"Cambiar PIN", export:"Exportar datos", exportBtn:"Exportar JSON",
+        footer:"Soporte con privacidad primero", clearData:"Borrar datos",
+        q1:"¿Estás seguro/a donde estás ahora?",
+        q2:"¿Alguien te ha amenazado recientemente?",
+        q3:"¿Has sufrido daño físico en el último mes?",
+        q4:"¿Te preocupa que tu pareja tenga acceso a tu teléfono?",
+        q5:"¿Alguien te impide salir?",
+        q6:"¿Tienes hijos/as en riesgo?",
+        q7:"¿Te sientes aislado/a de la ayuda?",
+        q8:"¿Te gustaría ver recursos locales inmediatos?"
       }
     };
 
-    // ====== HELPERS ======
-    const $ = (id)=>document.getElementById(id);
-    const loadJSON = (k, f)=>{ try{ const v = JSON.parse(localStorage.getItem(k)); return v??f; }catch{ return f; } };
+    // ====== helpers ======
+    const $ = id => document.getElementById(id);
+    const loadJSON = (k, f)=>{ try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? f; } catch { return f; } };
     const saveJSON = (k, v)=> localStorage.setItem(k, JSON.stringify(v));
     const getPIN = ()=> localStorage.getItem(LS.pin) || DEFAULT_PIN;
     const setPIN = (p)=> localStorage.setItem(LS.pin, p);
-    const getLang = ()=>{
-      const saved = localStorage.getItem(LS.lang);
-      if (saved) return saved;
-      return (navigator.language||"en").toLowerCase().startsWith("es") ? "es" : "en";
-    };
-    const setLang = (l)=> localStorage.setItem(LS.lang, l);
+    const getLang = ()=> localStorage.getItem(LS.lang) || ((navigator.language||"en").toLowerCase().startsWith("es") ? "es" : "en");
+    const setLang = l => localStorage.setItem(LS.lang, l);
 
-    // ====== STATE ======
+    // ====== state ======
     let unlocked = false;
     let profile = loadJSON(LS.profile, { name:"Anonymous", trust:100 });
-    let answers = loadJSON(LS.answers, {});
-    let resources = loadJSON(LS.resources, []);
-    let longPressTimer = null;
+    let answers  = loadJSON(LS.answers, {});
+    let resources= loadJSON(LS.resources, []);
     let lang = getLang();
 
-    // ====== REFS ======
-    // header + decoy
+    // ====== refs ======
     const decoyView = $("decoyView");
     const realApp = $("realApp");
-    const quickExitBtn = $("quickExitBtn");
-    const panicBtn = $("panicBtn");
     const decoyTitle = $("decoyTitle");
     const hdrSub = $("hdrSub");
+    const quickExitBtn = $("quickExitBtn");
     const btnExitLabel = $("btnExitLabel");
-    const btnPanicLabel = $("btnPanicLabel");
-    const decoyCaption = $("decoyCaption");
-    const timerDisplay = $("timerDisplay");
-    const timerStart = $("timerStart");
-    const timerPause = $("timerPause");
-    const timerReset = $("timerReset");
-    const btnStart = $("btnStart");
-    const btnPause = $("btnPause");
-    const btnReset = $("btnReset");
-    const langEN = $("langEN");
-    const langES = $("langES");
+    const footerNote = $("footerNote");
+    const langEN = $("langEN"); const langES = $("langES");
+    const decoyTabClock = $("decoyTabClock");
+    const decoyTabStopwatch = $("decoyTabStopwatch");
+    const clockPane = $("clockPane"); const stopwatchPane = $("stopwatchPane");
+    const liveClock = $("liveClock"); const liveDate  = $("liveDate");
+    const swDisplay = $("swDisplay"); const swStart = $("swStart"); const swLap = $("swLap"); const swReset = $("swReset");
+    const lblStart = $("lblStart"); const lblLap = $("lblLap"); const lblReset = $("lblReset");
+    const swLaps  = $("swLaps");
 
-    // pin modal
-    const pinModal = $("pinModal");
-    const pinForm = $("pinForm");
-    const pinInput = $("pinInput");
-    const pinError = $("pinError");
-    const pinCancelBtn = $("pinCancelBtn");
-    const pinChangeFields = $("pinChangeFields");
-    const openChangePin = $("openChangePin");
-    const oldPin = $("oldPin");
-    const newPin = $("newPin");
-    const newPin2 = $("newPin2");
-    const pinModalTitle = $("pinModalTitle");
-    const pinConfirmBtn = $("pinConfirmBtn");
-    const pinNote = $("pinNote");
+    // PIN
+    const pinModal = $("pinModal"); const pinModalTitle = $("pinModalTitle");
+    const pinForm = $("pinForm"); const pinInput = $("pinInput"); const pinError = $("pinError"); const pinCancelBtn = $("pinCancelBtn");
+    const pinChangeFields = $("pinChangeFields"); const oldPin = $("oldPin"); const newPin = $("newPin"); const newPin2 = $("newPin2"); const pinConfirmBtn = $("pinConfirmBtn"); const pinNote = $("pinNote");
 
-    // real app
+    // Inside app
     const lockBtn = $("lockBtn");
     const signedInAs = $("signedInAs");
     const profileName = $("profileName");
-    const trustLabel = $("trustLabel");
-    const trustBadge = $("trustBadge");
-    const btnLock = $("btnLock");
-    const tabBtnHome = $("tabBtnHome");
-    const tabBtnCheck = $("tabBtnCheck");
-    const tabBtnRes = $("tabBtnRes");
-    const tabBtnProfile = $("tabBtnProfile");
-
-    const tabViews = { home:$("tab-home"), checkin:$("tab-checkin"), resources:$("tab-resources"), profile:$("tab-profile") };
-    const tabs = [tabBtnHome, tabBtnCheck, tabBtnRes, tabBtnProfile];
-
-    // home
-    const homeTitle = $("homeTitle");
-    const homeIntro = $("homeIntro");
-    const homeName = $("homeName");
-    const homeTrust = $("homeTrust");
-    const btnGoCheck = $("btnGoCheck");
-    const btnSaveAll = $("btnSaveAll");
-    const autoHideNote = $("autoHideNote");
-
-    // check-in
-    const checkTitle = $("checkTitle");
-    const questionsBox = $("questions");
-    const riskLabel = $("riskLabel");
+    const trustLabel  = $("trustLabel");
     const trustLabel2 = $("trustLabel2");
-    const riskPct = $("riskPct");
-    const trustPct = $("trustPct");
-    const saveCheckIn = $("saveCheckIn");
-    const clearCheckIn = $("clearCheckIn");
-    const btnSaveCheck = $("btnSaveCheck");
-    const btnClear = $("btnClear");
+    const trustBadge  = $("trustBadge");
+    const btnLock = $("btnLock");
 
-    // resources
-    const resTitle = $("resTitle");
-    const resForm = $("resourceForm");
-    const resTitleInput = $("resTitleInput");
-    const resDesc = $("resDesc");
-    const resUrl = $("resUrl");
-    const btnAddResource = $("btnAddResource");
-    const resourceList = $("resourceList");
+    const tabBtnHome = $("tabBtnHome"); const tabBtnCheck = $("tabBtnCheck"); const tabBtnRes = $("tabBtnRes"); const tabBtnProfile = $("tabBtnProfile");
+    const tabViews = { home:$("tab-home"), checkin:$("tab-checkin"), resources:$("tab-resources"), profile:$("tab-profile") };
 
-    // profile
-    const profileTitle = $("profileTitle");
-    const lblDisplayName = $("lblDisplayName");
-    const displayNameInput = $("displayNameInput");
-    const saveProfile = $("saveProfile");
-    const btnSaveProfile = $("btnSaveProfile");
-    const lblChangePIN = $("lblChangePIN");
-    const btnChangePIN = $("btnChangePIN");
-    const lblExport = $("lblExport");
-    const exportJson = $("exportJson");
-    const btnExport = $("btnExport");
-    const footerNote = $("footerNote");
+    const homeTitle = $("homeTitle"); const homeIntro = $("homeIntro"); const goToCheckIn = $("goToCheckIn"); const saveAll = $("saveAll"); const btnGoCheck = $("btnGoCheck"); const btnSaveAll = $("btnSaveAll"); const autoHideNote = $("autoHideNote");
 
-    // ====== i18n APPLY ======
-    function applyLang() {
+    const questionsBox = $("questions"); const checkTitle = $("checkTitle"); const riskLabel = $("riskLabel"); const riskPct = $("riskPct"); const trustPct = $("trustPct"); const saveCheckIn = $("saveCheckIn"); const clearCheckIn = $("clearCheckIn"); const btnSaveCheck = $("btnSaveCheck"); const btnClear = $("btnClear");
+
+    const resTitle = $("resTitle"); const resForm = $("resourceForm"); const resTitleInput = $("resTitleInput"); const resDesc = $("resDesc"); const resUrl = $("resUrl"); const btnAddResource = $("btnAddResource"); const resourceList = $("resourceList");
+
+    const profileTitle = $("profileTitle"); const lblDisplayName = $("lblDisplayName"); const displayNameInput = $("displayNameInput"); const saveProfile = $("saveProfile"); const btnSaveProfile = $("btnSaveProfile"); const lblChangePIN = $("lblChangePIN"); const btnChangePIN = $("btnChangePIN");
+    const lblExport = $("lblExport"); const exportJson = $("exportJson"); const btnExport = $("btnExport"); const clearData = $("clearData"); const lblClear = $("lblClear"); const btnClearData = $("btnClearData");
+
+    // ====== i18n apply ======
+    function applyLang(){
       const S = STR[lang];
-      hdrSub.textContent = S.appSub;
-      btnExitLabel.textContent = S.exit;
-      btnPanicLabel.textContent = S.panic;
-      decoyCaption.textContent = S.decoyCaption;
-      btnStart.textContent = S.start; btnPause.textContent = S.pause; btnReset.textContent = S.reset;
+      hdrSub.textContent = S.sub; btnExitLabel.textContent = S.exit;
+      decoyTabClock.textContent = S.tabClock; decoyTabStopwatch.textContent = S.tabStop;
+      lblStart.textContent = S.start; lblLap.textContent = S.lap; lblReset.textContent = S.reset;
 
-      pinModalTitle.textContent = S.pinEnter;
-      oldPin.placeholder = S.pinCurrent;
-      newPin.placeholder = S.pinNew;
-      newPin2.placeholder = S.pinConfirmNew;
-      pinConfirmBtn.textContent = S.confirm;
-      pinCancelBtn.textContent = S.cancel;
-      pinNote.textContent = S.pinDefaultNote;
+      pinModalTitle.textContent = S.pinEnter; pinConfirmBtn.textContent = S.confirm; pinCancelBtn.textContent = S.cancel;
+      oldPin.placeholder = S.pinCurrent; newPin.placeholder = S.pinNew; newPin2.placeholder = S.pinConfirmNew; pinNote.textContent = S.pinDefaultNote;
 
-      signedInAs.textContent = S.signedInAs;
-      trustLabel.textContent = S.trust;
-      btnLock.textContent = S.lock;
+      signedInAs.textContent = S.signedIn; trustLabel.textContent = S.trust; trustLabel2.textContent = S.trust2; btnLock.textContent = S.lock;
 
-      tabBtnHome.textContent = S.tabs.home;
-      tabBtnCheck.textContent = S.tabs.check;
-      tabBtnRes.textContent = S.tabs.res;
-      tabBtnProfile.textContent = S.tabs.profile;
+      tabBtnHome.textContent = S.tabs.home; tabBtnCheck.textContent = S.tabs.check; tabBtnRes.textContent = S.tabs.res; tabBtnProfile.textContent = S.tabs.profile;
 
       homeTitle.textContent = S.welcome;
-      homeIntro.innerHTML = `${S.homeIntroA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.homeIntroB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
-      // rebind refs replaced by innerHTML
-      window.homeName = document.getElementById("homeName");
-      window.homeTrust = document.getElementById("homeTrust");
+      homeIntro.innerHTML = `${S.introA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.introB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
 
-      btnGoCheck.textContent = S.goCheck;
-      btnSaveAll.textContent = S.saveAll;
-      autoHideNote.textContent = S.autoHide;
+      btnGoCheck.textContent = S.goCheck; btnSaveAll.textContent = S.saveAll; autoHideNote.textContent = S.autoHide;
 
-      checkTitle.textContent = S.checkTitle;
-      riskLabel.textContent = S.risk;
-      trustLabel2.textContent = S.trust2;
-      btnSaveCheck.textContent = S.saveCheck;
-      btnClear.textContent = S.clear;
+      checkTitle.textContent = S.checkTitle; riskLabel.textContent = S.risk; btnSaveCheck.textContent = S.saveCheck; btnClear.textContent = S.clear;
 
-      resTitle.textContent = S.resTitle;
-      resTitleInput.placeholder = S.resPhTitle;
-      resDesc.placeholder = S.resPhDesc;
-      resUrl.placeholder = S.resPhLink;
-      btnAddResource.textContent = S.resAdd;
+      resTitle.textContent = S.resTitle; resTitleInput.placeholder = S.phTitle; resDesc.placeholder = S.phDesc; resUrl.placeholder = S.phLink; btnAddResource.textContent = S.resAdd;
 
-      profileTitle.textContent = S.profileTitle;
-      lblDisplayName.textContent = S.displayName;
-      displayNameInput.placeholder = S.namePh;
-      btnSaveProfile.textContent = S.saveProfile;
-      lblChangePIN.textContent = S.changePIN;
-      btnChangePIN.textContent = S.changePIN;
-      lblExport.textContent = S.export;
-      btnExport.textContent = S.exportBtn;
+      profileTitle.textContent = S.profileTitle; lblDisplayName.textContent = S.displayName; displayNameInput.placeholder = S.namePh;
+      btnSaveProfile.textContent = S.saveProfile; lblChangePIN.textContent = S.changePIN; btnChangePIN.textContent = S.changePIN;
+      lblExport.textContent = S.export; btnExport.textContent = S.exportBtn; footerNote.textContent = S.footer; lblClear.textContent = S.clearData; btnClearData.textContent = S.clearData;
 
-      footerNote.textContent = S.footerNote;
-
-      // highlight lang toggle
       langEN.classList.toggle("lang-active", lang==="en");
       langES.classList.toggle("lang-active", lang==="es");
     }
 
-    // ====== QUICK EXIT / PANIC ======
+    // ====== Quick Exit ======
     quickExitBtn.addEventListener("click", ()=> location.href="https://www.google.com/");
-    panicBtn.addEventListener("click", ()=>{
-      try {
-        localStorage.removeItem(LS.profile);
-        localStorage.removeItem(LS.answers);
-        localStorage.removeItem(LS.resources);
-        localStorage.removeItem(LS.pin);
-      } catch {}
-      profile = { name:"Anonymous", trust:100 };
-      answers = {};
-      resources = [];
-      lockToDecoy();
-    });
 
-    // ====== TIMER (decoy) ======
-    let timerSeconds = 28*60 + 25;
-    let timerInterval = null;
-    const fmt = s=>`${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-    const renderTimer = ()=> timerDisplay.textContent = fmt(timerSeconds);
-    const startTimer = ()=> { if (timerInterval) return; timerInterval=setInterval(()=>{ if (timerSeconds>0){timerSeconds--; renderTimer();} else pauseTimer(); },1000); };
-    const pauseTimer = ()=> { clearInterval(timerInterval); timerInterval=null; };
-    const resetTimer = ()=> { timerSeconds = 28*60+25; renderTimer(); };
-    timerStart.addEventListener("click", startTimer);
-    timerPause.addEventListener("click", pauseTimer);
-    timerReset.addEventListener("click", resetTimer);
-    renderTimer();
+    // ====== Decoy: Clock ======
+    function pad(n){ return String(n).padStart(2,"0"); }
+    function renderClock(){
+      const d = new Date();
+      const h = pad(d.getHours()), m = pad(d.getMinutes()), s = pad(d.getSeconds());
+      liveClock.textContent = `${h}:${m}:${s}`;
+      const opts = { weekday:'short', month:'short', day:'numeric' };
+      liveDate.textContent = d.toLocaleDateString(lang==='es'?'es-ES':'en-US', opts);
+    }
+    setInterval(renderClock, 1000); renderClock();
 
-    // ====== LONG PRESS TO UNLOCK ======
+    // ====== Decoy: Stopwatch ======
+    let swRunning = false, swStartT = 0, swElapsed = 0, swRAF = null;
+    function fmtMillis(ms){
+      const total = Math.floor(ms/10); // centiseconds
+      const cs = total % 100;
+      const sec = Math.floor(total/100)%60;
+      const min = Math.floor(total/6000)%60;
+      const hr  = Math.floor(total/360000);
+      const hh = hr>0 ? String(hr).padStart(2,"0")+":" : "";
+      return `${hh}${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}.${String(cs).padStart(2,"0")}`;
+    }
+    function swTick(){
+      const ms = swElapsed + (swRunning ? (performance.now()-swStartT) : 0);
+      swDisplay.textContent = fmtMillis(ms);
+      if (swRunning) swRAF = requestAnimationFrame(swTick);
+    }
+    function swToggle(){
+      if (!swRunning){ swRunning = true; swStartT = performance.now(); lblStart.textContent = (lang==='es'?'Pausar':'Pause'); swTick(); }
+      else { swRunning = false; swElapsed += (performance.now()-swStartT); cancelAnimationFrame(swRAF); lblStart.textContent = (lang==='es'?'Iniciar':'Start'); swTick(); }
+    }
+    function swAddLap(){
+      const li = document.createElement("li");
+      li.textContent = swDisplay.textContent;
+      swLaps.prepend(li);
+    }
+    function swResetAll(){
+      swRunning=false; cancelAnimationFrame(swRAF); swElapsed=0; swDisplay.textContent="00:00.00"; lblStart.textContent = STR[lang].start; swLaps.innerHTML="";
+    }
+    swStart.addEventListener("click", swToggle);
+    swLap.addEventListener("click", swAddLap);
+    swReset.addEventListener("click", swResetAll);
+
+    // Switch decoy tabs
+    function setDecoyTab(which){
+      const activeClock = which==='clock';
+      decoyTabClock.classList.toggle("bg-blue-600", activeClock);
+      decoyTabClock.classList.toggle("text-white", activeClock);
+      decoyTabClock.classList.toggle("btn-ghost", !activeClock);
+      decoyTabStopwatch.classList.toggle("bg-blue-600", !activeClock);
+      decoyTabStopwatch.classList.toggle("text-white", !activeClock);
+      decoyTabStopwatch.classList.toggle("btn-ghost", activeClock);
+      clockPane.classList.toggle("hidden-soft", !activeClock);
+      stopwatchPane.classList.toggle("hidden-soft", activeClock);
+    }
+    decoyTabClock.addEventListener("click", ()=> setDecoyTab('clock'));
+    decoyTabStopwatch.addEventListener("click", ()=> setDecoyTab('stopwatch'));
+    setDecoyTab('clock');
+
+    // ====== Long-press to Unlock (on digits) ======
     const LP_MS = 800;
     function openPIN(mode="enter"){
-      pinError.textContent="";
-      pinInput.value="";
-      oldPin.value = newPin.value = newPin2.value = "";
+      const S = STR[lang];
+      pinError.textContent=""; pinInput.value=""; oldPin.value = newPin.value = newPin2.value = "";
       pinChangeFields.classList.add("hidden-soft");
-      pinModalTitle.textContent = (mode==="change") ? STR[lang].pinChange : STR[lang].pinEnter;
+      pinModalTitle.textContent = (mode==="change") ? S.pinChange : S.pinEnter;
       if (mode==="change") pinChangeFields.classList.remove("hidden-soft");
       pinModal.classList.remove("hidden-soft");
       setTimeout(()=>pinInput.focus(), 50);
@@ -531,10 +445,9 @@
       ["pointerdown","touchstart","mousedown"].forEach(e=> el.addEventListener(e,start));
       ["pointerup","pointerleave","touchend","touchcancel","mouseup","mouseleave"].forEach(e=> el.addEventListener(e,cancel));
     }
-    armLongPress(decoyTitle);
-    armLongPress(timerDisplay);
+    armLongPress(liveClock);
+    armLongPress(swDisplay);
     pinCancelBtn.addEventListener("click", closePIN);
-
     pinForm.addEventListener("submit",(e)=>{
       e.preventDefault();
       const mode = pinForm.dataset.mode || "enter";
@@ -546,37 +459,33 @@
         if (oldPin.value !== getPIN()){ pinError.textContent = S.errBadPin; return; }
         if ((newPin.value||"").length < 4){ pinError.textContent = S.errShortPin; return; }
         if (newPin.value !== newPin2.value){ pinError.textContent = S.errNoMatch; return; }
-        setPIN(newPin.value);
-        closePIN();
+        setPIN(newPin.value); closePIN();
       }
     });
-    openChangePin.addEventListener("click", ()=> openPIN("change"));
 
-    // ====== LOCK / UNLOCK / AUTOHIDE ======
-    function unlockReal(){ unlocked = true; decoyView.classList.add("hidden-soft"); realApp.classList.remove("hidden-soft"); setTab("home"); refreshUI(); }
+    // ====== Inside app behavior ======
+    function unlockReal(){ unlocked = true; decoyView.classList.add("hidden-soft"); realApp.classList.remove("hidden-soft"); setTab('home'); refreshUI(); }
     function lockToDecoy(){ unlocked = false; realApp.classList.add("hidden-soft"); decoyView.classList.remove("hidden-soft"); }
-    $("lockBtn").addEventListener("click", lockToDecoy);
+    lockBtn.addEventListener("click", lockToDecoy);
     document.addEventListener("visibilitychange", ()=> { if (document.hidden && unlocked) lockToDecoy(); });
 
-    // ====== TABS ======
     function setTab(name){
-      const btns = { home:tabBtnHome, checkin:tabBtnCheck, resources:tabBtnRes, profile:tabBtnProfile };
+      const btns = {home:tabBtnHome, checkin:tabBtnCheck, resources:tabBtnRes, profile:tabBtnProfile};
       Object.keys(btns).forEach(k=>{
-        const b = btns[k];
-        const active = k===name;
+        const b = btns[k]; const active = k===name;
         b.classList.toggle("bg-blue-600", active);
         b.classList.toggle("text-white", active);
-        b.classList.toggle("card", !active);
+        b.classList.toggle("btn-ghost", !active);
       });
       Object.entries(tabViews).forEach(([k,el])=> el.classList.toggle("hidden-soft", k!==name));
     }
-    tabBtnHome.addEventListener("click", ()=> setTab("home"));
-    tabBtnCheck.addEventListener("click", ()=> setTab("checkin"));
-    tabBtnRes.addEventListener("click", ()=> setTab("resources"));
-    tabBtnProfile.addEventListener("click", ()=> setTab("profile"));
-    $("goToCheckIn").addEventListener("click", ()=> setTab("checkin"));
+    tabBtnHome.addEventListener("click", ()=> setTab('home'));
+    tabBtnCheck.addEventListener("click", ()=> setTab('checkin'));
+    tabBtnRes.addEventListener("click", ()=> setTab('resources'));
+    tabBtnProfile.addEventListener("click", ()=> setTab('profile'));
+    goToCheckIn.addEventListener("click", ()=> setTab('checkin'));
 
-    // ====== CHECK-IN ======
+    // ====== Check-in ======
     const QUESTIONS = [
       { id:"q1", key:"q1", invert:true },
       { id:"q2", key:"q2" },
@@ -587,62 +496,59 @@
       { id:"q7", key:"q7" },
       { id:"q8", key:"q8" }
     ];
-
     function buildQuestions(){
       questionsBox.innerHTML="";
       QUESTIONS.forEach((q,i)=>{
         const row = document.createElement("div"); row.className="p-3 card";
         const label = document.createElement("div"); label.className="text-sm mb-2"; label.textContent = `${i+1}. ${STR[lang][q.key]}`;
-        const toggle = document.createElement("div"); toggle.className="toggle flex overflow-hidden";
-        const yes = document.createElement("button"); yes.type="button"; yes.className="opt"; yes.textContent="Yes";
-        const no  = document.createElement("button"); no.type="button";  no.className="opt";  no.textContent="No";
-        // translate yes/no
-        if (lang==="es"){ yes.textContent="Sí"; no.textContent="No"; }
-        toggle.append(yes,no); row.append(label,toggle); questionsBox.append(row);
-
+        const wrap = document.createElement("div"); wrap.className="flex gap-2";
+        const yes = document.createElement("button"); yes.type="button"; yes.className="btn btn-ghost flex-1"; yes.textContent = lang==='es'?'Sí':'Yes';
+        const no  = document.createElement("button");  no.type="button";  no.className="btn btn-ghost flex-1";  no.textContent  = "No";
+        wrap.append(yes,no); row.append(label,wrap); questionsBox.append(row);
         const cur = (answers[q.id]||"").toLowerCase();
-        if (cur==="yes") yes.classList.add("active-yes");
-        if (cur==="no")  no.classList.add("active-no");
-
-        const mark = ()=>{ yes.classList.toggle("active-yes", answers[q.id]==="yes"); no.classList.toggle("active-no", answers[q.id]==="no"); };
+        if(cur==="yes") yes.classList.add("bg-green-600","text-white");
+        if(cur==="no")  no.classList.add("bg-rose-600","text-white");
+        function mark(){
+          yes.classList.toggle("bg-green-600", answers[q.id]==="yes");
+          yes.classList.toggle("text-white",  answers[q.id]==="yes");
+          no.classList .toggle("bg-rose-600",  answers[q.id]==="no");
+          no.classList .toggle("text-white",   answers[q.id]==="no");
+        }
         yes.addEventListener("click", ()=>{ answers[q.id]="yes"; mark(); updateScores(); saveJSON(LS.answers,answers); });
-        no .addEventListener("click", ()=>{ answers[q.id]="no";  mark(); updateScores(); saveJSON(LS.answers,answers); });
+        no .addEventListener("click",  ()=>{ answers[q.id]="no";  mark(); updateScores(); saveJSON(LS.answers,answers); });
       });
     }
     function computeRiskTrust(){
       let risky=0;
       QUESTIONS.forEach(q=>{
-        const a=(answers[q.id]||"").toLowerCase();
+        const a = (answers[q.id]||"").toLowerCase();
         if(!a) return;
         if(q.invert){ if(a==="no") risky++; } else { if(a==="yes") risky++; }
       });
-      const risk = Math.round((risky/QUESTIONS.length)*100);
+      const risk  = Math.round((risky/QUESTIONS.length)*100);
       const trust = 100 - risk;
       return { risk, trust };
     }
     function updateScores(){
       const { risk, trust } = computeRiskTrust();
-      riskPct.textContent = `${risk}%`;
-      trustPct.textContent = `${trust}%`;
-      trustBadge.textContent = `${trust}%`;
+      riskPct.textContent = `${risk}%`; trustPct.textContent = `${trust}%`; trustBadge.textContent = `${trust}%`;
       (document.getElementById("homeTrust")||{}).textContent = `${trust}`;
       profile.trust = trust;
     }
     saveCheckIn.addEventListener("click", ()=> { saveJSON(LS.answers,answers); updateScores(); });
     clearCheckIn.addEventListener("click", ()=> { answers={}; saveJSON(LS.answers,answers); buildQuestions(); updateScores(); });
 
-    // ====== RESOURCES ======
+    // ====== Resources ======
     function renderResources(){
       resourceList.innerHTML="";
-      if(!Array.isArray(resources)) resources=[];
-      resources.forEach((r,i)=>{
+      (resources||[]).forEach((r,i)=>{
         const li = document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
         const txt = document.createElement("div");
         const t = document.createElement("div"); t.className="font-semibold"; t.textContent=r.title||"Untitled";
         const d = document.createElement("div"); d.className="text-sm text-gray-300"; d.textContent=r.desc||"";
         const u = document.createElement("a"); u.className="text-blue-400 underline text-sm"; u.href=r.url||"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent=r.url||"";
         txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
-        const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent= STR[lang].del;
+        const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent=STR[lang].del;
         del.addEventListener("click", ()=>{ resources.splice(i,1); saveJSON(LS.resources,resources); renderResources(); });
         li.append(txt,del); resourceList.append(li);
       });
@@ -655,20 +561,15 @@
       resTitleInput.value = resDesc.value = resUrl.value = ""; renderResources();
     });
 
-    // ====== PROFILE ======
+    // ====== Profile / Data ======
     function refreshUI(){
       profileName.textContent = profile.name || "Anonymous";
-      // update intro line safely
       const S = STR[lang];
-      homeIntro.innerHTML = `${S.homeIntroA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.homeIntroB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
+      homeIntro.innerHTML = `${S.introA} <span id="homeName">${profile.name||"Anonymous"}</span>. ${S.introB} <span id="homeTrust">${profile.trust??100}</span>${S.percent}.`;
       displayNameInput.value = profile.name || "";
       buildQuestions(); updateScores(); renderResources();
     }
-    saveProfile.addEventListener("click", ()=>{
-      profile.name = displayNameInput.value.trim() || "Anonymous";
-      saveJSON(LS.profile, profile);
-      refreshUI();
-    });
+    saveProfile.addEventListener("click", ()=>{ profile.name = displayNameInput.value.trim() || "Anonymous"; saveJSON(LS.profile, profile); refreshUI(); });
     exportJson.addEventListener("click", ()=>{
       const payload = {
         version: APP_VERSION,
@@ -681,30 +582,95 @@
       const a = document.createElement("a"); a.href=url; a.download="timeout-data.json"; document.body.append(a); a.click();
       setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },0);
     });
-
-    // ====== SAVE ALL ======
-    btnSaveAll.addEventListener("click", ()=>{
-      saveJSON(LS.profile, profile);
-      saveJSON(LS.answers, answers);
-      saveJSON(LS.resources, resources);
+    clearData.addEventListener("click", ()=>{
+      try {
+        localStorage.removeItem(LS.profile);
+        localStorage.removeItem(LS.answers);
+        localStorage.removeItem(LS.resources);
+        localStorage.removeItem(LS.pin);
+      } catch {}
+      profile = { name:"Anonymous", trust:100 }; answers = {}; resources = [];
+      lockToDecoy();
     });
+    saveAll.addEventListener("click", ()=>{ saveJSON(LS.profile, profile); saveJSON(LS.answers, answers); saveJSON(LS.resources, resources); });
 
-    // ====== LANG EVENTS ======
-    function switchLang(to){
-      lang = to; setLang(lang);
-      applyLang();
-      buildQuestions(); // rebuild yes/no labels too
-    }
+    // ====== Language switch ======
+    function switchLang(to){ lang = to; setLang(lang); applyLang(); buildQuestions(); }
     langEN.addEventListener("click", ()=> switchLang("en"));
     langES.addEventListener("click", ()=> switchLang("es"));
 
-    // ====== INIT ======
+    // ====== Screen Wake Lock (keep tablet screen on) ======
+    let wakeLock = null;
+    async function requestWakeLock(){
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', ()=>{ /* released */ });
+        }
+      } catch(e){ /* not supported or denied */ }
+    }
+    function releaseWakeLock(){ try{ wakeLock && wakeLock.release(); wakeLock=null; } catch{} }
+    document.addEventListener('visibilitychange', ()=> {
+      if (!document.hidden) { requestWakeLock(); } else { releaseWakeLock(); }
+      if (document.hidden && unlocked) lockToDecoy();
+    });
+    requestWakeLock();
+
+    // ====== PWA: Inline manifest + service worker (offline support) ======
+    (function setupPWA(){
+      // Manifest (inline)
+      const manifest = {
+        name: "TimeOut",
+        short_name: "TimeOut",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#0a0c11",
+        theme_color: "#0a0c11",
+        icons: []
+      };
+      const mBlob = new Blob([JSON.stringify(manifest)], {type:"application/json"});
+      const mURL = URL.createObjectURL(mBlob);
+      const link = document.createElement('link'); link.rel='manifest'; link.href=mURL; document.head.appendChild(link);
+
+      // Service Worker (inline via Blob)
+      const swCode = `
+        const CACHE = 'timeout-cache-v135';
+        const CORE = ['/', self.registration.scope, 'index.html'];
+        self.addEventListener('install', e=>{
+          e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE.catch?[]:CORE)).catch(()=>{}));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', e=>{
+          e.waitUntil(caches.keys().then(keys=>Promise.all(keys.map(k=>k===CACHE?null:caches.delete(k)))));
+          self.clients.claim();
+        });
+        self.addEventListener('fetch', e=>{
+          const req = e.request;
+          if (req.method !== 'GET') return;
+          e.respondWith(
+            caches.match(req).then(cached=>{
+              const fetchPromise = fetch(req).then(res=>{
+                const copy = res.clone();
+                caches.open(CACHE).then(c=>c.put(req, copy)).catch(()=>{});
+                return res;
+              }).catch(()=>cached);
+              return cached || fetchPromise;
+            })
+          );
+        });
+      `;
+      const swURL = URL.createObjectURL(new Blob([swCode], {type:'text/javascript'}));
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register(swURL).catch(()=>{});
+      }
+    })();
+
+    // ====== Init ======
     if (!localStorage.getItem(LS.pin)) setPIN(DEFAULT_PIN);
     applyLang();
-    renderResources(); buildQuestions(); updateScores();
+    buildQuestions(); updateScores(); renderResources();
     pinModal.addEventListener("click",(e)=>{ if(e.target===pinModal) closePIN(); });
     document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && unlocked) lockToDecoy(); });
-
   </script>
 </body>
 </html>
