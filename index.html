@@ -1,485 +1,591 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TimeOut — Mobile Safety App</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>TimeOut — Discreet Help</title>
+<meta name="description" content="Discreet TimeOut decoy with hidden DV check-in, resources, and trust score." />
+<link rel="icon" href="data:,">
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
-  /* compact custom styles for mobile-first layout */
-  body { background:#0f1724; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:#e6eef8; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-  .app-card { background: linear-gradient(180deg, rgba(17,24,39,0.9), rgba(9,11,16,0.85)); border:1px solid rgba(255,255,255,0.03); border-radius:14px; box-shadow:0 10px 30px rgba(2,6,23,0.6); }
-  .tab { padding:.5rem 1rem; border-radius:9999px; cursor:pointer; }
-  .tab.active { background:linear-gradient(90deg,#6366f1,#4f46e5); color:white; box-shadow:0 6px 18px rgba(79,70,229,0.16); }
-  .q-btn { min-width:64px; border-radius:9999px; padding:.4rem .8rem; }
-  .quick-exit { background:#ef4444; color:white; padding:.5rem 1rem; border-radius:10px;}
-  .decoy { display:none; }
-  .progress-ring { width:72px; height:72px; }
-  @media(min-width:768px){ .container-max { max-width:720px; } }
+  :root{--bg:#0a0f1c;--panel:#0c1426;--muted:#93a4c5;--ink:#e6eef8;--accent:#6366f1;--danger:#e11d48;--ok:#16a34a}
+  html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,#061024 0%, #0a0f1c 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+  .wrap{max-width:480px;margin:0 auto;padding:16px}
+  .app{margin:14px auto;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.04);border-radius:16px;box-shadow:0 12px 40px rgba(2,6,23,.55)}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .hdr{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+  .title{font-weight:800;font-size:18px;user-select:none}
+  .card{padding:14px}
+  .chip{padding:.38rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
+  .btn{border:0;border-radius:12px;padding:.65rem .9rem;font-weight:700}
+  .btn-accent{background:var(--accent);color:white}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--ink)}
+  .btn-danger{background:var(--danger);color:white}
+  .muted{color:var(--muted)}
+  .tiny{font-size:12px}
+  .hidden{display:none}
+  .grid2{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+  .qrow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
+  .pill{border:1px solid rgba(255,255,255,.08);padding:.35rem .6rem;border-radius:999px}
+  .sel{background:var(--accent);color:white}
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1530;border:1px solid rgba(255,255,255,.08);padding:.6rem .9rem;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,.6);z-index:60}
+  .pin-veil{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:80}
+  .pin-box{background:#08122b;border:1px solid rgba(255,255,255,.08);padding:18px;border-radius:12px;width:340px;max-width:94%}
+  input[type="text"],input[type="number"],input[type="url"],input[type="password"]{width:100%;padding:.7rem;border-radius:10px;background:#06142d;border:1px solid rgba(255,255,255,.08);color:var(--ink)}
+  @media (max-width:420px){.title{font-size:16px}.btn{padding:.55rem .75rem}}
 </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-
-  <div class="w-full container-max max-w-md space-y-4">
-    <!-- Header -->
-    <header class="flex items-center justify-between mb-2">
-      <div>
-        <h1 class="text-2xl font-bold">TimeOut</h1>
-        <p class="text-xs text-gray-400">Safety check-in & quick-exit mobile app</p>
+<body>
+<div class="wrap">
+  <div class="app" id="app">
+    <!-- Header (long-press to unlock) -->
+    <div class="hdr row">
+      <div class="title" id="appTitle" title="Long-press to unlock hidden features">TimeOut — Focus Timer</div>
+      <div class="row" style="gap:8px">
+        <button id="quickExit" class="btn btn-ghost tiny" title="Quick Exit to safe page">Quick Exit</button>
+        <button id="panicClear" class="btn btn-ghost tiny" title="Clear local data">Panic</button>
       </div>
-      <div class="text-xs text-gray-400 text-right">
-        <div id="userIdDisplay">local</div>
-        <div id="statusBadge" class="text-xs mt-1 text-green-300">Offline (local)</div>
-      </div>
-    </header>
-
-    <!-- Quick exit / decoy -->
-    <div class="flex justify-between items-center gap-2">
-      <button id="quickExitBtn" class="quick-exit">Quick Exit</button>
-      <button id="decoyBtn" class="bg-gray-700 px-3 py-2 rounded-md text-sm">Decoy Page</button>
     </div>
 
-    <!-- Tabs -->
-    <nav class="flex justify-between space-x-2">
-      <div id="tabLanding" class="tab active">Home</div>
-      <div id="tabCheckin" class="tab">Check-In</div>
-      <div id="tabJournal" class="tab">Journal</div>
-      <div id="tabResources" class="tab">Resources</div>
-      <div id="tabSettings" class="tab">Settings</div>
-    </nav>
+    <!-- Decoy view -->
+    <div id="decoy" class="card">
+      <div class="row">
+        <div>
+          <div class="muted tiny">Focus Session</div>
+          <div id="timerFace" style="font-weight:900;font-size:32px">25:00</div>
+        </div>
+        <div style="text-align:right">
+          <div class="muted tiny">Session</div>
+          <button id="timerStart" class="btn btn-accent tiny" style="margin-top:6px">Start</button>
+        </div>
+      </div>
+      <div class="muted tiny" style="margin-top:8px">Tip: Long-press the title to unlock. Sensitive screens auto-hide on app switch.</div>
+    </div>
 
-    <!-- App body / card -->
-    <main id="appCard" class="app-card p-4">
-      <!-- Landing view -->
-      <section id="view-landing">
-        <h2 class="text-lg font-semibold">Welcome back</h2>
-        <p class="text-sm text-gray-300 mt-1">Tap Check-In to answer the safety questions. Your trust score updates live.</p>
+    <!-- Real app (hidden until PIN) -->
+    <div id="real" class="hidden">
+      <!-- Tabs -->
+      <div class="card row" style="gap:8px;overflow-x:auto">
+        <button class="chip" id="tabHome" aria-pressed="true">Home</button>
+        <button class="chip" id="tabCheck">Check-In</button>
+        <button class="chip" id="tabRes">Resources</button>
+        <button class="chip" id="tabProfile">Profile</button>
+      </div>
 
-        <div class="mt-4 flex items-center justify-between">
+      <!-- Home -->
+      <div class="card" id="viewHome">
+        <div class="row">
           <div>
-            <p class="text-xs text-gray-400">Trust Score</p>
-            <div class="text-2xl font-bold" id="trustScoreText">--</div>
+            <div class="muted tiny">Welcome</div>
+            <div id="dispName" style="font-weight:800;font-size:18px">User</div>
           </div>
-          <div class="text-center">
-            <svg id="trustRing" class="progress-ring" viewBox="0 0 36 36">
-              <path id="ringBg" d="M18 2.1a15.9 15.9 0 1 1 0 31.8 15.9 15.9 0 1 1 0-31.8" fill="none" stroke="#111827" stroke-width="4"></path>
-              <path id="ring" d="M18 2.1a15.9 15.9 0 1 1 0 31.8 15.9 15.9 0 1 1 0-31.8" fill="none" stroke="#6366f1" stroke-width="4" stroke-linecap="round" stroke-dasharray="0 100"></path>
-            </svg>
+          <div style="text-align:right">
+            <div class="muted tiny">Trust</div>
+            <div id="trust" style="font-weight:900">25%</div>
           </div>
         </div>
-
-        <div class="mt-4">
-          <button id="startCheckinBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-2 rounded-md">Start Check-In</button>
+        <div class="muted tiny" style="margin-top:8px">Use Check-In to answer 8 safety questions. Tap Save to store locally and in the cloud (anonymous).</div>
+        <div class="row" style="gap:8px;margin-top:10px">
+          <button id="goCheck" class="btn btn-accent tiny">Start Check-In</button>
+          <button id="saveAll" class="btn btn-ghost tiny">Save</button>
         </div>
-      </section>
+      </div>
 
-      <!-- Check-in view -->
-      <section id="view-checkin" class="hidden">
-        <h2 class="text-lg font-semibold">Check-In — 8 Questions</h2>
-        <p class="text-xs text-gray-400 mt-1">Answer honestly. Tap Save to persist locally (and to cloud if configured).</p>
-
-        <form id="questionsForm" class="space-y-3 mt-3">
-          <!-- Questions (will be populated by JS) -->
-        </form>
-
-        <div class="flex gap-2 mt-3">
-          <button id="saveAnswersBtn" class="flex-1 bg-green-600 py-2 rounded-md">Save</button>
-          <button id="calcScoreBtn" class="flex-1 bg-indigo-600 py-2 rounded-md">Calc Score</button>
+      <!-- Check-In -->
+      <div class="card hidden" id="viewCheck">
+        <div class="row">
+          <h3 style="margin:0">Safety Check — 8 questions</h3>
+          <div class="muted tiny">Risk: <span id="riskPct">0%</span></div>
         </div>
-      </section>
-
-      <!-- Journal view -->
-      <section id="view-journal" class="hidden">
-        <h2 class="text-lg font-semibold">Journal</h2>
-        <p class="text-xs text-gray-400 mt-1">Quick note to yourself. Save locally; export if needed.</p>
-        <textarea id="journalText" class="w-full mt-2 p-3 rounded-md bg-gray-800 text-white h-36" placeholder="Write anything..."></textarea>
-        <div class="flex gap-2 mt-2">
-          <button id="saveJournalBtn" class="flex-1 bg-indigo-600 py-2 rounded-md">Save</button>
-          <button id="exportJournalBtn" class="flex-1 bg-gray-700 py-2 rounded-md">Export</button>
+        <div id="qList" style="margin-top:4px"></div>
+        <div class="row" style="gap:8px;margin-top:10px">
+          <button id="compute" class="btn btn-ghost tiny">Compute</button>
+          <button id="saveAnswers" class="btn btn-accent tiny">Save</button>
         </div>
-      </section>
+      </div>
 
-      <!-- Resources view -->
-      <section id="view-resources" class="hidden">
-        <h2 class="text-lg font-semibold">Resources</h2>
-        <ul class="mt-2 text-sm space-y-2">
-          <li><a class="text-indigo-300" href="tel:18007997233">National Domestic Violence Hotline: 1-800-799-7233</a></li>
-          <li><a class="text-indigo-300" href="https://www.thehotline.org/">thehotline.org</a></li>
-          <li><a class="text-indigo-300" href="https://www.rainn.org/">RAINN (sexual assault)</a></li>
-        </ul>
-      </section>
+      <!-- Resources -->
+      <div class="card hidden" id="viewRes">
+        <h3 style="margin:0">Resources</h3>
+        <div id="resList" class="muted tiny" style="margin-top:6px">No resources yet.</div>
+      </div>
 
-      <!-- Settings view -->
-      <section id="view-settings" class="hidden">
-        <h2 class="text-lg font-semibold">Settings</h2>
-        <p class="text-xs text-gray-400 mt-1">App mode and persistence</p>
+      <!-- Profile -->
+      <div class="card hidden" id="viewProfile">
+        <h3 style="margin:0 0 8px 0">Profile & Settings</h3>
+        <label class="muted tiny">Display name</label>
+        <input id="nameInput" type="text" placeholder="e.g., Alex" />
 
-        <div class="mt-3">
-          <label class="flex items-center justify-between text-sm">
-            <span>Auto-save to localStorage</span>
-            <input id="toggleAutosave" type="checkbox" checked />
-          </label>
-          <label class="flex items-center justify-between text-sm mt-2">
-            <span>Enable cloud sync (Firebase)</span>
-            <input id="toggleCloud" type="checkbox" />
-          </label>
+        <div class="row" style="gap:8px;margin-top:10px">
+          <button id="saveProfile" class="btn btn-accent tiny">Save Profile</button>
+          <button id="exportData" class="btn btn-ghost tiny">Export JSON</button>
         </div>
 
-        <div class="mt-3 space-y-2">
-          <button id="exportDataBtn" class="w-full bg-gray-700 py-2 rounded-md">Export Data</button>
-          <input id="importFile" type="file" accept="application/json" class="w-full text-xs text-gray-400" />
-          <button id="resetDataBtn" class="w-full bg-red-600 py-2 rounded-md">Reset All Local Data</button>
+        <div style="margin-top:16px">
+          <div class="muted tiny" style="margin-bottom:6px">Change unlock PIN</div>
+          <button id="changePin" class="btn btn-ghost tiny">Change PIN</button>
         </div>
 
-        <div class="mt-3 text-xs text-gray-500">
-          <p>Firebase: paste credentials in the top of the file (see comments) to enable cloud save.</p>
+        <div style="margin-top:16px">
+          <h4 style="margin:0 0 6px 0">Add a Resource</h4>
+          <input id="resTitle" type="text" placeholder="Name (e.g., Hotline)" />
+          <input id="resDesc" type="text" placeholder="Short description" style="margin-top:6px" />
+          <input id="resUrl" type="url" placeholder="https://..." style="margin-top:6px" />
+          <div class="row" style="gap:8px;margin-top:8px">
+            <button id="addRes" class="btn btn-accent tiny">Add</button>
+            <button id="clearRes" class="btn btn-ghost tiny">Clear</button>
+          </div>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <!-- Decoy page (quick-exit redirect target inside the app) -->
-      <section id="view-decoy" class="hidden decoy">
-        <h2 class="text-lg font-semibold">News & Weather</h2>
-        <p class="text-xs text-gray-300">Latest headlines</p>
-        <ul id="decoyList" class="mt-2 text-sm space-y-1 text-gray-200">
-          <li>Local news headline #1</li>
-          <li>Local news headline #2</li>
-          <li>Weather: Sunny, 72°F</li>
-        </ul>
-        <div class="mt-3">
-          <button id="returnFromDecoy" class="w-full bg-indigo-600 py-2 rounded-md">Return</button>
-        </div>
-      </section>
-
-    </main>
-
+    <!-- Footer -->
+    <div class="card row" style="border-top:1px solid rgba(255,255,255,.06)">
+      <div class="muted tiny">TimeOut v1.3.5</div>
+      <div class="muted tiny">Long-press title to unlock</div>
+    </div>
   </div>
+</div>
 
-<script>
-/* ==========================
-   TIMEOUT APP - single file
-   - Local persistence via localStorage
-   - Optional Firebase placeholders
-   - Tab UI, 8 questions, trust score
-   ========================== */
+<!-- PIN Modal -->
+<div id="pinVeil" class="pin-veil hidden" aria-hidden="true">
+  <div class="pin-box">
+    <div id="pinTitle" style="font-weight:800;margin-bottom:8px">Enter PIN</div>
+    <input id="pinField" type="password" inputmode="numeric" maxlength="8" placeholder="••••" />
+    <div class="row" style="gap:8px;margin-top:10px;justify-content:center">
+      <button id="pinOk" class="btn btn-accent tiny">OK</button>
+      <button id="pinCancel" class="btn btn-ghost tiny">Cancel</button>
+    </div>
+  </div>
+</div>
 
-/* ----- Configurable Questions ----- */
-const QUESTIONS = [
-  { id: 'q1', text: "Is your partner currently with you?" },
-  { id: 'q2', text: "Have you felt frightened within the last 24 hours?" },
-  { id: 'q3', text: "Has any physical harm occurred recently?" },
-  { id: 'q4', text: "Do you feel safe going home right now?" },
-  { id: 'q5', text: "Have they threatened you or your kids?" },
-  { id: 'q6', text: "Do you have a safe place to go?" },
-  { id: 'q7', text: "Do you have important documents accessible?" },
-  { id: 'q8', text: "Would you like help/resources now?" }
-];
+<!-- Toast -->
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
-/* ----- Storage keys ----- */
-const STORAGE_KEY = 'timeout_app_v1';
-const JOURNAL_KEY = 'timeout_journal_v1';
-
-/* ----- Simple state ----- */
-let STATE = {
-  answers: {},   // qid -> boolean
-  trustScore: 0,
-  journal: '',
-  autosave: true,
-  cloudEnabled: false
+<script type="module">
+/* =========================
+   Firebase (your project)
+   ========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyC3Ga-GhV8xQztnbef7ybPFu4BRtLANtuk",
+  authDomain: "unbrokenpath-630b0.firebaseapp.com",
+  projectId: "unbrokenpath-630b0",
+  storageBucket: "unbrokenpath-630b0.firebasestorage.app",
+  messagingSenderId: "147188865145",
+  appId: "1:147188865145:web:ff1f35a732bf89b31e1ca8",
+  measurementId: "G-0Y8G7SS1BV"
 };
 
-/* ----- DOM refs ----- */
-const refs = {};
-function $(id){ return document.getElementById(id); }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, addDoc, getDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-/* ----- Initialize UI ----- */
-function init() {
-  // Build questions UI
-  const form = $('questionsForm');
-  QUESTIONS.forEach(q => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'flex items-center justify-between bg-gray-800 p-3 rounded-md';
-    wrapper.innerHTML = `
-      <div>
-        <div class="text-sm font-medium">${escapeHtml(q.text)}</div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button type="button" data-q="${q.id}" data-val="yes" class="q-btn bg-green-600 hover:bg-green-700">Yes</button>
-        <button type="button" data-q="${q.id}" data-val="no" class="q-btn bg-gray-700 hover:bg-gray-600">No</button>
-      </div>
-    `;
-    form.appendChild(wrapper);
-  });
+const APP_ID = "timeout-app";           // namespace
+const DEFAULT_PIN = "2580";             // first-run PIN
+const VERSION = "1.3.5";
 
-  // wire tab buttons
-  ['Landing','Checkin','Journal','Resources','Settings'].forEach(name => {
-    $( 'tab' + name ).addEventListener('click', () => switchView(name.toLowerCase()));
-  });
-  $('startCheckinBtn').addEventListener('click', ()=> switchView('checkin'));
-  $('decoyBtn').addEventListener('click', openDecoy);
-  $('quickExitBtn').addEventListener('click', quickExit);
-  $('returnFromDecoy').addEventListener('click', ()=> switchView('landing'));
+/* =============== DOM =============== */
+const appTitle = document.getElementById('appTitle');
+const decoy = document.getElementById('decoy');
+const real = document.getElementById('real');
+const quickExit = document.getElementById('quickExit');
+const panicClear = document.getElementById('panicClear');
+const timerStart = document.getElementById('timerStart');
+const timerFace = document.getElementById('timerFace');
 
-  // question buttons
-  document.querySelectorAll('[data-q]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const qid = e.currentTarget.dataset.q;
-      const val = e.currentTarget.dataset.val === 'yes';
-      STATE.answers[qid] = val;
-      // visual mark
-      const group = document.querySelectorAll(`[data-q="${qid}"]`);
-      group.forEach(b => {
-        if (b.dataset.val === (val ? 'yes' : 'no')) {
-          b.classList.remove('bg-gray-700'); b.classList.add('bg-indigo-600');
-        } else {
-          b.classList.remove('bg-indigo-600'); b.classList.add('bg-gray-700');
-        }
-      });
-      if (STATE.autosave) saveLocal();
-    });
-  });
+const tabHome = document.getElementById('tabHome');
+const tabCheck = document.getElementById('tabCheck');
+const tabRes = document.getElementById('tabRes');
+const tabProfile = document.getElementById('tabProfile');
 
-  // Save, calc, journal, settings
-  $('saveAnswersBtn').addEventListener('click', async ()=> {
-    saveLocal();
-    showMessage('Answers saved.');
-  });
-  $('calcScoreBtn').addEventListener('click', ()=> {
-    computeTrust();
-    showMessage('Trust score updated.');
-  });
+const viewHome = document.getElementById('viewHome');
+const viewCheck = document.getElementById('viewCheck');
+const viewRes = document.getElementById('viewRes');
+const viewProfile = document.getElementById('viewProfile');
 
-  $('saveJournalBtn').addEventListener('click', ()=> {
-    STATE.journal = $('journalText').value || '';
-    localStorage.setItem(JOURNAL_KEY, STATE.journal);
-    showMessage('Journal saved.');
-  });
-  $('exportJournalBtn').addEventListener('click', ()=> {
-    const data = localStorage.getItem(JOURNAL_KEY) || '';
-    downloadFile('journal.txt', data);
-  });
+const dispName = document.getElementById('dispName');
+const trust = document.getElementById('trust');
+const goCheck = document.getElementById('goCheck');
+const saveAll = document.getElementById('saveAll');
 
-  $('toggleAutosave').addEventListener('change', (e)=> STATE.autosave = e.target.checked );
-  $('toggleCloud').addEventListener('change', (e)=> {
-    STATE.cloudEnabled = e.target.checked;
-    updateStatusBadge();
-  });
+const qList = document.getElementById('qList');
+const riskPct = document.getElementById('riskPct');
+const computeBtn = document.getElementById('compute');
+const saveAnswersBtn = document.getElementById('saveAnswers');
 
-  $('exportDataBtn').addEventListener('click', ()=> {
-    const exportObj = { state: STATE, stored: localStorage.getItem(STORAGE_KEY), journal: localStorage.getItem(JOURNAL_KEY) };
-    downloadFile('timeout-data.json', JSON.stringify(exportObj, null, 2));
-  });
-  $('importFile').addEventListener('change', (e)=> {
-    const f = e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = ()=> {
-      try {
-        const obj = JSON.parse(r.result);
-        if (obj.state) {
-          STATE = obj.state;
-          restoreUIFromState();
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
-          if (obj.journal) localStorage.setItem(JOURNAL_KEY, obj.journal);
-          showMessage('Imported data.');
-        } else showMessage('Invalid file.', true);
-      } catch (err) { showMessage('Import failed.', true); }
-    };
-    r.readAsText(f);
-  });
+const resList = document.getElementById('resList');
+const nameInput = document.getElementById('nameInput');
+const saveProfileBtn = document.getElementById('saveProfile');
+const exportDataBtn = document.getElementById('exportData');
+const changePinBtn = document.getElementById('changePin');
+const resTitle = document.getElementById('resTitle');
+const resDesc = document.getElementById('resDesc');
+const resUrl = document.getElementById('resUrl');
+const addResBtn = document.getElementById('addRes');
+const clearResBtn = document.getElementById('clearRes');
 
-  $('resetDataBtn').addEventListener('click', async ()=> {
-    const ok = confirm('Reset local data? This cannot be undone.');
-    if (!ok) return;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(JOURNAL_KEY);
-    STATE = { answers:{}, trustScore:0, journal:'', autosave:true, cloudEnabled:false };
-    restoreUIFromState();
-    showMessage('Local data reset.');
-  });
+const pinVeil = document.getElementById('pinVeil');
+const pinTitle = document.getElementById('pinTitle');
+const pinField = document.getElementById('pinField');
+const pinOk = document.getElementById('pinOk');
+const pinCancel = document.getElementById('pinCancel');
 
-  // load saved data
-  loadLocal();
-  restoreUIFromState();
-  computeTrust();
-  updateStatusBadge();
+const toast = document.getElementById('toast');
+
+/* =============== STATE =============== */
+let auth, db, uid;
+let unlocked = false;
+let timer = { total: 25*60, left: 25*60, handle: null, running:false };
+
+let state = {
+  profile: { name: "", trust: 25 },
+  answers: {},     // qid -> boolean
+  resources: []    // {title,desc,url}
+};
+const QUESTIONS = [
+  { id:'q1', text:'Are you currently safe where you are?' },
+  { id:'q2', text:'Has someone threatened you recently?' },
+  { id:'q3', text:'Have you experienced physical harm in past month?' },
+  { id:'q4', text:'Are you worried about your partner’s access to your phone?' },
+  { id:'q5', text:'Is anyone preventing you from leaving?' },
+  { id:'q6', text:'Do you have children at risk?' },
+  { id:'q7', text:'Do you feel isolated from help?' },
+  { id:'q8', text:'Would you like immediate local resources?' }
+];
+
+/* =============== HELPERS =============== */
+function showToast(msg, ms=2000){
+  toast.textContent = msg;
+  toast.classList.remove('hidden');
+  setTimeout(()=> toast.classList.add('hidden'), ms);
+}
+function fmtMMSS(s){
+  const m = Math.floor(s/60).toString().padStart(2,'0');
+  const ss = (s%60).toString().padStart(2,'0');
+  return `${m}:${ss}`;
+}
+function saveLocal(){
+  localStorage.setItem('timeout_profile', JSON.stringify(state.profile));
+  localStorage.setItem('timeout_answers', JSON.stringify(state.answers));
+  localStorage.setItem('timeout_resources', JSON.stringify(state.resources));
+}
+function loadLocal(){
+  const p = JSON.parse(localStorage.getItem('timeout_profile')||"null");
+  const a = JSON.parse(localStorage.getItem('timeout_answers')||"null");
+  const r = JSON.parse(localStorage.getItem('timeout_resources')||"null");
+  if (p) state.profile = p;
+  if (a) state.answers = a;
+  if (r) state.resources = r;
 }
 
-/* ----- Helper: switch views ----- */
-function switchView(view) {
-  const mapping = {
-    landing: 'view-landing',
-    checkin: 'view-checkin',
-    journal: 'view-journal',
-    resources: 'view-resources',
-    settings: 'view-settings'
-  };
-  // hide all
-  Object.values(mapping).forEach(id => { $(id).classList.add('hidden'); });
-  const activeId = mapping[view] || 'view-landing';
-  $(activeId).classList.remove('hidden');
-
-  // highlight tab
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  const tabId = 'tab' + (view.charAt(0).toUpperCase() + view.slice(1));
-  if ($(tabId)) $(tabId).classList.add('active');
-  // set active state
-  STATE.active = view;
-}
-
-/* ----- Quick Exit / Decoy ----- */
-function quickExit() {
-  // Option 1: redirect to external safe site
-  const safeUrl = 'https://www.google.com'; // change if you want
-  window.location.href = safeUrl;
-}
-function openDecoy() {
-  // show decoy inside app (so back button returns)
-  document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-  $('view-decoy').classList.remove('hidden');
-  // mark decoy tab style on decoy button
-}
-
-/* ----- Persistence: localStorage ----- */
-function saveLocal() {
-  const toSave = {
-    answers: STATE.answers,
-    trustScore: STATE.trustScore,
-    journal: STATE.journal,
-    autosave: STATE.autosave
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-  // also journal
-  if (STATE.journal) localStorage.setItem(JOURNAL_KEY, STATE.journal);
-}
-
-function loadLocal() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  try {
-    const obj = JSON.parse(raw);
-    STATE.answers = obj.answers || {};
-    STATE.trustScore = obj.trustScore || 0;
-    STATE.journal = obj.journal || '';
-    STATE.autosave = typeof obj.autosave === 'boolean' ? obj.autosave : true;
-  } catch (e) {
-    console.warn('Failed to parse saved state', e);
-  }
-}
-
-/* ----- Compute trust score ----- */
-function computeTrust() {
-  // Example: each "no" to risky questions increases score negatively. We'll score 0..100.
-  // Simple heuristic: each "yes" to risk increases risk -> lower score.
-  let riskCount = 0;
-  QUESTIONS.forEach((q, idx) => {
-    const ans = STATE.answers[q.id];
-    // treat true (yes) as risky for first 5 Qs; invert for safe questions (like having docs)
-    if (q.id === 'q6' || q.id === 'q7') {
-      // q6: have safe place -> yes reduces risk
-      if (ans === true) riskCount -= 1;
+/* =============== DECOY =============== */
+function startTimer(){
+  if (timer.running) return;
+  timer.running = true;
+  timer.left = timer.total;
+  timerFace.textContent = fmtMMSS(timer.left);
+  timer.handle = setInterval(()=>{
+    timer.left -= 1;
+    if (timer.left <= 0){
+      clearInterval(timer.handle);
+      timer.running = false;
+      timerFace.textContent = "00:00";
+      showToast("Time up");
     } else {
-      if (ans === true) riskCount += 1;
+      timerFace.textContent = fmtMMSS(timer.left);
     }
-  });
-  // normalize: riskCount may be -2..8. Map to trust score 0..100 (higher trust = safer)
-  // trust = 100 - (riskCount * 12) with bounding
-  let score = 100 - (riskCount * 12);
-  score = Math.max(0, Math.min(100, score));
-  STATE.trustScore = score;
-  updateTrustUI();
-  saveLocal();
+  },1000);
 }
 
-/* ----- UI updates ----- */
-function updateTrustUI() {
-  $('trustScoreText').textContent = Math.round(STATE.trustScore) + '%';
-  const ring = $('ring');
-  const pct = STATE.trustScore;
-  // stroke-dasharray technique for simple ring
-  const dash = (pct / 100) * 100;
-  ring.setAttribute('stroke-dasharray', `${dash} 100`);
-}
+/* =============== UNLOCK / PIN =============== */
+let pressId = null;
+appTitle.addEventListener('pointerdown', ()=>{
+  if (unlocked) return;
+  pressId = setTimeout(()=> openPin("Enter PIN"), 800);
+});
+["pointerup","pointercancel","pointerleave"].forEach(ev=>{
+  appTitle.addEventListener(ev, ()=> pressId && clearTimeout(pressId));
+});
 
-/* restore UI from state */
-function restoreUIFromState() {
+function openPin(title){
+  pinTitle.textContent = title;
+  pinVeil.classList.remove('hidden');
+  pinField.value = "";
+  pinField.focus();
+}
+function closePin(){ pinVeil.classList.add('hidden'); }
+
+function getPin(){ return localStorage.getItem('timeout_pin') || DEFAULT_PIN; }
+function setPin(p){ localStorage.setItem('timeout_pin', p); }
+
+pinOk.addEventListener('click', ()=>{
+  const v = (pinField.value||"").trim();
+  if (!v) return;
+  if (!unlocked){
+    if (v === getPin()){
+      unlocked = true;
+      closePin();
+      renderReal();
+      showToast("Unlocked");
+    } else {
+      showToast("Wrong PIN", 1200);
+    }
+  } else { closePin(); }
+});
+pinCancel.addEventListener('click', closePin);
+
+/* =============== VIEWS =============== */
+function renderDecoy(){
+  unlocked = false;
+  real.classList.add('hidden');
+  decoy.classList.remove('hidden');
+  document.title = "TimeOut — Focus Timer";
+}
+function renderReal(){
+  decoy.classList.add('hidden');
+  real.classList.remove('hidden');
+  document.title = "TimeOut — Help";
+  // fill profile
+  dispName.textContent = state.profile.name || (uid ? `User ${uid.slice(0,8)}` : 'User');
+  nameInput.value = state.profile.name || "";
+  trust.textContent = (state.profile.trust??25) + "%";
   // questions
-  QUESTIONS.forEach(q => {
-    const val = STATE.answers[q.id];
-    const group = document.querySelectorAll(`[data-q="${q.id}"]`);
-    group.forEach(b => {
-      b.classList.remove('bg-indigo-600');
-      b.classList.remove('bg-gray-700');
-      if (b.dataset.val === 'yes') {
-        b.classList.add((val===true)?'bg-indigo-600':'bg-gray-700');
-      } else {
-        b.classList.add((val===false)?'bg-indigo-600':'bg-gray-700');
-      }
+  renderQuestions();
+  // resources
+  renderResources();
+  // default tab
+  setTab('home');
+}
+function renderQuestions(){
+  qList.innerHTML = "";
+  QUESTIONS.forEach(q=>{
+    const row = document.createElement('div');
+    row.className = "qrow";
+    const left = document.createElement('div');
+    left.innerHTML = `<div style="font-weight:700">${q.text}</div>`;
+    const right = document.createElement('div');
+    right.className = "row";
+    right.style.gap = "8px";
+    const yes = document.createElement('button');
+    yes.className = "pill";
+    yes.textContent = "Yes";
+    const no = document.createElement('button');
+    no.className = "pill";
+    no.textContent = "No";
+
+    const set = (val)=>{
+      state.answers[q.id] = val;
+      yes.classList.toggle('sel', val===true);
+      no.classList.toggle('sel', val===false);
+      computeScore(false);
+    };
+    yes.addEventListener('click', ()=> set(true));
+    no.addEventListener('click', ()=> set(false));
+
+    // initial visual
+    if (state.answers[q.id] === true) yes.classList.add('sel');
+    if (state.answers[q.id] === false) no.classList.add('sel');
+
+    right.appendChild(yes); right.appendChild(no);
+    row.appendChild(left); row.appendChild(right);
+    qList.appendChild(row);
+  });
+}
+function renderResources(){
+  if (!state.resources.length){
+    resList.textContent = "No resources yet.";
+    return;
+  }
+  resList.innerHTML = state.resources.map((r,i)=>`
+    <div class="row" style="align-items:flex-start;gap:8px;margin-bottom:8px">
+      <div style="flex:1">
+        <div style="font-weight:700">${r.title}</div>
+        <div class="muted tiny">${r.desc||""}</div>
+        ${r.url ? `<a class="muted tiny" href="${r.url}" target="_blank" rel="noopener">Open</a>` : ""}
+      </div>
+      <button data-i="${i}" class="btn btn-ghost tiny delRes">✕</button>
+    </div>
+  `).join("");
+  resList.querySelectorAll('.delRes').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = Number(btn.dataset.i);
+      state.resources.splice(i,1);
+      saveLocal();
+      renderResources();
     });
   });
-  // journal
-  $('journalText').value = STATE.journal || localStorage.getItem(JOURNAL_KEY) || '';
-  // trust
-  updateTrustUI();
-  // settings toggles
-  $('toggleAutosave').checked = STATE.autosave;
-  $('toggleCloud').checked = STATE.cloudEnabled;
 }
 
-/* ----- Small utilities ----- */
-function showMessage(msg, isError) {
-  const box = $('message-box');
-  box.textContent = msg;
-  box.classList.add('show');
-  box.style.background = isError ? '#dc2626' : '#4f46e5';
-  setTimeout(()=> box.classList.remove('show'), 2000);
-}
-function escapeHtml(s){ return s.replace?.(/[&<>"']/g, (m)=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) || s; }
-function downloadFile(name, content) {
-  const a = document.createElement('a');
-  const blob = new Blob([content], { type:'application/octet-stream' });
-  a.href = URL.createObjectURL(blob);
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+/* =============== SCORE =============== */
+function computeScore(show=true){
+  const total = QUESTIONS.length;
+  let risk = 0;
+  QUESTIONS.forEach(q=>{ if (state.answers[q.id]===true) risk += 1; });
+  const riskPercent = Math.round((risk/total)*100);
+  const trustPercent = Math.max(0, 100 - riskPercent);
+  riskPct.textContent = riskPercent + "%";
+  state.profile.trust = trustPercent;
+  trust.textContent = trustPercent + "%";
+  if (show) showToast("Score updated");
+  return { riskPercent, trustPercent };
 }
 
-/* ----- Optional: Firebase wiring placeholder ----- */
-/*
-  If you want cloud sync:
-  1) Add Firebase SDK and config (replace below placeholder with your real config).
-  2) On login (anonymous or custom), set STATE.userId = auth.uid and update UI.
-  3) On saveLocal(), also write to Firestore under artifacts/{appId}/users/{uid}/... and for meetings etc.
+/* =============== TABS =============== */
+function setTab(which){
+  [tabHome,tabCheck,tabRes,tabProfile].forEach(b=>b.classList.remove('sel'));
+  [viewHome,viewCheck,viewRes,viewProfile].forEach(v=>v.classList.add('hidden'));
+  if (which==='home'){ tabHome.classList.add('sel'); viewHome.classList.remove('hidden'); }
+  if (which==='check'){ tabCheck.classList.add('sel'); viewCheck.classList.remove('hidden'); }
+  if (which==='res'){ tabRes.classList.add('sel'); viewRes.classList.remove('hidden'); }
+  if (which==='profile'){ tabProfile.classList.add('sel'); viewProfile.classList.remove('hidden'); }
+}
 
-  Example placeholder (do NOT leave keys in public code unless intended):
-  const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "..." };
-
-  NOTE: I left Firebase out by default because you need your own keys. If you want, say "add firebase" and
-  I'll paste a ready-to-drop-in block that will sign in anonymously and sync STATE to Firestore.
-*/
-
-/* ----- Update the status badge (local/cloud) ----- */
-function updateStatusBadge() {
-  const s = $('statusBadge');
-  if (STATE.cloudEnabled) {
-    s.textContent = 'Cloud sync: enabled (not configured)';
-    s.classList.remove('text-green-300'); s.classList.add('text-yellow-300');
-  } else {
-    s.textContent = 'Offline (local)';
-    s.classList.remove('text-yellow-300'); s.classList.add('text-green-300');
+/* =============== CLOUD =============== */
+let app, ready = false;
+async function bootCloud(){
+  try{
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    await new Promise((resolve)=> {
+      onAuthStateChanged(auth, async (user)=>{
+        if (!user){
+          try{ await signInAnonymously(auth); } catch(e){ console.warn('Anon sign-in failed', e); }
+        }
+        uid = auth.currentUser?.uid || user?.uid || uid;
+        resolve();
+      });
+    });
+    ready = true;
+    // create / merge profile mirror
+    if (uid){
+      const pRef = doc(db, `artifacts/${APP_ID}/public/data/profiles`, uid);
+      await setDoc(pRef, { publicName: state.profile.name || `User ${uid.slice(0,8)}`, trustScore: state.profile.trust ?? 25, appVersion: VERSION }, { merge:true });
+    }
+  }catch(e){
+    console.error(e);
+    showToast("Cloud init failed");
+  }
+}
+async function saveAnswersCloud(){
+  if (!ready || !uid) return showToast("No cloud", 1500);
+  try{
+    await addDoc(collection(db, `artifacts/${APP_ID}/private/data/checkins`), {
+      userId: uid,
+      answers: state.answers,
+      profile: state.profile,
+      createdAt: serverTimestamp(),
+      appVersion: VERSION
+    });
+    showToast("Saved to cloud");
+  }catch(e){
+    console.error(e);
+    showToast("Cloud save failed");
+  }
+}
+async function saveProfileCloud(){
+  if (!ready || !uid) return;
+  try{
+    const pRef = doc(db, `artifacts/${APP_ID}/public/data/profiles`, uid);
+    await setDoc(pRef, { publicName: state.profile.name, trustScore: state.profile.trust ?? 25, updatedAt: serverTimestamp(), appVersion: VERSION }, { merge:true });
+  }catch(e){
+    console.error(e);
   }
 }
 
-/* ----- Init on load ----- */
-window.addEventListener('DOMContentLoaded', () => {
-  try {
-    init();
-  } catch (err) {
-    console.error('Init error', err);
-    showMessage('Init error: see console', true);
-  }
+/* =============== EVENTS =============== */
+quickExit.addEventListener('click', ()=>{
+  renderDecoy();
+  window.location.href = "https://www.google.com/";
 });
-</script>
+panicClear.addEventListener('click', ()=>{
+  localStorage.removeItem('timeout_profile');
+  localStorage.removeItem('timeout_answers');
+  localStorage.removeItem('timeout_resources');
+  state = { profile:{name:"",trust:25}, answers:{}, resources:[] };
+  renderDecoy();
+  showToast("Local data cleared", 1500);
+});
+timerStart.addEventListener('click', startTimer);
 
+tabHome.addEventListener('click', ()=> setTab('home'));
+tabCheck.addEventListener('click', ()=> setTab('check'));
+tabRes.addEventListener('click', ()=> setTab('res'));
+tabProfile.addEventListener('click', ()=> setTab('profile'));
+goCheck.addEventListener('click', ()=> setTab('check'));
+
+saveAll.addEventListener('click', async ()=>{
+  computeScore(false);
+  saveLocal();
+  await saveProfileCloud();
+  await saveAnswersCloud();
+  showToast("Saved");
+});
+computeBtn.addEventListener('click', ()=> computeScore(true));
+saveAnswersBtn.addEventListener('click', async ()=>{
+  computeScore(false);
+  saveLocal();
+  await saveAnswersCloud();
+});
+
+saveProfileBtn.addEventListener('click', async ()=>{
+  state.profile.name = nameInput.value.trim() || state.profile.name;
+  saveLocal();
+  await saveProfileCloud();
+  renderReal();
+  showToast("Profile saved");
+});
+exportDataBtn.addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify({profile:state.profile,answers:state.answers,resources:state.resources,exportedAt:new Date().toISOString()}, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'timeout-export.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+changePinBtn.addEventListener('click', ()=>{
+  openPin("Enter current PIN");
+  const oldHandler = pinOk.onclick;
+  pinOk.onclick = ()=>{
+    const v = (pinField.value||"").trim();
+    if (v === getPin()){
+      pinTitle.textContent = "Enter new PIN";
+      pinField.value = "";
+      pinOk.onclick = ()=>{
+        const nv = (pinField.value||"").trim();
+        if (nv.length >= 4){ setPin(nv); closePin(); showToast("PIN changed"); pinOk.onclick = oldHandler; }
+        else showToast("PIN too short", 1200);
+      };
+    } else { showToast("Wrong PIN", 1200); }
+  };
+});
+
+addResBtn.addEventListener('click', ()=>{
+  const t = resTitle.value.trim();
+  const d = resDesc.value.trim();
+  const u = resUrl.value.trim();
+  if (!t) return showToast("Title required", 1200);
+  state.resources.push({title:t, desc:d, url:u});
+  saveLocal();
+  resTitle.value = ""; resDesc.value = ""; resUrl.value = "";
+  renderResources();
+  showToast("Resource added");
+});
+clearResBtn.addEventListener('click', ()=>{
+  resTitle.value = ""; resDesc.value = ""; resUrl.value = "";
+});
+
+/* Hide sensitive screens if app goes to background */
+document.addEventListener('visibilitychange', ()=>{
+  if (document.hidden && unlocked){ renderDecoy(); }
+});
+
+/* =============== BOOT =============== */
+(async function(){
+  loadLocal();
+  renderDecoy();
+  computeScore(false);
+  await bootCloud();
+})();
+</script>
 </body>
 </html>
