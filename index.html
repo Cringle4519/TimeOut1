@@ -1,591 +1,663 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>TimeOut — Discreet Help</title>
-<meta name="description" content="Discreet TimeOut decoy with hidden DV check-in, resources, and trust score." />
-<link rel="icon" href="data:,">
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  :root{--bg:#0a0f1c;--panel:#0c1426;--muted:#93a4c5;--ink:#e6eef8;--accent:#6366f1;--danger:#e11d48;--ok:#16a34a}
-  html,body{height:100%}
-  body{margin:0;background:linear-gradient(180deg,#061024 0%, #0a0f1c 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
-  .wrap{max-width:480px;margin:0 auto;padding:16px}
-  .app{margin:14px auto;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.04);border-radius:16px;box-shadow:0 12px 40px rgba(2,6,23,.55)}
-  .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .hdr{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
-  .title{font-weight:800;font-size:18px;user-select:none}
-  .card{padding:14px}
-  .chip{padding:.38rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
-  .btn{border:0;border-radius:12px;padding:.65rem .9rem;font-weight:700}
-  .btn-accent{background:var(--accent);color:white}
-  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--ink)}
-  .btn-danger{background:var(--danger);color:white}
-  .muted{color:var(--muted)}
-  .tiny{font-size:12px}
-  .hidden{display:none}
-  .grid2{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-  .qrow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(255,255,255,.06)}
-  .pill{border:1px solid rgba(255,255,255,.08);padding:.35rem .6rem;border-radius:999px}
-  .sel{background:var(--accent);color:white}
-  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1530;border:1px solid rgba(255,255,255,.08);padding:.6rem .9rem;border-radius:10px;box-shadow:0 8px 24px rgba(2,6,23,.6);z-index:60}
-  .pin-veil{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:80}
-  .pin-box{background:#08122b;border:1px solid rgba(255,255,255,.08);padding:18px;border-radius:12px;width:340px;max-width:94%}
-  input[type="text"],input[type="number"],input[type="url"],input[type="password"]{width:100%;padding:.7rem;border-radius:10px;background:#06142d;border:1px solid rgba(255,255,255,.08);color:var(--ink)}
-  @media (max-width:420px){.title{font-size:16px}.btn{padding:.55rem .75rem}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>TimeOut — Focus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="theme-color" content="#0a0a0a">
+  <style>
+    :root { --maxw: 480px; }
+    body { background:#0a0a0a; color:#e5e7eb; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+    .container { max-width: var(--maxw); margin: 0 auto; }
+    .card { background: #111827; border: 1px solid #1f2937; border-radius: 16px; }
+    .btn { border-radius: 12px; padding: .65rem .9rem; font-weight: 600; }
+    .btn-primary { background:#2563eb; color:white; }
+    .btn-ghost { background:#0b0b0b; border:1px solid #1f2937; color:#e5e7eb; }
+    .btn-danger { background:#b91c1c; color:white; }
+    .tab-btn { padding:.6rem .8rem; border-radius: 999px; }
+    .toggle { border:1px solid #334155; border-radius:12px; }
+    .toggle .opt { flex:1; padding:.6rem; text-align:center; border-right:1px solid #334155; }
+    .toggle .opt:last-child { border-right:0; }
+    .opt.active-yes { background:#16a34a; color:#fff; }
+    .opt.active-no { background:#dc2626; color:#fff; }
+    .hidden-soft { display:none !important; }
+    .fade-enter { opacity:0; transform: translateY(4px); }
+    .fade-enter-active { opacity:1; transform:none; transition: all .2s ease; }
+    .pin-input { letter-spacing:.4em; text-align:center; font-weight:700; }
+    .link { color:#60a5fa; text-decoration: underline; }
+    .pill { border:1px solid #374151; background:#0b0b0b; border-radius:999px; padding:.2rem .6rem; font-size:.75rem; color:#9ca3af; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background:#111827; border:1px solid #374151; border-radius:6px; padding:.1rem .35rem; font-size:.75rem; color:#cbd5e1; }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="app" id="app">
-    <!-- Header (long-press to unlock) -->
-    <div class="hdr row">
-      <div class="title" id="appTitle" title="Long-press to unlock hidden features">TimeOut — Focus Timer</div>
-      <div class="row" style="gap:8px">
-        <button id="quickExit" class="btn btn-ghost tiny" title="Quick Exit to safe page">Quick Exit</button>
-        <button id="panicClear" class="btn btn-ghost tiny" title="Clear local data">Panic</button>
+  <div id="app" class="container px-4 py-3">
+    <!-- Header (always visible) -->
+    <header class="flex items-center justify-between mb-3">
+      <div>
+        <h1 id="decoyTitle" class="text-xl font-bold select-none">TimeOut Focus</h1>
+        <p class="text-xs text-gray-400">Stay on task • <span class="pill">v1.3.5</span></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="quickExitBtn" class="btn btn-ghost" title="Quick Exit (opens Google)"><span class="hidden sm:inline">Quick Exit</span><span class="sm:hidden">Exit</span></button>
+        <button id="panicBtn" class="btn btn-danger" title="Panic: Clear local data & return to decoy">Panic</button>
+      </div>
+    </header>
+
+    <!-- Decoy Landing -->
+    <section id="decoyView" class="card p-5 fade-enter-active">
+      <div class="flex flex-col items-center">
+        <div class="text-xs text-gray-400 mb-2">Focus Timer</div>
+        <div id="timerDisplay" class="text-6xl font-bold tabular-nums tracking-tight">25:00</div>
+        <div class="mt-4 flex gap-2">
+          <button id="timerStart" class="btn btn-primary">Start</button>
+          <button id="timerPause" class="btn btn-ghost">Pause</button>
+          <button id="timerReset" class="btn btn-ghost">Reset</button>
+        </div>
+        <div class="mt-5 text-xs text-gray-500 text-center">
+          Tip: Long-press the title for about <span class="font-semibold">0.8s</span> for more options.
+        </div>
+      </div>
+    </section>
+
+    <!-- PIN Modal -->
+    <div id="pinModal" class="fixed inset-0 bg-black/70 hidden-soft items-end sm:items-center justify-center p-4">
+      <div class="card w-full sm:max-w-sm p-4">
+        <h3 id="pinModalTitle" class="text-lg font-semibold mb-2">Enter PIN</h3>
+        <form id="pinForm" class="space-y-3">
+          <input id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-3 card pin-input" placeholder="••••" autocomplete="off">
+          <div id="pinChangeFields" class="space-y-2 hidden-soft">
+            <input id="oldPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card pin-input" placeholder="Current PIN">
+            <input id="newPin" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card pin-input" placeholder="New PIN (min 4)">
+            <input id="newPin2" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="w-full px-3 py-2 card pin-input" placeholder="Confirm New PIN">
+          </div>
+          <div class="flex gap-2">
+            <button id="pinConfirmBtn" class="btn btn-primary flex-1" type="submit">Confirm</button>
+            <button id="pinCancelBtn" class="btn btn-ghost flex-1" type="button">Cancel</button>
+          </div>
+          <div id="pinError" class="text-rose-400 text-sm min-h-[1.5rem]"></div>
+        </form>
       </div>
     </div>
 
-    <!-- Decoy view -->
-    <div id="decoy" class="card">
-      <div class="row">
-        <div>
-          <div class="muted tiny">Focus Session</div>
-          <div id="timerFace" style="font-weight:900;font-size:32px">25:00</div>
-        </div>
-        <div style="text-align:right">
-          <div class="muted tiny">Session</div>
-          <button id="timerStart" class="btn btn-accent tiny" style="margin-top:6px">Start</button>
-        </div>
-      </div>
-      <div class="muted tiny" style="margin-top:8px">Tip: Long-press the title to unlock. Sensitive screens auto-hide on app switch.</div>
-    </div>
-
-    <!-- Real app (hidden until PIN) -->
-    <div id="real" class="hidden">
-      <!-- Tabs -->
-      <div class="card row" style="gap:8px;overflow-x:auto">
-        <button class="chip" id="tabHome" aria-pressed="true">Home</button>
-        <button class="chip" id="tabCheck">Check-In</button>
-        <button class="chip" id="tabRes">Resources</button>
-        <button class="chip" id="tabProfile">Profile</button>
-      </div>
-
-      <!-- Home -->
-      <div class="card" id="viewHome">
-        <div class="row">
+    <!-- Real App (hidden until unlocked) -->
+    <section id="realApp" class="hidden-soft fade-enter">
+      <!-- Real Header -->
+      <div class="mt-4 card p-4">
+        <div class="flex items-center justify-between">
           <div>
-            <div class="muted tiny">Welcome</div>
-            <div id="dispName" style="font-weight:800;font-size:18px">User</div>
+            <div class="text-xs text-gray-400">Signed in as</div>
+            <div id="profileName" class="text-lg font-semibold">Anonymous</div>
           </div>
-          <div style="text-align:right">
-            <div class="muted tiny">Trust</div>
-            <div id="trust" style="font-weight:900">25%</div>
-          </div>
-        </div>
-        <div class="muted tiny" style="margin-top:8px">Use Check-In to answer 8 safety questions. Tap Save to store locally and in the cloud (anonymous).</div>
-        <div class="row" style="gap:8px;margin-top:10px">
-          <button id="goCheck" class="btn btn-accent tiny">Start Check-In</button>
-          <button id="saveAll" class="btn btn-ghost tiny">Save</button>
-        </div>
-      </div>
-
-      <!-- Check-In -->
-      <div class="card hidden" id="viewCheck">
-        <div class="row">
-          <h3 style="margin:0">Safety Check — 8 questions</h3>
-          <div class="muted tiny">Risk: <span id="riskPct">0%</span></div>
-        </div>
-        <div id="qList" style="margin-top:4px"></div>
-        <div class="row" style="gap:8px;margin-top:10px">
-          <button id="compute" class="btn btn-ghost tiny">Compute</button>
-          <button id="saveAnswers" class="btn btn-accent tiny">Save</button>
-        </div>
-      </div>
-
-      <!-- Resources -->
-      <div class="card hidden" id="viewRes">
-        <h3 style="margin:0">Resources</h3>
-        <div id="resList" class="muted tiny" style="margin-top:6px">No resources yet.</div>
-      </div>
-
-      <!-- Profile -->
-      <div class="card hidden" id="viewProfile">
-        <h3 style="margin:0 0 8px 0">Profile & Settings</h3>
-        <label class="muted tiny">Display name</label>
-        <input id="nameInput" type="text" placeholder="e.g., Alex" />
-
-        <div class="row" style="gap:8px;margin-top:10px">
-          <button id="saveProfile" class="btn btn-accent tiny">Save Profile</button>
-          <button id="exportData" class="btn btn-ghost tiny">Export JSON</button>
-        </div>
-
-        <div style="margin-top:16px">
-          <div class="muted tiny" style="margin-bottom:6px">Change unlock PIN</div>
-          <button id="changePin" class="btn btn-ghost tiny">Change PIN</button>
-        </div>
-
-        <div style="margin-top:16px">
-          <h4 style="margin:0 0 6px 0">Add a Resource</h4>
-          <input id="resTitle" type="text" placeholder="Name (e.g., Hotline)" />
-          <input id="resDesc" type="text" placeholder="Short description" style="margin-top:6px" />
-          <input id="resUrl" type="url" placeholder="https://..." style="margin-top:6px" />
-          <div class="row" style="gap:8px;margin-top:8px">
-            <button id="addRes" class="btn btn-accent tiny">Add</button>
-            <button id="clearRes" class="btn btn-ghost tiny">Clear</button>
+          <div class="text-right">
+            <div class="text-xs text-gray-400">Trust</div>
+            <div id="trustBadge" class="text-2xl font-bold">100%</div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="card row" style="border-top:1px solid rgba(255,255,255,.06)">
-      <div class="muted tiny">TimeOut v1.3.5</div>
-      <div class="muted tiny">Long-press title to unlock</div>
-    </div>
+      <!-- Tabs -->
+      <nav class="mt-3">
+        <div class="flex gap-2">
+          <button data-tab="home" class="tab-btn bg-blue-600 text-white">Home</button>
+          <button data-tab="checkin" class="tab-btn card">Check-In</button>
+          <button data-tab="resources" class="tab-btn card">Resources</button>
+          <button data-tab="profile" class="tab-btn card">Profile</button>
+        </div>
+      </nav>
+
+      <!-- Tab: Home -->
+      <div id="tab-home" class="mt-3 card p-4">
+        <h3 class="text-lg font-semibold mb-2">Welcome</h3>
+        <p class="text-sm text-gray-300">Hi <span id="homeName">Anonymous</span>. Your current trust score is <span id="homeTrust">100</span>%.</p>
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <button id="goToCheckIn" class="btn btn-primary">Go to Check-In</button>
+          <button id="saveAll" class="btn btn-ghost">Save (Local + Cloud)</button>
+        </div>
+        <div class="mt-4 text-xs text-gray-500">
+          Losing focus (switching apps) will auto-hide sensitive screens.
+        </div>
+      </div>
+
+      <!-- Tab: Check-In -->
+      <div id="tab-checkin" class="mt-3 card p-4 hidden-soft">
+        <h3 class="text-lg font-semibold mb-3">Safety Check-In</h3>
+        <div class="space-y-3" id="questions"></div>
+        <div class="mt-4 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-gray-400">Risk</div>
+            <div id="riskPct" class="text-2xl font-bold text-rose-400">0%</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-gray-400">Trust</div>
+            <div id="trustPct" class="text-2xl font-bold text-green-400">100%</div>
+          </div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button id="saveCheckIn" class="btn btn-primary flex-1">Save Check-In</button>
+          <button id="clearCheckIn" class="btn btn-ghost flex-1">Clear</button>
+        </div>
+      </div>
+
+      <!-- Tab: Resources -->
+      <div id="tab-resources" class="mt-3 card p-4 hidden-soft">
+        <h3 class="text-lg font-semibold mb-3">My Resources</h3>
+        <form id="resourceForm" class="grid grid-cols-1 gap-2 mb-3">
+          <input id="resTitle" class="card px-3 py-2" placeholder="Title (e.g., Shelter)">
+          <input id="resDesc" class="card px-3 py-2" placeholder="Description">
+          <input id="resUrl" class="card px-3 py-2" placeholder="Link (https://...)">
+          <button class="btn btn-primary">Add Resource</button>
+        </form>
+        <ul id="resourceList" class="space-y-2"></ul>
+      </div>
+
+      <!-- Tab: Profile -->
+      <div id="tab-profile" class="mt-3 card p-4 hidden-soft">
+        <h3 class="text-lg font-semibold mb-3">Profile</h3>
+        <div class="grid grid-cols-1 gap-2">
+          <label class="text-sm">Display Name</label>
+          <input id="displayNameInput" class="card px-3 py-2" placeholder="Your name (optional)">
+          <button id="saveProfile" class="btn btn-primary">Save Profile</button>
+        </div>
+        <hr class="my-4 border-gray-800">
+        <div class="grid grid-cols-1 gap-2">
+          <label class="text-sm">Change PIN</label>
+          <button id="openChangePin" class="btn btn-ghost">Change PIN</button>
+        </div>
+        <hr class="my-4 border-gray-800">
+        <div class="grid grid-cols-1 gap-2">
+          <label class="text-sm">Export Data</label>
+          <button id="exportJson" class="btn btn-ghost">Export JSON</button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="py-6 text-center text-xs text-gray-500">
+        TimeOut • Privacy-first support • <span class="pill">v1.3.5</span>
+      </footer>
+    </section>
   </div>
-</div>
 
-<!-- PIN Modal -->
-<div id="pinVeil" class="pin-veil hidden" aria-hidden="true">
-  <div class="pin-box">
-    <div id="pinTitle" style="font-weight:800;margin-bottom:8px">Enter PIN</div>
-    <input id="pinField" type="password" inputmode="numeric" maxlength="8" placeholder="••••" />
-    <div class="row" style="gap:8px;margin-top:10px;justify-content:center">
-      <button id="pinOk" class="btn btn-accent tiny">OK</button>
-      <button id="pinCancel" class="btn btn-ghost tiny">Cancel</button>
-    </div>
-  </div>
-</div>
+  <!-- Firebase v11.6.1 (modules via CDN) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-<!-- Toast -->
-<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
-
-<script type="module">
-/* =========================
-   Firebase (your project)
-   ========================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyC3Ga-GhV8xQztnbef7ybPFu4BRtLANtuk",
-  authDomain: "unbrokenpath-630b0.firebaseapp.com",
-  projectId: "unbrokenpath-630b0",
-  storageBucket: "unbrokenpath-630b0.firebasestorage.app",
-  messagingSenderId: "147188865145",
-  appId: "1:147188865145:web:ff1f35a732bf89b31e1ca8",
-  measurementId: "G-0Y8G7SS1BV"
-};
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, addDoc, getDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-const APP_ID = "timeout-app";           // namespace
-const DEFAULT_PIN = "2580";             // first-run PIN
-const VERSION = "1.3.5";
-
-/* =============== DOM =============== */
-const appTitle = document.getElementById('appTitle');
-const decoy = document.getElementById('decoy');
-const real = document.getElementById('real');
-const quickExit = document.getElementById('quickExit');
-const panicClear = document.getElementById('panicClear');
-const timerStart = document.getElementById('timerStart');
-const timerFace = document.getElementById('timerFace');
-
-const tabHome = document.getElementById('tabHome');
-const tabCheck = document.getElementById('tabCheck');
-const tabRes = document.getElementById('tabRes');
-const tabProfile = document.getElementById('tabProfile');
-
-const viewHome = document.getElementById('viewHome');
-const viewCheck = document.getElementById('viewCheck');
-const viewRes = document.getElementById('viewRes');
-const viewProfile = document.getElementById('viewProfile');
-
-const dispName = document.getElementById('dispName');
-const trust = document.getElementById('trust');
-const goCheck = document.getElementById('goCheck');
-const saveAll = document.getElementById('saveAll');
-
-const qList = document.getElementById('qList');
-const riskPct = document.getElementById('riskPct');
-const computeBtn = document.getElementById('compute');
-const saveAnswersBtn = document.getElementById('saveAnswers');
-
-const resList = document.getElementById('resList');
-const nameInput = document.getElementById('nameInput');
-const saveProfileBtn = document.getElementById('saveProfile');
-const exportDataBtn = document.getElementById('exportData');
-const changePinBtn = document.getElementById('changePin');
-const resTitle = document.getElementById('resTitle');
-const resDesc = document.getElementById('resDesc');
-const resUrl = document.getElementById('resUrl');
-const addResBtn = document.getElementById('addRes');
-const clearResBtn = document.getElementById('clearRes');
-
-const pinVeil = document.getElementById('pinVeil');
-const pinTitle = document.getElementById('pinTitle');
-const pinField = document.getElementById('pinField');
-const pinOk = document.getElementById('pinOk');
-const pinCancel = document.getElementById('pinCancel');
-
-const toast = document.getElementById('toast');
-
-/* =============== STATE =============== */
-let auth, db, uid;
-let unlocked = false;
-let timer = { total: 25*60, left: 25*60, handle: null, running:false };
-
-let state = {
-  profile: { name: "", trust: 25 },
-  answers: {},     // qid -> boolean
-  resources: []    // {title,desc,url}
-};
-const QUESTIONS = [
-  { id:'q1', text:'Are you currently safe where you are?' },
-  { id:'q2', text:'Has someone threatened you recently?' },
-  { id:'q3', text:'Have you experienced physical harm in past month?' },
-  { id:'q4', text:'Are you worried about your partner’s access to your phone?' },
-  { id:'q5', text:'Is anyone preventing you from leaving?' },
-  { id:'q6', text:'Do you have children at risk?' },
-  { id:'q7', text:'Do you feel isolated from help?' },
-  { id:'q8', text:'Would you like immediate local resources?' }
-];
-
-/* =============== HELPERS =============== */
-function showToast(msg, ms=2000){
-  toast.textContent = msg;
-  toast.classList.remove('hidden');
-  setTimeout(()=> toast.classList.add('hidden'), ms);
-}
-function fmtMMSS(s){
-  const m = Math.floor(s/60).toString().padStart(2,'0');
-  const ss = (s%60).toString().padStart(2,'0');
-  return `${m}:${ss}`;
-}
-function saveLocal(){
-  localStorage.setItem('timeout_profile', JSON.stringify(state.profile));
-  localStorage.setItem('timeout_answers', JSON.stringify(state.answers));
-  localStorage.setItem('timeout_resources', JSON.stringify(state.resources));
-}
-function loadLocal(){
-  const p = JSON.parse(localStorage.getItem('timeout_profile')||"null");
-  const a = JSON.parse(localStorage.getItem('timeout_answers')||"null");
-  const r = JSON.parse(localStorage.getItem('timeout_resources')||"null");
-  if (p) state.profile = p;
-  if (a) state.answers = a;
-  if (r) state.resources = r;
-}
-
-/* =============== DECOY =============== */
-function startTimer(){
-  if (timer.running) return;
-  timer.running = true;
-  timer.left = timer.total;
-  timerFace.textContent = fmtMMSS(timer.left);
-  timer.handle = setInterval(()=>{
-    timer.left -= 1;
-    if (timer.left <= 0){
-      clearInterval(timer.handle);
-      timer.running = false;
-      timerFace.textContent = "00:00";
-      showToast("Time up");
-    } else {
-      timerFace.textContent = fmtMMSS(timer.left);
-    }
-  },1000);
-}
-
-/* =============== UNLOCK / PIN =============== */
-let pressId = null;
-appTitle.addEventListener('pointerdown', ()=>{
-  if (unlocked) return;
-  pressId = setTimeout(()=> openPin("Enter PIN"), 800);
-});
-["pointerup","pointercancel","pointerleave"].forEach(ev=>{
-  appTitle.addEventListener(ev, ()=> pressId && clearTimeout(pressId));
-});
-
-function openPin(title){
-  pinTitle.textContent = title;
-  pinVeil.classList.remove('hidden');
-  pinField.value = "";
-  pinField.focus();
-}
-function closePin(){ pinVeil.classList.add('hidden'); }
-
-function getPin(){ return localStorage.getItem('timeout_pin') || DEFAULT_PIN; }
-function setPin(p){ localStorage.setItem('timeout_pin', p); }
-
-pinOk.addEventListener('click', ()=>{
-  const v = (pinField.value||"").trim();
-  if (!v) return;
-  if (!unlocked){
-    if (v === getPin()){
-      unlocked = true;
-      closePin();
-      renderReal();
-      showToast("Unlocked");
-    } else {
-      showToast("Wrong PIN", 1200);
-    }
-  } else { closePin(); }
-});
-pinCancel.addEventListener('click', closePin);
-
-/* =============== VIEWS =============== */
-function renderDecoy(){
-  unlocked = false;
-  real.classList.add('hidden');
-  decoy.classList.remove('hidden');
-  document.title = "TimeOut — Focus Timer";
-}
-function renderReal(){
-  decoy.classList.add('hidden');
-  real.classList.remove('hidden');
-  document.title = "TimeOut — Help";
-  // fill profile
-  dispName.textContent = state.profile.name || (uid ? `User ${uid.slice(0,8)}` : 'User');
-  nameInput.value = state.profile.name || "";
-  trust.textContent = (state.profile.trust??25) + "%";
-  // questions
-  renderQuestions();
-  // resources
-  renderResources();
-  // default tab
-  setTab('home');
-}
-function renderQuestions(){
-  qList.innerHTML = "";
-  QUESTIONS.forEach(q=>{
-    const row = document.createElement('div');
-    row.className = "qrow";
-    const left = document.createElement('div');
-    left.innerHTML = `<div style="font-weight:700">${q.text}</div>`;
-    const right = document.createElement('div');
-    right.className = "row";
-    right.style.gap = "8px";
-    const yes = document.createElement('button');
-    yes.className = "pill";
-    yes.textContent = "Yes";
-    const no = document.createElement('button');
-    no.className = "pill";
-    no.textContent = "No";
-
-    const set = (val)=>{
-      state.answers[q.id] = val;
-      yes.classList.toggle('sel', val===true);
-      no.classList.toggle('sel', val===false);
-      computeScore(false);
+    // ---- Firebase Config (verbatim) ----
+    const firebaseConfig = {
+      apiKey: "AIzaSyC3Ga-GhV8xQztnbef7ybPFu4BRtLANtuk",
+      authDomain: "unbrokenpath-630b0.firebaseapp.com",
+      projectId: "unbrokenpath-630b0",
+      storageBucket: "unbrokenpath-630b0.firebasestorage.app",
+      messagingSenderId: "147188865145",
+      appId: "1:147188865145:web:ff1f35a732bf89b31e1ca8",
+      measurementId: "G-0Y8G7SS1BV"
     };
-    yes.addEventListener('click', ()=> set(true));
-    no.addEventListener('click', ()=> set(false));
 
-    // initial visual
-    if (state.answers[q.id] === true) yes.classList.add('sel');
-    if (state.answers[q.id] === false) no.classList.add('sel');
+    // ---- App State / Constants ----
+    const APP_VERSION = "v1.3.5";
+    const DEFAULT_PIN = "2580";
+    const LS_KEYS = {
+      profile: "timeout_profile",
+      answers: "timeout_answers",
+      resources: "timeout_resources",
+      pin: "timeout_pin"
+    };
+    const QUESTIONS = [
+      { id:"q1", text:"Are you currently safe where you are?", invert:true },
+      { id:"q2", text:"Has someone threatened you recently?" },
+      { id:"q3", text:"Have you experienced physical harm in past month?" },
+      { id:"q4", text:"Are you worried about your partner’s access to your phone?" },
+      { id:"q5", text:"Is anyone preventing you from leaving?" },
+      { id:"q6", text:"Do you have children at risk?" },
+      { id:"q7", text:"Do you feel isolated from help?" },
+      { id:"q8", text:"Would you like immediate local resources?" }
+    ];
 
-    right.appendChild(yes); right.appendChild(no);
-    row.appendChild(left); row.appendChild(right);
-    qList.appendChild(row);
-  });
-}
-function renderResources(){
-  if (!state.resources.length){
-    resList.textContent = "No resources yet.";
-    return;
-  }
-  resList.innerHTML = state.resources.map((r,i)=>`
-    <div class="row" style="align-items:flex-start;gap:8px;margin-bottom:8px">
-      <div style="flex:1">
-        <div style="font-weight:700">${r.title}</div>
-        <div class="muted tiny">${r.desc||""}</div>
-        ${r.url ? `<a class="muted tiny" href="${r.url}" target="_blank" rel="noopener">Open</a>` : ""}
-      </div>
-      <button data-i="${i}" class="btn btn-ghost tiny delRes">✕</button>
-    </div>
-  `).join("");
-  resList.querySelectorAll('.delRes').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const i = Number(btn.dataset.i);
-      state.resources.splice(i,1);
-      saveLocal();
+    // ---- UI Refs ----
+    const decoyTitle = document.getElementById("decoyTitle");
+    const decoyView = document.getElementById("decoyView");
+    const realApp = document.getElementById("realApp");
+    const quickExitBtn = document.getElementById("quickExitBtn");
+    const panicBtn = document.getElementById("panicBtn");
+
+    const pinModal = document.getElementById("pinModal");
+    const pinModalTitle = document.getElementById("pinModalTitle");
+    const pinForm = document.getElementById("pinForm");
+    const pinInput = document.getElementById("pinInput");
+    const pinError = document.getElementById("pinError");
+    const pinCancelBtn = document.getElementById("pinCancelBtn");
+    const pinChangeFields = document.getElementById("pinChangeFields");
+    const oldPin = document.getElementById("oldPin");
+    const newPin = document.getElementById("newPin");
+    const newPin2 = document.getElementById("newPin2");
+
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+    const tabHome = document.getElementById("tab-home");
+    const tabCheck = document.getElementById("tab-checkin");
+    const tabRes = document.getElementById("tab-resources");
+    const tabProfile = document.getElementById("tab-profile");
+
+    const profileName = document.getElementById("profileName");
+    const trustBadge = document.getElementById("trustBadge");
+    const homeName = document.getElementById("homeName");
+    const homeTrust = document.getElementById("homeTrust");
+    const goToCheckIn = document.getElementById("goToCheckIn");
+    const saveAll = document.getElementById("saveAll");
+
+    const questionsBox = document.getElementById("questions");
+    const riskPct = document.getElementById("riskPct");
+    const trustPct = document.getElementById("trustPct");
+    const saveCheckIn = document.getElementById("saveCheckIn");
+    const clearCheckIn = document.getElementById("clearCheckIn");
+
+    const resForm = document.getElementById("resourceForm");
+    const resTitle = document.getElementById("resTitle");
+    const resDesc = document.getElementById("resDesc");
+    const resUrl = document.getElementById("resUrl");
+    const resList = document.getElementById("resourceList");
+
+    const displayNameInput = document.getElementById("displayNameInput");
+    const saveProfile = document.getElementById("saveProfile");
+    const openChangePin = document.getElementById("openChangePin");
+    const exportJson = document.getElementById("exportJson");
+
+    // ---- Utility: Local Storage helpers ----
+    const loadJSON = (k, f) => {
+      try { const v = JSON.parse(localStorage.getItem(k)); return v ?? f; } catch { return f; }
+    };
+    const saveJSON = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+    // ---- PIN helpers ----
+    function getStoredPin() {
+      const p = localStorage.getItem(LS_KEYS.pin);
+      return (p && p.length >= 4) ? p : DEFAULT_PIN;
+    }
+    function setStoredPin(p) { localStorage.setItem(LS_KEYS.pin, p); }
+
+    // ---- App Data In-Memory ----
+    let unlocked = false;
+    let user = null;
+    let uid = null;
+    let profile = loadJSON(LS_KEYS.profile, { name: "Anonymous", trust: 100 });
+    let answers = loadJSON(LS_KEYS.answers, {}); // { q1: "yes"/"no", ... }
+    let resources = loadJSON(LS_KEYS.resources, []); // [{title,desc,url}]
+    let longPressTimer = null;
+
+    // ---- Firebase Init ----
+    const fbApp = initializeApp(firebaseConfig);
+    const auth = getAuth(fbApp);
+    const db = getFirestore(fbApp);
+
+    // Anonymous Auth
+    onAuthStateChanged(auth, async (u) => {
+      if (u) {
+        user = u; uid = u.uid;
+      } else {
+        await signInAnonymously(auth).catch(console.error);
+      }
+    });
+    // Kick off anon sign-in immediately (in case state doesn't trigger on fast load)
+    signInAnonymously(auth).catch(()=>{});
+
+    // ---- Decoy Timer ----
+    const timerDisplay = document.getElementById("timerDisplay");
+    const timerStart = document.getElementById("timerStart");
+    const timerPause = document.getElementById("timerPause");
+    const timerReset = document.getElementById("timerReset");
+    let timerSeconds = 25 * 60;
+    let timerInterval = null;
+
+    function fmtTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+    function renderTimer() { timerDisplay.textContent = fmtTime(timerSeconds); }
+    function startTimer() {
+      if (timerInterval) return;
+      timerInterval = setInterval(() => {
+        if (timerSeconds > 0) { timerSeconds--; renderTimer(); } else { pauseTimer(); }
+      }, 1000);
+    }
+    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; }
+    function resetTimer() { timerSeconds = 25*60; renderTimer(); }
+    timerStart.addEventListener("click", startTimer);
+    timerPause.addEventListener("click", pauseTimer);
+    timerReset.addEventListener("click", resetTimer);
+    renderTimer();
+
+    // ---- Quick Exit / Panic ----
+    quickExitBtn.addEventListener("click", () => {
+      // Immediate redirect to Google
+      location.href = "https://www.google.com/";
+    });
+    panicBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(LS_KEYS.profile);
+        localStorage.removeItem(LS_KEYS.answers);
+        localStorage.removeItem(LS_KEYS.resources);
+        localStorage.removeItem(LS_KEYS.pin);
+      } catch {}
+      // Reset in-memory
+      profile = { name: "Anonymous", trust: 100 };
+      answers = {};
+      resources = [];
+      lockToDecoy();
+    });
+
+    // ---- Long-press on Title to Unlock ----
+    const LP_MS = 800;
+    function openPin(mode="enter") {
+      pinError.textContent = "";
+      pinInput.value = "";
+      oldPin.value = newPin.value = newPin2.value = "";
+      pinChangeFields.classList.add("hidden-soft");
+      if (mode === "change") {
+        pinModalTitle.textContent = "Change PIN";
+        pinChangeFields.classList.remove("hidden-soft");
+      } else {
+        pinModalTitle.textContent = "Enter PIN";
+      }
+      pinModal.classList.remove("hidden-soft");
+      setTimeout(()=>pinInput.focus(), 50);
+      pinForm.dataset.mode = mode;
+    }
+    function closePin() { pinModal.classList.add("hidden-soft"); }
+
+    function armLongPress(el) {
+      const start = () => { longPressTimer = setTimeout(()=> openPin("enter"), LP_MS); };
+      const cancel = () => { clearTimeout(longPressTimer); longPressTimer = null; };
+      ["pointerdown","touchstart","mousedown"].forEach(ev=> el.addEventListener(ev, start));
+      ["pointerup","pointerleave","touchend","touchcancel","mouseup","mouseleave"].forEach(ev=> el.addEventListener(ev, cancel));
+    }
+    armLongPress(decoyTitle);
+    pinCancelBtn.addEventListener("click", closePin);
+
+    pinForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const mode = pinForm.dataset.mode || "enter";
+      if (mode === "enter") {
+        const expected = getStoredPin();
+        if (pinInput.value === expected) {
+          closePin();
+          unlockRealApp();
+        } else {
+          pinError.textContent = "Incorrect PIN.";
+        }
+      } else {
+        // change mode
+        const expected = getStoredPin();
+        if (oldPin.value !== expected) { pinError.textContent = "Current PIN is incorrect."; return; }
+        if ((newPin.value ?? "").length < 4) { pinError.textContent = "New PIN must be at least 4 digits."; return; }
+        if (newPin.value !== newPin2.value) { pinError.textContent = "New PINs do not match."; return; }
+        setStoredPin(newPin.value);
+        closePin();
+      }
+    });
+
+    openChangePin.addEventListener("click", () => openPin("change"));
+
+    // ---- Lock/Unlock ----
+    function unlockRealApp() {
+      unlocked = true;
+      decoyView.classList.add("hidden-soft");
+      realApp.classList.remove("hidden-soft");
+      realApp.classList.remove("fade-enter"); // ensure visible
+      // set default tab
+      setActiveTab("home");
+      refreshAllUI();
+    }
+    function lockToDecoy() {
+      unlocked = false;
+      realApp.classList.add("hidden-soft");
+      decoyView.classList.remove("hidden-soft");
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && unlocked) {
+        lockToDecoy();
+      }
+    });
+
+    // ---- Tabs ----
+    const tabViews = {
+      home: tabHome,
+      checkin: tabCheck,
+      resources: tabRes,
+      profile: tabProfile
+    };
+    function setActiveTab(name) {
+      tabs.forEach(b=>{
+        if (b.dataset.tab === name) {
+          b.classList.add("bg-blue-600","text-white");
+          b.classList.remove("card");
+        } else {
+          b.classList.remove("bg-blue-600","text-white");
+          b.classList.add("card");
+        }
+      });
+      for (const k in tabViews) {
+        if (k === name) tabViews[k].classList.remove("hidden-soft");
+        else tabViews[k].classList.add("hidden-soft");
+      }
+    }
+    tabs.forEach(b => b.addEventListener("click", ()=> setActiveTab(b.dataset.tab)));
+    goToCheckIn.addEventListener("click", ()=> setActiveTab("checkin"));
+
+    // ---- Questions UI ----
+    function buildQuestions() {
+      questionsBox.innerHTML = "";
+      QUESTIONS.forEach((q, idx) => {
+        const row = document.createElement("div");
+        row.className = "p-3 card";
+        const label = document.createElement("div");
+        label.className = "text-sm mb-2";
+        label.textContent = `${idx+1}. ${q.text}`;
+        const toggle = document.createElement("div");
+        toggle.className = "toggle flex overflow-hidden";
+        const yes = document.createElement("button");
+        yes.type="button"; yes.className="opt"; yes.textContent="Yes";
+        const no = document.createElement("button");
+        no.type="button"; no.className="opt"; no.textContent="No";
+        toggle.appendChild(yes); toggle.appendChild(no);
+        row.appendChild(label); row.appendChild(toggle);
+        questionsBox.appendChild(row);
+
+        const cur = (answers[q.id] || "").toLowerCase();
+        if (cur === "yes") yes.classList.add("active-yes");
+        if (cur === "no") no.classList.add("active-no");
+
+        yes.addEventListener("click", ()=> { answers[q.id] = "yes"; mark(); updateScores(); persistAnswers(); });
+        no.addEventListener("click",  ()=> { answers[q.id] = "no";  mark(); updateScores(); persistAnswers(); });
+
+        function mark() {
+          yes.classList.toggle("active-yes", answers[q.id]==="yes");
+          no.classList.toggle("active-no", answers[q.id]==="no");
+        }
+      });
+    }
+
+    function computeRiskAndTrust() {
+      let risky = 0;
+      QUESTIONS.forEach(q => {
+        const a = (answers[q.id]||"").toLowerCase();
+        if (!a) return;
+        if (q.invert) {
+          // "Are you currently safe..." -> risky if NO
+          if (a === "no") risky++;
+        } else {
+          // all others risky if YES
+          if (a === "yes") risky++;
+        }
+      });
+      const risk = Math.round((risky / QUESTIONS.length) * 100);
+      const trust = 100 - risk;
+      return { risk, trust };
+    }
+
+    function updateScores() {
+      const { risk, trust } = computeRiskAndTrust();
+      riskPct.textContent = `${risk}%`;
+      trustPct.textContent = `${trust}%`;
+      trustBadge.textContent = `${trust}%`;
+      homeTrust.textContent = `${trust}`;
+      profile.trust = trust;
+    }
+
+    function refreshAllUI() {
+      profileName.textContent = profile.name || "Anonymous";
+      homeName.textContent = profile.name || "Anonymous";
+      displayNameInput.value = profile.name || "";
+      buildQuestions();
+      updateScores();
+      renderResources();
+    }
+
+    function persistAnswers() { saveJSON(LS_KEYS.answers, answers); }
+
+    // ---- Resources ----
+    function renderResources() {
+      resList.innerHTML = "";
+      if (!Array.isArray(resources)) resources = [];
+      resources.forEach((r, i) => {
+        const li = document.createElement("li");
+        li.className = "p-3 card flex items-start justify-between gap-3";
+        const txt = document.createElement("div");
+        const t = document.createElement("div"); t.className="font-semibold"; t.textContent = r.title || "Untitled";
+        const d = document.createElement("div"); d.className="text-sm text-gray-300"; d.textContent = r.desc || "";
+        const u = document.createElement("a"); u.className="link text-sm"; u.href = r.url || "#"; u.target="_blank"; u.rel="noreferrer"; u.textContent = r.url || "";
+        txt.appendChild(t); if (r.desc) txt.appendChild(d); if (r.url) txt.appendChild(u);
+        const del = document.createElement("button");
+        del.className = "btn btn-ghost"; del.textContent = "Delete";
+        del.addEventListener("click", ()=> {
+          resources.splice(i,1);
+          saveJSON(LS_KEYS.resources, resources);
+          renderResources();
+        });
+        li.appendChild(txt); li.appendChild(del);
+        resList.appendChild(li);
+      });
+    }
+
+    resForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const item = { title: resTitle.value.trim(), desc: resDesc.value.trim(), url: resUrl.value.trim() };
+      if (!item.title) return;
+      resources.push(item);
+      saveJSON(LS_KEYS.resources, resources);
+      resTitle.value = resDesc.value = resUrl.value = "";
       renderResources();
     });
-  });
-}
 
-/* =============== SCORE =============== */
-function computeScore(show=true){
-  const total = QUESTIONS.length;
-  let risk = 0;
-  QUESTIONS.forEach(q=>{ if (state.answers[q.id]===true) risk += 1; });
-  const riskPercent = Math.round((risk/total)*100);
-  const trustPercent = Math.max(0, 100 - riskPercent);
-  riskPct.textContent = riskPercent + "%";
-  state.profile.trust = trustPercent;
-  trust.textContent = trustPercent + "%";
-  if (show) showToast("Score updated");
-  return { riskPercent, trustPercent };
-}
-
-/* =============== TABS =============== */
-function setTab(which){
-  [tabHome,tabCheck,tabRes,tabProfile].forEach(b=>b.classList.remove('sel'));
-  [viewHome,viewCheck,viewRes,viewProfile].forEach(v=>v.classList.add('hidden'));
-  if (which==='home'){ tabHome.classList.add('sel'); viewHome.classList.remove('hidden'); }
-  if (which==='check'){ tabCheck.classList.add('sel'); viewCheck.classList.remove('hidden'); }
-  if (which==='res'){ tabRes.classList.add('sel'); viewRes.classList.remove('hidden'); }
-  if (which==='profile'){ tabProfile.classList.add('sel'); viewProfile.classList.remove('hidden'); }
-}
-
-/* =============== CLOUD =============== */
-let app, ready = false;
-async function bootCloud(){
-  try{
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    await new Promise((resolve)=> {
-      onAuthStateChanged(auth, async (user)=>{
-        if (!user){
-          try{ await signInAnonymously(auth); } catch(e){ console.warn('Anon sign-in failed', e); }
-        }
-        uid = auth.currentUser?.uid || user?.uid || uid;
-        resolve();
-      });
+    // ---- Profile ----
+    saveProfile.addEventListener("click", async () => {
+      profile.name = displayNameInput.value.trim() || "Anonymous";
+      saveJSON(LS_KEYS.profile, profile);
+      profileName.textContent = profile.name;
+      homeName.textContent = profile.name;
+      await mirrorProfileToCloud().catch(console.error);
     });
-    ready = true;
-    // create / merge profile mirror
-    if (uid){
-      const pRef = doc(db, `artifacts/${APP_ID}/public/data/profiles`, uid);
-      await setDoc(pRef, { publicName: state.profile.name || `User ${uid.slice(0,8)}`, trustScore: state.profile.trust ?? 25, appVersion: VERSION }, { merge:true });
+
+    openChangePin.addEventListener("click", () => openPin("change"));
+
+    // ---- Save (Local + Cloud) ----
+    saveAll.addEventListener("click", async () => {
+      saveJSON(LS_KEYS.profile, profile);
+      saveJSON(LS_KEYS.answers, answers);
+      saveJSON(LS_KEYS.resources, resources);
+      await Promise.all([
+        mirrorProfileToCloud(),
+        saveCheckInToCloud()
+      ]).catch(console.error);
+    });
+
+    saveCheckIn.addEventListener("click", async () => {
+      persistAnswers();
+      await saveCheckInToCloud().catch(console.error);
+    });
+
+    clearCheckIn.addEventListener("click", () => {
+      answers = {};
+      persistAnswers();
+      buildQuestions();
+      updateScores();
+    });
+
+    // ---- Cloud Ops ----
+    async function mirrorProfileToCloud() {
+      if (!uid) return;
+      const ref = doc(db, "artifacts/timeout-app/public/data/profiles", uid);
+      await setDoc(ref, {
+        publicName: profile.name || "Anonymous",
+        trustScore: profile.trust ?? 100,
+        appVersion: APP_VERSION,
+        updatedAt: serverTimestamp(),
+        createdAt: serverTimestamp() // Firestore will set on first write; harmless if overwritten
+      }, { merge: true });
     }
-  }catch(e){
-    console.error(e);
-    showToast("Cloud init failed");
-  }
-}
-async function saveAnswersCloud(){
-  if (!ready || !uid) return showToast("No cloud", 1500);
-  try{
-    await addDoc(collection(db, `artifacts/${APP_ID}/private/data/checkins`), {
-      userId: uid,
-      answers: state.answers,
-      profile: state.profile,
-      createdAt: serverTimestamp(),
-      appVersion: VERSION
-    });
-    showToast("Saved to cloud");
-  }catch(e){
-    console.error(e);
-    showToast("Cloud save failed");
-  }
-}
-async function saveProfileCloud(){
-  if (!ready || !uid) return;
-  try{
-    const pRef = doc(db, `artifacts/${APP_ID}/public/data/profiles`, uid);
-    await setDoc(pRef, { publicName: state.profile.name, trustScore: state.profile.trust ?? 25, updatedAt: serverTimestamp(), appVersion: VERSION }, { merge:true });
-  }catch(e){
-    console.error(e);
-  }
-}
 
-/* =============== EVENTS =============== */
-quickExit.addEventListener('click', ()=>{
-  renderDecoy();
-  window.location.href = "https://www.google.com/";
-});
-panicClear.addEventListener('click', ()=>{
-  localStorage.removeItem('timeout_profile');
-  localStorage.removeItem('timeout_answers');
-  localStorage.removeItem('timeout_resources');
-  state = { profile:{name:"",trust:25}, answers:{}, resources:[] };
-  renderDecoy();
-  showToast("Local data cleared", 1500);
-});
-timerStart.addEventListener('click', startTimer);
+    async function saveCheckInToCloud() {
+      if (!uid) return;
+      const { risk, trust } = computeRiskAndTrust();
+      const col = collection(db, "artifacts/timeout-app/private/data/checkins");
+      await addDoc(col, {
+        userId: uid,
+        answers: { ...answers },
+        profile: { name: profile.name || "Anonymous", trustScore: trust },
+        riskPercent: risk,
+        appVersion: APP_VERSION,
+        createdAt: serverTimestamp()
+      });
+      profile.trust = trust;
+      saveJSON(LS_KEYS.profile, profile);
+      updateScores();
+    }
 
-tabHome.addEventListener('click', ()=> setTab('home'));
-tabCheck.addEventListener('click', ()=> setTab('check'));
-tabRes.addEventListener('click', ()=> setTab('res'));
-tabProfile.addEventListener('click', ()=> setTab('profile'));
-goCheck.addEventListener('click', ()=> setTab('check'));
-
-saveAll.addEventListener('click', async ()=>{
-  computeScore(false);
-  saveLocal();
-  await saveProfileCloud();
-  await saveAnswersCloud();
-  showToast("Saved");
-});
-computeBtn.addEventListener('click', ()=> computeScore(true));
-saveAnswersBtn.addEventListener('click', async ()=>{
-  computeScore(false);
-  saveLocal();
-  await saveAnswersCloud();
-});
-
-saveProfileBtn.addEventListener('click', async ()=>{
-  state.profile.name = nameInput.value.trim() || state.profile.name;
-  saveLocal();
-  await saveProfileCloud();
-  renderReal();
-  showToast("Profile saved");
-});
-exportDataBtn.addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify({profile:state.profile,answers:state.answers,resources:state.resources,exportedAt:new Date().toISOString()}, null, 2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'timeout-export.json'; a.click();
-  URL.revokeObjectURL(url);
-});
-changePinBtn.addEventListener('click', ()=>{
-  openPin("Enter current PIN");
-  const oldHandler = pinOk.onclick;
-  pinOk.onclick = ()=>{
-    const v = (pinField.value||"").trim();
-    if (v === getPin()){
-      pinTitle.textContent = "Enter new PIN";
-      pinField.value = "";
-      pinOk.onclick = ()=>{
-        const nv = (pinField.value||"").trim();
-        if (nv.length >= 4){ setPin(nv); closePin(); showToast("PIN changed"); pinOk.onclick = oldHandler; }
-        else showToast("PIN too short", 1200);
+    // ---- Export JSON ----
+    exportJson.addEventListener("click", () => {
+      const payload = {
+        version: APP_VERSION,
+        uid: uid || null,
+        profile: loadJSON(LS_KEYS.profile, { name:"Anonymous", trust:100 }),
+        answers: loadJSON(LS_KEYS.answers, {}),
+        resources: loadJSON(LS_KEYS.resources, [])
       };
-    } else { showToast("Wrong PIN", 1200); }
-  };
-});
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "timeout-data.json";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=> { URL.revokeObjectURL(url); a.remove(); }, 0);
+    });
 
-addResBtn.addEventListener('click', ()=>{
-  const t = resTitle.value.trim();
-  const d = resDesc.value.trim();
-  const u = resUrl.value.trim();
-  if (!t) return showToast("Title required", 1200);
-  state.resources.push({title:t, desc:d, url:u});
-  saveLocal();
-  resTitle.value = ""; resDesc.value = ""; resUrl.value = "";
-  renderResources();
-  showToast("Resource added");
-});
-clearResBtn.addEventListener('click', ()=>{
-  resTitle.value = ""; resDesc.value = ""; resUrl.value = "";
-});
+    // ---- Initial Local Defaults ----
+    // Ensure default PIN exists (2580) unless user changed it
+    if (!localStorage.getItem(LS_KEYS.pin)) setStoredPin(DEFAULT_PIN);
+    // Load saved resources into UI
+    renderResources();
+    // Prepare questions UI (even before unlock, so it's ready)
+    buildQuestions();
+    updateScores();
 
-/* Hide sensitive screens if app goes to background */
-document.addEventListener('visibilitychange', ()=>{
-  if (document.hidden && unlocked){ renderDecoy(); }
-});
+    // ---- Tab Buttons Save Guards ----
+    tabs.forEach(b => b.addEventListener("click", () => {
+      // nothing special; kept for future guards
+    }));
 
-/* =============== BOOT =============== */
-(async function(){
-  loadLocal();
-  renderDecoy();
-  computeScore(false);
-  await bootCloud();
-})();
-</script>
+    // ---- PIN modal escape ----
+    pinModal.addEventListener("click", (e) => {
+      if (e.target === pinModal) closePin();
+    });
+
+    // ---- Keyboard shortcuts (optional helpful) ----
+    document.addEventListener("keydown", (e) => {
+      // Quick lock with Escape when in real app
+      if (e.key === "Escape" && unlocked) lockToDecoy();
+    });
+  </script>
 </body>
 </html>
