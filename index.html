@@ -1352,6 +1352,89 @@
   } catch(e){ console.error('Resource seeding failed',e); }
 
 })();
+</script><!-- PATCH: Safety Plan length + demo Q&A + YES/NO fix + header fix -->
+<style>
+  /* YES/NO highlight */
+  .yn-btn.selected {
+    background:#2563eb !important;
+    color:#fff !important;
+  }
+  /* Fix header icons cut-off */
+  header .btn { min-width:44px; min-height:44px; }
+  /* Safety Plan spacing */
+  #tab-plan.panel-scroll { padding-bottom:3rem; }
+  .demo-qs button {
+    display:block;
+    margin:.3rem 0;
+    padding:.4rem .6rem;
+    border-radius:.5rem;
+    background:#f3f4f6;
+    width:100%;
+    text-align:left;
+  }
+</style>
+<script>
+(function(){
+  if(window.__safety_patch_done) return;
+  window.__safety_patch_done = true;
+
+  const $=id=>document.getElementById(id);
+
+  /* 1) YES/NO toggle */
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('.yn-btn'); if(!b) return;
+    const qid=b.dataset.q; if(!qid) return;
+    document.querySelectorAll(`.yn-btn[data-q="${qid}"]`).forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+  });
+
+  /* 2) Demo Q&A list in Safety Plan */
+  function addDemoQuestions(){
+    const plan=$('tab-plan');
+    if(!plan || $('demoQs')) return;
+    const lang=(localStorage.getItem('timeout_lang')||'en');
+    const wrap=document.createElement('div');
+    wrap.id='demoQs';
+    wrap.className='card p-3 mt-3';
+    wrap.innerHTML=`<div class="font-semibold mb-2">${lang==='en'?'Example Questions':'Preguntas de ejemplo'}</div>
+      <div class="demo-qs">
+        <button data-q="safe">${lang==='en'?'Am I safe if I leave now?':'¿Estoy seguro si me voy ahora?'}</button>
+        <button data-q="help">${lang==='en'?'Where can I get help tonight?':'¿Dónde puedo obtener ayuda esta noche?'}</button>
+        <button data-q="bag">${lang==='en'?'What should I put in my go-bag?':'¿Qué debo poner en mi bolsa de emergencia?'}</button>
+      </div>`;
+    plan.appendChild(wrap);
+
+    wrap.addEventListener('click',e=>{
+      const btn=e.target.closest('button[data-q]'); if(!btn) return;
+      const q=btn.textContent;
+      if(typeof window.openAsk==='function'){ 
+        window.openAsk();
+        setTimeout(()=>{
+          const inp=$('askInput'); if(inp){ inp.value=q; inp.focus(); }
+        },400);
+      }
+    });
+  }
+  // Run once after page ready
+  window.addEventListener('load',addDemoQuestions);
+
+  /* 3) Voice reply stub for demo questions */
+  function extendReply(){
+    if(!window.__reply_extend){
+      window.__reply_extend=true;
+      const oldReply = window.__ask_reply || function(){return "";};
+      window.__ask_reply=function(q){
+        const s=(q||"").toLowerCase();
+        if(/go-?bag|bolsa/.test(s)) return "Pack ID, keys, money, meds, clothes. Keep it hidden.";
+        if(/help|ayuda/.test(s)) return "If unsafe, call hotline or 911. Resources tab has numbers now.";
+        if(/safe|segur/.test(s)) return "Leaving can be dangerous — plan ahead, tell someone you trust.";
+        return oldReply(q);
+      };
+    }
+  }
+  extendReply();
+
+})();
 </script>
 </body>
 </html>
