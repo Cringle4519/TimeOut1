@@ -932,6 +932,39 @@
 
   // Close everything with ESC when unlocked
   document.addEventListener("keydown", (e)=> { if(e.key==="Escape" && unlocked) lockToDecoy(); });
-  </script>
+  </script><!-- PATCH: force-close the Disclaimer overlay reliably -->
+<script>
+(function(){
+  // Ensure the disclaimer overlay can never get "stuck" on top
+  const closeDisclaimer = () => {
+    try {
+      localStorage.setItem('timeout_disclaimer_accepted','1');
+      const overlay = document.getElementById('firstRunDisc');
+      if (overlay) overlay.classList.add('hidden-soft');
+      document.body.style.overflow = 'auto';
+    } catch(e){}
+  };
+
+  // Rebind buttons safely (adds closures even if earlier code exists)
+  const accept = document.getElementById('acceptDisclaimer');
+  const decline = document.getElementById('declineDisclaimer');
+  if (accept) accept.onclick = closeDisclaimer;
+  if (decline) decline.onclick = () => {
+    const overlay = document.getElementById('firstRunDisc');
+    if (overlay) overlay.classList.add('hidden-soft');
+    // send back to decoy just in case
+    const real = document.getElementById('realApp');
+    const decoy = document.getElementById('decoyView');
+    if (real && decoy) { real.classList.add('hidden-soft'); decoy.classList.remove('hidden-soft'); }
+    document.body.style.overflow = 'auto';
+  };
+
+  // Extra safety: any tab click also hides it (in case it lingered)
+  ['tabHomeBtn','tabCheckBtn','tabPlanBtn','tabResBtn','tabProfileBtn'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', closeDisclaimer, { once:true });
+  });
+})();
+</script>
 </body>
 </html>
