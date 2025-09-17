@@ -965,6 +965,35 @@
     if (el) el.addEventListener('click', closeDisclaimer, { once:true });
   });
 })();
+</script><!-- HARD KILL for stuck Disclaimer -->
+<script>
+(function(){
+  const KEY='timeout_disclaimer_accepted';
+  function hideOverlay(){
+    const el=document.getElementById('firstRunDisc');
+    if(!el) return;
+    el.classList.add('hidden-soft');
+    el.style.display='none';
+    el.style.pointerEvents='none';
+    try{ el.remove(); }catch(e){}
+    document.body.style.overflow='auto';
+  }
+  // If already accepted before, remove immediately
+  try{ if(localStorage.getItem(KEY)==='1'){ hideOverlay(); } }catch(e){}
+
+  // Rebind buttons to force-remove
+  const acc=document.getElementById('acceptDisclaimer');
+  const dec=document.getElementById('declineDisclaimer');
+  if(acc) acc.onclick=()=>{ try{localStorage.setItem(KEY,'1');}catch(e){} hideOverlay(); };
+  if(dec) dec.onclick=()=>{ hideOverlay();
+    const real=document.getElementById('realApp'), decoy=document.getElementById('decoyView');
+    if(real&&decoy){ real.classList.add('hidden-soft'); decoy.classList.remove('hidden-soft'); }
+  };
+
+  // Extra: any click inside main app hides it if it somehow lingers
+  ['tabHomeBtn','tabCheckBtn','tabPlanBtn','tabResBtn','tabProfileBtn','saveCheckIn','goToCheckIn','btnQuickGenerate']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click', hideOverlay, {once:true}); });
+})();
 </script>
 </body>
 </html>
