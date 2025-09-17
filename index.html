@@ -1021,6 +1021,73 @@
   const hint = document.querySelector('#skinClock + p, #skinClock .small, #decoyView .small');
   if(hint) hint.style.color = '#64748b';
 })();
+</script><!-- PATCH: #ask quick-open + scrollable tab panels (no clutter) -->
+<style>
+  /* Give each app tab its own tall, scrollable panel */
+  .panel-scroll{
+    /* Header (~68) + margins + bottom bar (64) + buffer */
+    max-height: calc(100vh - 160px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  /* Ensure decoy never gets covered */
+  #decoyView{ padding-bottom: 20px !important; }
+</style>
+<script>
+(function(){
+  if(window.__timeout_layout_hashask) return;
+  window.__timeout_layout_hashask = true;
+
+  /* 1) Mark tabs as scrollable panels (roomier on phones) */
+  function applyScrollablePanels(){
+    ["tab-home","tab-checkin","tab-plan","tab-resources","tab-profile"].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && !el.classList.contains('panel-scroll')) el.classList.add('panel-scroll');
+    });
+  }
+  applyScrollablePanels();
+
+  /* Also re-apply after any rebuilds */
+  const _setTab = window.setTab;
+  window.setTab = function(name){
+    if(_setTab) _setTab(name);
+    applyScrollablePanels();
+    // When you open Check-In, clear old feedback so it never “grows”
+    if(name==='checkin'){
+      const fb=document.getElementById('checkFeedback');
+      if(fb) fb.innerHTML='';
+    }
+  };
+
+  /* 2) Quick-open Ask modal via URL hash (#ask) */
+  function openAskIfHash(){
+    if(location.hash === '#ask'){
+      if(typeof window.openAiChat === 'function'){
+        window.openAiChat();
+      } else {
+        // fallback: if modal exists, show it
+        const m = document.getElementById('askModal');
+        if(m){ m.classList.remove('hidden-soft'); document.body.style.overflow='hidden'; }
+      }
+    }
+  }
+  window.addEventListener('hashchange', openAskIfHash);
+  openAskIfHash();
+
+  /* 3) Make sure Ask FAB only shows inside the real app (not on decoy) */
+  const _showRealApp = window.showRealApp;
+  const _lockToDecoy = window.lockToDecoy;
+  window.showRealApp = function(){ if(_showRealApp) _showRealApp(); const f=document.getElementById('askFab'); if(f) f.classList.remove('hidden-soft'); };
+  window.lockToDecoy = function(){ if(_lockToDecoy) _lockToDecoy(); const f=document.getElementById('askFab'); if(f) f.classList.add('hidden-soft'); };
+
+  /* 4) One more guard: prevent duplicate Quick Plan */
+  const btnQ = document.getElementById('btnQuickGenerate');
+  if(btnQ && !btnQ.__onceGuard){
+    btnQ.addEventListener('click', ()=>{ btnQ.disabled=true; setTimeout(()=>btnQ.disabled=false,500); }, {capture:true});
+    btnQ.__onceGuard = true;
+  }
+})();
 </script>
 </body>
 </html>
