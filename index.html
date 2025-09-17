@@ -994,6 +994,220 @@
   ['tabHomeBtn','tabCheckBtn','tabPlanBtn','tabResBtn','tabProfileBtn','saveCheckIn','goToCheckIn','btnQuickGenerate']
     .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click', hideOverlay, {once:true}); });
 })();
+</script><!-- CONSOLIDATED PATCH: bilingual Qs + plans working + resources preload + talk tips + overlay & unlock fixes -->
+<script>
+(function(){
+  /* ---------- 0) UTIL ---------- */
+  const getLang = ()=> (localStorage.getItem("timeout_lang")||"en");
+  const isEN = ()=> getLang()==="en";
+
+  /* ---------- 1) PRELOAD RESOURCES (once) ---------- */
+  (function preloadResourcesOnce(){
+    const KEY="timeout_resources";
+    try{
+      const existing = JSON.parse(localStorage.getItem(KEY)||"[]");
+      if (Array.isArray(existing) && existing.length>0) return; // don't overwrite
+      const R = [
+        { title:isEN()?"National Domestic Violence Hotline (US)":"Línea Nacional de Violencia Doméstica (EE. UU.)", desc:isEN()?"24/7 confidential support":"Atención confidencial 24/7", url:"https://www.thehotline.org/ 1-800-799-7233" },
+        { title:isEN()?"RAINN Sexual Assault Hotline (US)":"RAINN Línea de Agresión Sexual (EE. UU.)", desc:isEN()?"24/7 — chat & phone":"24/7 — chat y teléfono", url:"https://www.rainn.org/ 1-800-656-4673" },
+        { title:isEN()?"Childhelp National Child Abuse Hotline (US)":"Childhelp Línea Nacional de Abuso Infantil (EE. UU.)", desc:isEN()?"24/7 — children & adults":"24/7 — para niños y adultos", url:"https://www.childhelp.org/ 1-800-422-4453" },
+        { title:isEN()?"Elder Abuse Resource (NCEA)":"Recurso para Abuso a Personas Mayores (NCEA)", desc:isEN()?"Info & reporting paths":"Información y vías de reporte", url:"https://ncea.acl.gov/" },
+        { title:isEN()?"Local Social Services Finder":"Buscador de Servicios Sociales Locales", desc:isEN()?"Locate nearby assistance":"Encuentra ayuda cercana", url:"https://www.211.org/" },
+        { title:isEN()?"Emergency (If in immediate danger)":"Emergencias (Si hay peligro inmediato)", desc:isEN()?"Call your local emergency number":"Llama al número de emergencias local", url:"911" }
+      ];
+      localStorage.setItem(KEY, JSON.stringify(R));
+      if (typeof window.renderResources === "function") window.renderResources();
+      document.dispatchEvent(new Event("resources-updated"));
+    }catch(e){}
+  })();
+
+  /* ---------- 2) TRUE BILINGUAL QUESTIONS (labels update) ---------- */
+  const Q_EN = [
+    "Are you currently safe where you are?",
+    "Has someone threatened you recently?",
+    "Have you experienced physical harm in past month?",
+    "Are you worried about your partner’s access to your phone?",
+    "Is anyone preventing you from leaving?",
+    "Do you have children at risk?",
+    "Do you feel isolated from help?",
+    "Would you like immediate local resources?"
+  ];
+  const Q_ES = [
+    "¿Estás segura/o donde estás ahora?",
+    "¿Alguien te ha amenazado recientemente?",
+    "¿Has sufrido daño físico en el último mes?",
+    "¿Te preocupa que tu pareja tenga acceso a tu teléfono?",
+    "¿Alguien te impide salir?",
+    "¿Tienes hijas/os en riesgo?",
+    "¿Te sientes aislada/o de la ayuda?",
+    "¿Quieres recursos locales de inmediato?"
+  ];
+
+  function relabelQuestions(){
+    const texts = isEN()? Q_EN : Q_ES;
+    const container = document.getElementById("questions");
+    if(!container) return;
+    const rows = Array.from(container.querySelectorAll(".card"));
+    rows.forEach((row, idx)=>{
+      const label = row.querySelector(".font-semibold.small");
+      if(label && texts[idx]) label.textContent = `${idx+1}. ${texts[idx]}`;
+      const btns = row.querySelectorAll("button");
+      if(btns.length>=2){
+        btns[0].textContent = isEN()?"Yes":"Sí";
+        btns[1].textContent = isEN()?"No":"No";
+      }
+    });
+    const t = document.getElementById("checkTitle");
+    if(t) t.textContent = isEN()? "Safety Check-In" : "Revisión de seguridad";
+    const demo = document.getElementById("demoLoadBtn");
+    if(demo) demo.textContent = isEN()? "Load Demo Answers" : "Cargar respuestas de demo";
+    const quickExitBtn = document.getElementById("quickExitBtn");
+    if(quickExitBtn) quickExitBtn.textContent = isEN()? "Home" : "Inicio";
+  }
+
+  // apply now and after language toggle
+  relabelQuestions();
+  const langToggle = document.getElementById("langToggle");
+  if(langToggle){
+    langToggle.addEventListener("click", ()=> setTimeout(relabelQuestions, 10));
+    langToggle.textContent = isEN()? "EN | ES" : "ES | EN";
+  }
+
+  /* ---------- 3) SAFETY PLAN BUTTONS (make them work) ---------- */
+  function plans(){ try{ return JSON.parse(localStorage.getItem("timeout_plans")||"[]"); }catch{ return []; } }
+  function setPlans(arr){ localStorage.setItem("timeout_plans", JSON.stringify(arr)); }
+  function renderPlansLite(){
+    const list = document.getElementById("planList"); if(!list) return;
+    const arr = plans();
+    list.innerHTML = "";
+    arr.forEach((p,i)=>{
+      const el = document.createElement("div");
+      el.className="p-3 card flex items-center justify-between gap-2";
+      const txt = document.createElement("div");
+      txt.innerHTML = `<div class="font-semibold">${p.title||"Plan"}</div><div class="small">${p.summary||""}</div>`;
+      const actions = document.createElement("div");
+      const open = document.createElement("button");
+      open.className="btn btn-ghost";
+      open.textContent = isEN()? "Open" : "Abrir";
+      open.onclick = ()=>{
+        const t = prompt(isEN()? "Title:" : "Título:", p.title||"");
+        if(t===null) return;
+        const s = prompt(isEN()? "Summary:" : "Resumen:", p.summary||"");
+        const arr2 = plans(); arr2[i] = { ...arr2[i], title:t, summary:s };
+        setPlans(arr2); renderPlansLite();
+      };
+      const del = document.createElement("button");
+      del.className="btn btn-ghost";
+      del.textContent = isEN()? "Delete" : "Eliminar";
+      del.onclick = ()=>{ const arr2 = plans(); arr2.splice(i,1); setPlans(arr2); renderPlansLite(); };
+      actions.append(open, del);
+      el.append(txt, actions);
+      list.appendChild(el);
+    });
+  }
+  renderPlansLite();
+
+  const btnNew = document.getElementById("btnNewPlan");
+  if(btnNew) btnNew.onclick = ()=>{
+    const t = prompt(isEN()? "Plan title:" : "Título del plan:");
+    if(!t) return;
+    const s = prompt(isEN()? "Short summary:" : "Resumen corto:") || "";
+    const arr = plans(); arr.push({ id:"plan_"+Date.now(), title:t, summary:s, items:{} }); setPlans(arr);
+    renderPlansLite(); alert(isEN()? "Plan created." : "Plan creado.");
+  };
+
+  const btnTemplates = document.getElementById("btnTemplates");
+  if(btnTemplates) btnTemplates.onclick = ()=>{
+    const templates = [
+      {title:isEN()?"Grab-and-Go Bag":"Bolsa de emergencia", summary:isEN()?"List items + hidden spot":"Lista de artículos + lugar oculto"},
+      {title:isEN()?"Trusted Contacts":"Contactos de confianza", summary:isEN()?"Names & numbers":"Nombres y teléfonos"},
+      {title:isEN()?"Safe Exit Plan":"Salida segura", summary:isEN()?"Safe place & transport":"Lugar seguro y transporte"}
+    ];
+    const pick = prompt((isEN()?"Templates:\n":"Plantillas:\n")+templates.map((t,i)=>`${i+1}. ${t.title}`).join("\n")+"\n"+(isEN()?"Number:":"Número:"));
+    const n = Number(pick);
+    if(n>=1 && n<=templates.length){
+      const arr = plans(); arr.push({ id:"plan_"+Date.now(), ...templates[n-1], items:{} }); setPlans(arr);
+      renderPlansLite(); alert(isEN()? "Template added." : "Plantilla añadida.");
+    }
+  };
+
+  const btnQuick = document.getElementById("btnQuickGenerate");
+  if(btnQuick) btnQuick.onclick = ()=>{
+    let a={}; try{ a = JSON.parse(localStorage.getItem("timeout_answers")||"{}"); }catch{}
+    const parts=[];
+    if(a.q1==="no") parts.push(isEN()? "Safe site: public place or trusted home." : "Sitio seguro: lugar público o casa de confianza.");
+    if(a.q2==="yes") parts.push(isEN()? "Record threats privately (date/time)." : "Registra amenazas en privado (fecha/hora).");
+    if(a.q4==="yes") parts.push(isEN()? "Avoid storing sensitive content; consider quick-wipe." : "Evita contenido sensible; considera borrado rápido.");
+    if(parts.length===0) parts.push(isEN()? "Keep exits clear and contacts ready." : "Mantén salidas despejadas y contactos listos.");
+    const arr = plans(); arr.push({ id:"plan_"+Date.now(), title:isEN()? "Quick Plan":"Plan Rápido", summary:parts.join(" "), items:{} }); setPlans(arr);
+    renderPlansLite(); alert(isEN()? "Quick plan created." : "Plan rápido creado.");
+  };
+
+  /* ---------- 4) TALK TO THE APP (rule-based supportive tips) ---------- */
+  const talkBtn = document.getElementById("talkBtn");
+  if(talkBtn) talkBtn.onclick = ()=>{
+    let a={}; try{ a = JSON.parse(localStorage.getItem("timeout_answers")||"{}"); }catch{}
+    const lines = [];
+    if(a.q1==="no") lines.push(isEN()? "You might not be safe now. Move to a public place or contact someone you trust." : "Podrías no estar segura/o ahora. Ve a un lugar público o contacta a alguien de confianza.");
+    if(a.q2==="yes") lines.push(isEN()? "Threats raise risk. Note dates/times privately." : "Las amenazas elevan el riesgo. Anota fechas/horas en privado.");
+    if(a.q4==="yes") lines.push(isEN()? "Phone privacy: avoid sensitive content; use quick wipe if needed." : "Privacidad del teléfono: evita contenido sensible; usa borrado rápido si es necesario.");
+    if(a.q7==="yes") lines.push(isEN()? "Message one trusted person today." : "Escribe hoy a una persona de confianza.");
+    if(a.q8==="yes") lines.push(isEN()? "Open Resources; copy numbers if call logs worry you." : "Abre Recursos; copia números si te preocupan los historiales.");
+    if(lines.length===0) lines.push(isEN()? "Low immediate risk suggested. Keep your plan updated." : "Riesgo inmediato bajo. Mantén tu plan actualizado.");
+
+    const box = document.getElementById("checkFeedback");
+    if(box){
+      const card = document.createElement("div"); card.className="card mt-2";
+      const h = document.createElement("div"); h.className="font-semibold"; h.textContent = isEN()? "Quick suggestions" : "Sugerencias rápidas";
+      const p = document.createElement("div"); p.className="small mt-2"; p.innerHTML = lines.map(l=>"• "+l).join("<br>");
+      card.append(h,p); box.prepend(card);
+    }
+  };
+
+  /* ---------- 5) OVERLAY FAILSAFE + HASH UNLOCK + WIDER LONG-PRESS ---------- */
+  function killDisclaimer(){
+    const el=document.getElementById('firstRunDisc');
+    if(el){ try{ el.classList.add('hidden-soft'); el.style.display='none'; el.remove(); }catch{} }
+    document.body.style.overflow='auto';
+  }
+  // bind close on accept/decline
+  const acc=document.getElementById('acceptDisclaimer');
+  const dec=document.getElementById('declineDisclaimer');
+  if(acc) acc.onclick = ()=>{ try{ localStorage.setItem('timeout_disclaimer_accepted','1'); }catch{} killDisclaimer(); };
+  if(dec) dec.onclick = ()=>{ killDisclaimer(); const real=$('realApp'), decoy=$('decoyView'); if(real&&decoy){ real.classList.add('hidden-soft'); decoy.classList.remove('hidden-soft'); } };
+
+  // also close overlay on common actions
+  ['saveCheckIn','btnQuickGenerate','btnTemplates','btnNewPlan','talkBtn'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.addEventListener('click', killDisclaimer, {capture:true});
+  });
+
+  // hash unlock: /#unlock opens PIN right away
+  function hashUnlock(){
+    if(location.hash === '#unlock'){
+      const modal = document.getElementById('pinModal');
+      if(modal) modal.classList.remove('hidden-soft');
+      const inp = document.getElementById('pinInput'); if(inp) setTimeout(()=>inp.focus(),50);
+    }
+  }
+  window.addEventListener('hashchange', hashUnlock); hashUnlock();
+
+  // widen long-press to whole decoy card
+  function addLongPress(el, action){
+    if(!el) return; let t;
+    const start=()=>{ t=setTimeout(action,800); }, stop=()=>clearTimeout(t);
+    el.addEventListener('mousedown',start); el.addEventListener('mouseup',stop); el.addEventListener('mouseleave',stop);
+    el.addEventListener('touchstart',start,{passive:true}); el.addEventListener('touchend',stop); el.addEventListener('touchcancel',stop);
+  }
+  const decoy = document.getElementById('decoyView');
+  addLongPress(decoy, ()=>{
+    const modal = document.getElementById('pinModal');
+    if(modal) modal.classList.remove('hidden-soft');
+    const inp = document.getElementById('pinInput'); if(inp) setTimeout(()=>inp.focus(),50);
+  });
+
+  // helper $
+  function $(id){ return document.getElementById(id); }
+})();
 </script>
 </body>
 </html>
