@@ -1088,6 +1088,145 @@
     btnQ.__onceGuard = true;
   }
 })();
+</script><!-- PATCH: yes/no highlight + dedupe + quick plan guard + minimal Ask voice bot -->
+<style>
+  /* Clear, reliable selected states for yes/no */
+  .btn-yes.selected { background:#16a34a !important; color:#fff !important; border-color:#16a34a !important; }
+  .btn-no.selected  { background:#dc2626 !important; color:#fff !important; border-color:#dc2626 !important; }
+</style>
+<script>
+(function(){
+  if(window.__timeout_patch_fixYN) return; window.__timeout_patch_fixYN = true;
+  const $=id=>document.getElementById(id);
+
+  /* 1) YES/NO highlight that sticks and never duplicates */
+  function paintYN(){
+    const box=$('questions'); if(!box) return;
+    const rows=[...box.querySelectorAll('.card')];
+    rows.forEach((row,i)=>{
+      const btns=row.querySelectorAll('button'); if(btns.length<2) return;
+      const yes=btns[0], no=btns[1], qid='q'+(i+1);
+      yes.classList.add('btn-yes'); no.classList.add('btn-no');
+      function apply(){
+        const a=(window.core?.answers||{})[qid];
+        yes.classList.toggle('selected', a==='yes');
+        no .classList.toggle('selected',  a==='no');
+      }
+      if(!yes.__ynBound){
+        yes.addEventListener('click', ()=>{ window.core.answers[qid]='yes'; apply(); window.updateScoresAndFeedback?.(); window.saveCoreEncryptedIfUnlocked?.(); });
+        yes.__ynBound=true;
+      }
+      if(!no.__ynBound){
+        no.addEventListener('click',  ()=>{ window.core.answers[qid]='no';  apply(); window.updateScoresAndFeedback?.(); window.saveCoreEncryptedIfUnlocked?.(); });
+        no.__ynBound=true;
+      }
+      apply();
+    });
+  }
+
+  // Wrap buildQuestions to rebuild cleanly and then paint
+  if(window.buildQuestions && !window.buildQuestions.__ynPatched){
+    const _bq=window.buildQuestions;
+    window.buildQuestions=function(){ const box=$('questions'); if(box) box.innerHTML=''; _bq(); paintYN(); };
+    window.buildQuestions.__ynPatched=true;
+  }
+  // First paint
+  setTimeout(paintYN, 50);
+
+  /* 2) No more duplicate feedback/cards on Check-In */
+  if(window.updateScoresAndFeedback && !window.updateScoresAndFeedback.__clr){
+    const _u=window.updateScoresAndFeedback;
+    window.updateScoresAndFeedback=function(){ const fb=$('checkFeedback'); if(fb) fb.innerHTML=''; return _u.apply(this,arguments); };
+    window.updateScoresAndFeedback.__clr=true;
+  }
+  // Also clear when switching to Check-In
+  if(window.setTab && !window.setTab.__clrFB){
+    const _st=window.setTab;
+    window.setTab=function(name){ _st(name); if(name==='checkin'){ const fb=$('checkFeedback'); if(fb) fb.innerHTML=''; paintYN(); } };
+    window.setTab.__clrFB=true;
+  }
+
+  /* 3) Quick Plan guard so a single tap adds only ONE plan */
+  (function guardQuickPlan(){
+    const btn=$('btnQuickGenerate'); if(!btn || btn.__guarded) return;
+    btn.addEventListener('click', ()=>{ if(btn.disabled) return; btn.disabled=true; setTimeout(()=>btn.disabled=false,600);
+      // re-render plans shortly after
+      setTimeout(()=> window.renderPlans && window.renderPlans(), 80);
+    }, {capture:true});
+    btn.__guarded=true;
+  })();
+
+  /* 4) Minimal “Ask” voice bot (if not already present) */
+  (function ensureAsk(){
+    if($('askFab') && $('askModal')) return;
+    const lang = (localStorage.getItem('timeout_lang')||'en');
+
+    // FAB
+    const fab=document.createElement('button');
+    fab.id='askFab'; fab.className='btn btn-primary hidden-soft';
+    Object.assign(fab.style,{position:'fixed',right:'16px',bottom:'80px',zIndex:55});
+    fab.textContent='🎙️ Ask';
+    document.body.appendChild(fab);
+
+    // Modal
+    const m=document.createElement('div'); m.id='askModal'; m.className='overlay hidden-soft';
+    m.innerHTML=`
+      <div class="panel card p-3" style="max-width:520px;width:92vw">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-semibold">${lang==='en'?'Ask Support':'Pregunta al Apoyo'}</div>
+          <button id="askClose" class="btn btn-ghost">✕</button>
+        </div>
+        <div class="small mb-2">${lang==='en'?'General guidance only, not therapy or emergency.':'Orientación general, no terapia ni emergencia.'}</div>
+        <div id="askOut" style="max-height:42vh;overflow:auto" class="space-y-2"></div>
+        <div class="mt-3 flex gap-2">
+          <input id="askInput" class="card flex-1" placeholder="${lang==='en'?'Say or type a question…':'Di o escribe una pregunta…'}" />
+          <button id="askMic" class="btn btn-ghost">🎤</button>
+          <button id="askSend" class="btn btn-primary">${lang==='en'?'Send':'Enviar'}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+
+    const askOut=$('askOut');
+    function bubble(who,text){
+      const el=document.createElement('div'); el.className='card p-2'; el.style.background = who==='user'?'#e8f7ee':'#fff';
+      el.innerHTML=`<div class="small" style="opacity:.6">${who==='user'?(lang==='en'?'You':'Tú'):(lang==='en'?'Support':'Apoyo')}</div><div style="margin-top:6px">${text}</div>`;
+      askOut.appendChild(el); askOut.scrollTop=askOut.scrollHeight;
+    }
+    function reply(q){
+      const es=lang==='es'; const a=window.core?.answers||{}; const s=(q||'').toLowerCase();
+      if(/safe|segur/.test(s)) return a.q1==='no' ? (es?"Ve a un lugar público y contacta a alguien de confianza.":"Go to a public place and contact a trusted person.") : (es?"Mantén tu plan y contactos listos.":"Keep your plan and contacts ready.");
+      if(/phone|tel[eé]fono|privac/.test(s)) return a.q4==='yes' ? (es?"Evita contenido sensible; usa borrado rápido.":"Avoid sensitive content; use quick-wipe.") : (es?"Revisa accesos y bloqueo.":"Review access and screen lock.");
+      if(/threat|amenaz/.test(s)) return a.q2==='yes' ? (es?"Registra fecha/hora en privado.":"Record date/time privately.") : (es?"Monitorea y actualiza tu plan.":"Monitor and update your plan.");
+      if(/help|ayuda|hotline|línea/.test(s)) return es?"Para apoyo confidencial, ve a Recursos; si hay peligro, llama a emergencias.":"For confidential help, open Resources; if in danger, call emergency.";
+      return es?"Gracias por compartir. Un paso pequeño: revisa tu plan o agrega un contacto de confianza.":"Thanks for sharing. A small step: review your plan or add a trusted contact.";
+    }
+    function send(){ const q=$('askInput').value.trim(); if(!q) return; bubble('user',q); $('askInput').value=''; setTimeout(()=> bubble('bot', reply(q)), 400); }
+    $('askSend').onclick=send; $('askInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+    $('askMic').onclick=()=>{ try{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) throw 0; const rec=new SR(); rec.lang=(lang==='es'?'es-ES':'en-US'); rec.onresult=e=>{ const t=e.results[0][0].transcript; $('askInput').value=t; send(); }; rec.start(); }catch{ alert(lang==='en'?'Voice not supported here.':'Voz no soportada.'); } };
+    $('askClose').onclick=()=>{ $('askModal').classList.add('hidden-soft'); document.body.style.overflow='auto'; };
+    $('askFab').onclick = ()=>{ $('askModal').classList.remove('hidden-soft'); document.body.style.overflow='hidden'; $('askInput').focus(); };
+
+    // Show FAB only in real app
+    if(window.showRealApp && !window.showRealApp.__fab){
+      const _sr=window.showRealApp; window.showRealApp=function(){ _sr(); $('askFab').classList.remove('hidden-soft'); }; window.showRealApp.__fab=true;
+    }
+    if(window.lockToDecoy && !window.lockToDecoy.__fab){
+      const _lk=window.lockToDecoy; window.lockToDecoy=function(){ _lk(); $('askFab').classList.add('hidden-soft'); $('askModal').classList.add('hidden-soft'); }; window.lockToDecoy.__fab=true;
+    }
+  })();
+
+  /* 5) Small: call button in Resources (dials hotline) */
+  (function callBtn(){
+    const hdr=$('resTitle'); if(!hdr || $('callHotlineBtn')) return;
+    const b=document.createElement('button'); b.id='callHotlineBtn'; b.className='btn btn-ghost'; b.style.marginLeft='8px';
+    b.textContent=(localStorage.getItem('timeout_lang')||'en')==='en'?'Call Hotline':'Llamar línea';
+    b.onclick=()=>{ location.href='tel:+18007997233'; };
+    hdr.parentElement.insertBefore(b, hdr.nextSibling);
+  })();
+
+  // Trigger a clean rebuild once so fixes apply now
+  setTimeout(()=>{ window.buildQuestions && window.buildQuestions(); window.renderPlans && window.renderPlans(); }, 80);
+})();
 </script>
 </body>
 </html>
