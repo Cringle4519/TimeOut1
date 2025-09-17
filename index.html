@@ -926,6 +926,101 @@
     lang = localStorage.getItem(LS.lang)||lang; setLangText();
     const meta = JSON.parse(localStorage.getItem(LS.meta)||"{}"); if(meta.skin) setSkin(meta.skin);
   })();
-  </script>
+  </script><!-- LIGHT PALETTE PATCH: sand + sage, force light theme -->
+<style>
+  :root{
+    --bg: #f7f3ea;      /* sand */
+    --card: #ffffff;    /* white cards */
+    --ink: #0f172a;     /* dark text */
+    --sub: #48556b;     /* subtext */
+    --line: #e6e4de;    /* light borders */
+    --sage: #16a34a;    /* primary sage green */
+    --sage-ink: #ffffff;
+    --sage-soft: #e8f7ee;
+    --btn-ghost-ink:#0f172a;
+  }
+  body{ background:var(--bg)!important; color:var(--ink)!important; }
+  .container{ padding-bottom:88px; } /* keep bottom bar clear in real app */
+
+  /* Cards, inputs */
+  .card{ background:var(--card)!important; border:1px solid var(--line)!important; color:var(--ink)!important; }
+  input.card, textarea.card, select.card{ background:#fff!important; border:1px solid var(--line)!important; color:var(--ink)!important; }
+
+  /* Buttons */
+  .btn-primary{ background:var(--sage)!important; color:var(--sage-ink)!important; border:0!important; }
+  .btn-ghost{ background:#fff!important; color:var(--btn-ghost-ink)!important; border:1px solid var(--line)!important; }
+
+  /* Pills, small text */
+  .pill{ background:#fff!important; color:var(--sub)!important; border:1px solid var(--line)!important; }
+  .small{ color:var(--sub)!important; }
+
+  /* Tabs */
+  .tab-btn{ background:#fff!important; border:1px solid var(--line)!important; color:var(--ink)!important; }
+  .tab-btn.active{ background:var(--sage)!important; color:#fff!important; border-color:var(--sage)!important; }
+
+  /* Bottom bar (only visible in real app) */
+  #bottomNav{
+    background:#ffffff!important; border-top:1px solid var(--line)!important;
+  }
+  #bottomNav .bottom-btn{ color:#334155!important; border-color:transparent!important; }
+  #bottomNav .bottom-btn.active{ background:var(--sage)!important; color:#fff!important; border-color:var(--sage)!important; }
+
+  /* Decoy digits & separators (clock) */
+  .digit{
+    background:#fff!important; color:#0f172a!important;
+    border:1px solid var(--line)!important; text-shadow:none!important;
+  }
+  .sep{ color:#2f855a!important; text-shadow:none!important; }
+
+  /* Overlays */
+  .overlay{ background:rgba(0,0,0,.35)!important; }
+  .overlay .panel.card{ box-shadow:0 10px 30px rgba(0,0,0,.08); }
+
+  /* Weather tile demo */
+  #skinWeather .card{ background:linear-gradient(180deg,#fff,#f1fbf5)!important; }
+
+  /* Misc accents on feedback */
+  #riskPct{ color:#dc2626!important; }
+  #trustPct, #trustBadge{ color:#15803d!important; }
+</style>
+
+<script>
+/* Force LIGHT mode (disable stored dim/dark), tidy decoy/bottom bar */
+(function(){
+  try{
+    // Kill any saved dim/dark choice and ensure light
+    localStorage.setItem('timeout_theme_dim','0');
+    document.body.classList.remove('theme-dim');
+  }catch(e){}
+
+  // Ensure bottom bar hidden on decoy (keep real app clean)
+  function updateBottomBarVisibility(){
+    const decoy = document.getElementById('decoyView');
+    const bar   = document.getElementById('bottomNav');
+    if(!bar || !decoy) return;
+    const onDecoy = !decoy.classList.contains('hidden-soft');
+    bar.style.display = onDecoy ? 'none' : 'flex';
+  }
+  // Wrap existing functions if present
+  const _showRealApp = window.showRealApp;
+  const _lockToDecoy = window.lockToDecoy;
+  const _setTab      = window.setTab;
+
+  if(_showRealApp) window.showRealApp = function(){ _showRealApp(); updateBottomBarVisibility(); };
+  if(_lockToDecoy) window.lockToDecoy = function(){ _lockToDecoy(); updateBottomBarVisibility(); };
+  if(_setTab) window.setTab = function(name){ _setTab(name); updateBottomBarVisibility(); };
+
+  // Initial call
+  updateBottomBarVisibility();
+
+  // Optional: rename header sublabel from "Clock" to something neutral/light
+  const sub = document.getElementById('hdrSub');
+  if(sub) sub.textContent = (localStorage.getItem('timeout_lang')==='es'?'Reloj':'Clock');
+
+  // Slightly soften the decoy hint text
+  const hint = document.querySelector('#skinClock + p, #skinClock .small, #decoyView .small');
+  if(hint) hint.style.color = '#64748b';
+})();
+</script>
 </body>
 </html>
