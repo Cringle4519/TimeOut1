@@ -3,36 +3,43 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>TimeOut — Privacy-first Safety App</title>
-  <meta name="theme-color" content="#07090d" />
+  <title>TimeOut — Safety & Support</title>
+  <meta name="theme-color" content="#0a0f18" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{--maxw:480px}
     html,body{height:100%}
-    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:#06070a;color:#e6eef8;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;background:#0a0f18;color:#eaf1fb;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
     .container{max-width:var(--maxw);margin:0 auto;padding:16px}
-    .card{background:rgba(10,14,24,.68);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,.03);backdrop-filter:blur(6px)}
+    .card{background:rgba(18,25,38,.78);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,.06);backdrop-filter:blur(6px)}
     header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    h1{font-weight:700;font-size:20px;margin:0}
-    .pill{background:#081226;padding:.15rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.04);font-size:12px;color:#9fb0d9}
-    .theme-dot{width:16px;height:16px;border-radius:999px;border:1px solid rgba(255,255,255,.06);cursor:pointer}
+    h1{font-weight:800;font-size:20px;margin:0;letter-spacing:.2px}
+    .pill{background:#0d1626;padding:.15rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.06);font-size:12px;color:#9fb0d9}
     .btn{border-radius:10px;padding:.5rem .8rem;font-weight:700;cursor:pointer}
-    .btn-primary{background:#2563eb;color:white;border:0}
+    .btn-primary{background:#2563eb;color:#fff;border:0}
     .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.06);color:inherit}
     .small{font-size:13px;color:#9fb0d9}
-    .flipwrap{display:inline-grid;grid-auto-flow:column;gap:.18rem;user-select:none}
-    .digit{width:56px;height:80px;border-radius:12px;background:linear-gradient(180deg,#071428,#071025);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:44px;letter-spacing:.02em;text-shadow:0 0 8px rgba(59,130,246,.28);border:1px solid rgba(255,255,255,.02);overflow:hidden}
-    .sep{width:14px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#9fb5ff;font-size:40px;text-shadow:0 0 8px rgba(99,102,241,.25)}
-    .tick{animation:tick .62s ease}
-    @keyframes tick{0%{transform:rotateX(0)}49%{transform:rotateX(-86deg)}50%{transform:rotateX(86deg)}100%{transform:rotateX(0)}}
     .hidden-soft{display:none!important}
-    .tab-btn{padding:.45rem .75rem;border-radius:999px;border:1px solid rgba(255,255,255,.03)}
+    .digit{width:54px;height:76px;border-radius:12px;background:linear-gradient(180deg,#0e1a2a,#0c1726);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:42px;letter-spacing:.02em;text-shadow:0 0 8px rgba(59,130,246,.28);border:1px solid rgba(255,255,255,.05)}
+    .sep{width:14px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#9fb5ff;font-size:38px;text-shadow:0 0 8px rgba(99,102,241,.25)}
+    .flipwrap{display:inline-grid;grid-auto-flow:column;gap:.18rem;user-select:none}
+    .tab-btn{padding:.45rem .75rem;border-radius:999px;border:1px solid rgba(255,255,255,.06)}
     .tab-btn.active{background:#2563eb;color:white;border:0}
-    input.card{background:transparent;border:1px solid rgba(255,255,255,.04);padding:.6rem;border-radius:8px;color:inherit}
-    .chip{padding:.2rem .5rem;border-radius:999px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.02)}
+    input.card, textarea.card, select.card{background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.08);padding:.6rem;border-radius:8px;color:inherit}
     footer.small-note{text-align:center;color:#93a7c7;margin-top:12px;font-size:12px}
     .danger{color:#ff6b6b}
-    @media (max-width:480px){ .digit{width:48px;height:72px;font-size:38px} }
+    .bottom-bar{
+      position:fixed;left:0;right:0;bottom:0;height:64px;display:flex;align-items:center;justify-content:space-around;
+      background:rgba(11,17,26,.94);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.06);z-index:50
+    }
+    .bottom-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;border-radius:10px;border:1px solid transparent;font-size:12px;color:#9fb0d9}
+    .bottom-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+    .bottom-ico{font-size:18px;line-height:18px}
+    .theme-dim body, body.theme-dim{background:#0c1220;color:#edf3ff}
+    .theme-dim .card{background:rgba(16,23,36,.8);border-color:rgba(255,255,255,.07)}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:60}
+    .overlay .panel{max-width:520px;width:92vw}
+    @media(max-width:480px){ .digit{width:48px;height:70px;font-size:36px} }
   </style>
 </head>
 <body>
@@ -41,15 +48,10 @@
     <header>
       <div>
         <h1 id="decoyTitle" class="select-none">TimeOut</h1>
-        <div class="small"><span id="hdrSub">Clock</span> • <span class="pill">v1.3.5</span></div>
+        <div class="small"><span id="hdrSub">Clock</span> • <span class="pill" id="versionPill">v1.4.0</span></div>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2" title="Theme">
-          <div class="theme-dot" data-t="aurora" aria-label="Aurora" style="background:linear-gradient(135deg,#22c55e,#2563eb)"></div>
-          <div class="theme-dot" data-t="neon" aria-label="Neon" style="background:linear-gradient(135deg,#06b6d4,#8b5cf6)"></div>
-          <div class="theme-dot" data-t="amoled" aria-label="AMOLED" style="background:#000"></div>
-        </div>
-        <div id="langToggle" class="btn btn-ghost mr-2">EN | ES</div>
+        <div id="langToggle" class="btn btn-ghost">EN | ES</div>
         <button id="quickExitBtn" class="btn btn-ghost">Home</button>
       </div>
     </header>
@@ -90,7 +92,7 @@
 
       <!-- CALC SKIN -->
       <div id="skinCalc" class="hidden-soft mt-3">
-        <div class="card mb-3 text-right" id="calcDisplay" style="font-size:1.4rem;padding:.7rem">123 + 456</div>
+        <div class="card mb-3 text-right" id="calcDisplay" style="font-size:1.4rem;padding:.7rem">0</div>
         <div class="grid grid-cols-4 gap-2">
           <button class="btn btn-ghost">7</button><button class="btn btn-ghost">8</button><button class="btn btn-ghost">9</button><button class="btn btn-ghost">÷</button>
           <button class="btn btn-ghost">4</button><button class="btn btn-ghost">5</button><button class="btn btn-ghost">6</button><button class="btn btn-ghost">×</button>
@@ -116,39 +118,38 @@
       </div>
     </section>
 
-    <!-- PIN / CHANGE PIN MODAL -->
-    <div id="pinModal" class="fixed inset-0 bg-black/80 hidden-soft flex items-center justify-center p-4">
-      <div class="card w-full max-w-md p-4">
+    <!-- OVERLAY: PIN / CHANGE PIN -->
+    <div id="pinModal" class="overlay hidden-soft">
+      <div class="panel card p-4">
         <h3 id="pinModalTitle" class="text-lg font-semibold mb-2">Enter PIN</h3>
         <form id="pinForm" class="space-y-3">
           <input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="off"
                  class="w-full card text-center font-bold text-xl" placeholder="••••" />
           <div id="pinChangeFields" class="hidden-soft space-y-2">
             <input id="oldPin" maxlength="32" inputmode="numeric" class="w-full card text-center" placeholder="Current PIN" />
-            <input id="newPin" maxlength="64" inputmode="text" class="w-full card text-center" placeholder="New PIN or passphrase (min 4)" />
-            <input id="newPin2" maxlength="64" inputmode="text" class="w-full card text-center" placeholder="Confirm new" />
+            <input id="newPin" maxlength="64" class="w-full card text-center" placeholder="New PIN or passphrase (min 4)" />
+            <input id="newPin2" maxlength="64" class="w-full card text-center" placeholder="Confirm new" />
           </div>
           <div class="flex gap-2">
             <button id="pinConfirmBtn" class="btn btn-primary flex-1" type="submit">Confirm</button>
             <button id="pinCancelBtn" class="btn btn-ghost flex-1" type="button">Cancel</button>
           </div>
           <div id="pinError" class="small danger min-h-[1rem]"></div>
-          <div class="small text-gray-400">Default PIN: <strong>2580</strong>. Duress PIN: <strong>1111</strong>. Change in Profile.</div>
+          <div class="small text-gray-400">Default PIN: <strong>2580</strong>. Duress: <strong>1111</strong>. Change in Profile.</div>
         </form>
       </div>
     </div>
 
-    <!-- DISCLAIMER (first-run after unlock) -->
-    <div id="firstRunDisc" class="fixed inset-0 bg-black/80 hidden-soft flex items-center justify-center p-4">
-      <div class="card max-w-lg">
-        <h3 class="text-lg font-semibold mb-2">Important Safety Notice</h3>
-        <div class="small mb-3">
-          <p>This tool helps with planning and private check-ins. It is <strong>not</strong> a guarantee of safety or emergency response.</p>
-          <p>If you are in immediate danger call local emergency services. Use duress PIN and auto-wipe with caution. No system is 100% secure.</p>
+    <!-- OVERLAY: DISCLAIMER (first unlock only) -->
+    <div id="firstRunDisc" class="overlay hidden-soft">
+      <div class="panel card p-4">
+        <h3 class="text-lg font-semibold mb-2" id="discTitle">Important Safety Notice</h3>
+        <div class="small mb-3" id="discBody">
+          This tool helps with planning and private check-ins. It is <strong>not</strong> a guarantee of safety or emergency response.
+          If you are in immediate danger, call local emergency services. Use duress PIN and auto-wipe with caution. No system is 100% secure.
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 justify-end">
           <button id="acceptDisclaimer" class="btn btn-primary">I Understand</button>
-          <button id="declineDisclaimer" class="btn btn-ghost">Not Now</button>
         </div>
       </div>
     </div>
@@ -156,14 +157,14 @@
     <!-- REAL APP -->
     <section id="realApp" class="hidden-soft mt-3">
       <div class="card mb-3">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="flex items-center justify-between">
           <div>
-            <div class="small">Signed in as</div>
+            <div class="small" id="signedAsLbl">Signed in as</div>
             <div id="profileName" class="font-semibold text-lg">Anonymous</div>
           </div>
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="text-align:right">
-              <div class="small">Trust</div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <div class="small" id="trustLbl">Trust</div>
               <div id="trustBadge" class="font-bold text-2xl">100%</div>
             </div>
             <button id="lockBtn" class="btn btn-ghost">Lock</button>
@@ -171,20 +172,13 @@
         </div>
       </div>
 
-      <nav class="mb-3">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button id="tabHomeBtn" class="tab-btn active">Home</button>
-          <button id="tabCheckBtn" class="tab-btn">Check-In</button>
-          <button id="tabPlanBtn" class="tab-btn">Safety Plan</button>
-          <button id="tabResBtn" class="tab-btn">Resources</button>
-          <button id="tabProfileBtn" class="tab-btn">Profile</button>
-        </div>
-      </nav>
+      <!-- Spacer so content doesn't hide behind bottom bar -->
+      <div style="height:64px"></div>
 
       <!-- HOME -->
       <div id="tab-home" class="card">
-        <h3 class="text-lg font-semibold">Welcome</h3>
-        <p class="small mt-2">Hi <span id="homeName">Anonymous</span>. Your trust score is <span id="homeTrust">100</span>%.</p>
+        <h3 class="text-lg font-semibold" id="homeTitle">Welcome</h3>
+        <p class="small mt-2"><span id="homeHi">Hi</span> <span id="homeName">Anonymous</span>. <span id="homeTrustCopy">Your trust score is</span> <span id="homeTrust">100</span>%.</p>
         <div class="mt-3 grid grid-cols-2 gap-2">
           <button id="goToCheckIn" class="btn btn-primary">Go to Check-In</button>
           <button id="saveAll" class="btn btn-ghost">Save</button>
@@ -201,26 +195,24 @@
         </div>
         <div class="mt-3 flex justify-between">
           <div>
-            <div class="small">Risk</div>
+            <div class="small" id="riskLbl">Risk</div>
             <div id="riskPct" class="font-bold text-2xl text-rose-400">0%</div>
           </div>
-          <div style="text-align:right">
-            <div class="small">Trust</div>
+          <div class="text-right">
+            <div class="small" id="trustPctLbl">Trust</div>
             <div id="trustPct" class="font-bold text-2xl text-green-400">100%</div>
           </div>
         </div>
-
         <div class="mt-4 flex gap-2">
           <button id="demoLoadBtn" class="btn btn-ghost">Load Demo Answers</button>
           <button id="talkBtn" class="btn btn-ghost">Talk to the App</button>
         </div>
-
         <div id="checkFeedback" class="mt-4"></div>
       </div>
 
-      <!-- PLAN -->
+      <!-- SAFETY PLAN -->
       <div id="tab-plan" class="card hidden-soft mt-3">
-        <h3 class="text-lg font-semibold">Safety Plans</h3>
+        <h3 class="text-lg font-semibold" id="planTitle">Safety Plans</h3>
         <div id="planList" class="mt-2 space-y-2"></div>
         <div class="mt-2 flex gap-2">
           <button id="btnNewPlan" class="btn btn-primary">New Plan</button>
@@ -231,7 +223,7 @@
 
       <!-- RESOURCES -->
       <div id="tab-resources" class="card hidden-soft mt-3">
-        <h3 class="text-lg font-semibold">My Resources</h3>
+        <h3 class="text-lg font-semibold" id="resTitle">My Resources</h3>
         <form id="resourceForm" class="grid grid-cols-1 gap-2 mt-3 mb-3">
           <input id="resTitleInput" class="card" placeholder="Title (e.g., Shelter)" />
           <input id="resDesc" class="card" placeholder="Description" />
@@ -246,33 +238,33 @@
 
       <!-- PROFILE -->
       <div id="tab-profile" class="card hidden-soft mt-3">
-        <h3 class="text-lg font-semibold">Profile & Security</h3>
+        <h3 class="text-lg font-semibold" id="profileTitle">Profile & Security</h3>
         <div class="mt-3 grid gap-2">
-          <label class="small">Display Name</label>
+          <label class="small" id="displayNameLbl">Display Name</label>
           <input id="displayNameInput" class="card" placeholder="Your name (optional)" />
           <button id="saveProfile" class="btn btn-primary">Save Profile</button>
         </div>
 
         <hr class="my-4 border-gray-700" />
 
-        <h4 class="font-semibold">Security</h4>
+        <h4 class="font-semibold" id="securityTitle">Security</h4>
         <div class="mt-2 grid gap-2">
           <div class="flex items-center gap-2">
-            <label class="small">Change PIN</label>
+            <label class="small" id="changePinLbl">Change PIN</label>
             <input id="profileChangePin" class="card" placeholder="New PIN (min 4)" />
             <button id="profileChangePinBtn" class="btn btn-ghost">Change</button>
           </div>
           <div class="flex items-center gap-2">
-            <label class="small">Set Duress PIN</label>
+            <label class="small" id="duressPinLbl">Set Duress PIN</label>
             <input id="profileDuressPin" class="card" placeholder="Duress PIN" />
             <button id="profileSetDuress" class="btn btn-ghost">Set</button>
           </div>
           <div class="flex items-center gap-2">
-            <label class="small">Auto-wipe after failed attempts</label>
+            <label class="small" id="autoWipeLbl">Auto-wipe after failed attempts</label>
             <select id="autoWipeSelect" class="card w-28"><option value="0">Off</option><option value="3">3</option><option value="5">5</option></select>
           </div>
           <div class="flex items-center gap-2">
-            <label class="small">Shake-to-lock</label>
+            <label class="small" id="shakeLbl">Shake-to-lock</label>
             <input id="toggleShake" type="checkbox" />
           </div>
         </div>
@@ -285,16 +277,13 @@
           <button id="importJsonBtn" class="btn btn-ghost">Import Encrypted JSON</button>
           <button id="clearData" class="btn btn-ghost danger">Clear Data (Wipe)</button>
         </div>
-
-        <div id="devPanel" class="mt-3 hidden-soft">
-          <h4 class="font-semibold">Developer</h4>
-          <pre id="devState" class="small" style="white-space:pre-wrap;max-height:160px;overflow:auto;background:rgba(255,255,255,.02);padding:.6rem;border-radius:8px;"></pre>
-        </div>
       </div>
 
-      <footer class="small-note">TimeOut • Privacy-first support • v1.3.5</footer>
+      <footer class="small-note">TimeOut • Privacy-first support • <span id="verFoot">v1.4.0</span></footer>
     </section>
-  </div><!-- Firebase modular SDK (v11.6.1) -->
+  </div>
+
+  <!-- Firebase v11.6.1 (hooks are safe if not configured) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -313,109 +302,100 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    signInAnonymously(auth).catch((err)=> console.warn("Firebase anon signin failed:", err));
+    signInAnonymously(auth).catch(()=>{});
     let currentUid = null;
-    onAuthStateChanged(auth, user => { if(user){ currentUid = user.uid; } });
+    onAuthStateChanged(auth, u => { if(u){ currentUid = u.uid; } });
 
+    // Safe no-op if not signed in yet
     window.saveProfileMirror = async function(profile){
       if(!currentUid) return;
       try{
         const ref = doc(db, "artifacts/timeout-app/public/data/profiles/" + currentUid);
-        await setDoc(ref, { publicName: profile.name || "Anonymous", trustScore: profile.trust || 100, appVersion: "v1.3.5", updatedAt: serverTimestamp() }, { merge: true });
-      }catch(e){ console.warn("profile mirror failed", e); }
+        await setDoc(ref, {
+          publicName: profile.name || "Anonymous",
+          trustScore: profile.trust || 100,
+          appVersion: "v1.4.0",
+          updatedAt: serverTimestamp()
+        }, { merge:true });
+      }catch(e){}
     };
-
     window.saveCheckinToFirestore = async function(payload){
       if(!currentUid) return;
       try{
         const col = collection(db, "artifacts/timeout-app/private/data/checkins");
-        await addDoc(col, { userId: currentUid, answers: payload.answers, profile: payload.profile, createdAt: serverTimestamp(), appVersion: "v1.3.5" });
-      }catch(e){ console.warn("save checkin failed", e); }
+        await addDoc(col, {
+          userId: currentUid,
+          answers: payload.answers,
+          profile: payload.profile,
+          createdAt: serverTimestamp(),
+          appVersion: "v1.4.0"
+        });
+      }catch(e){}
     };
   </script>
 
-  <!-- App core (non-module) -->
+  <!-- App Core -->
   <script>
-  /* ====== App core ====== */
   const $ = id => document.getElementById(id);
-  const APP_VER = "v1.3.5";
+  const APP_VER = "v1.4.0";
   const LS = {
-    meta: "timeout_meta",
-    enc: "timeout_enc",
-    pinCheck: "timeout_pin_check",
-    duressCheck: "timeout_duress_check",
-    profile: "timeout_profile",
-    answers: "timeout_answers",
-    resources: "timeout_resources",
-    plans: "timeout_plans",
-    disclaimer: "timeout_disclaimer_accepted",
-    autoWipe: "timeout_autowipe"
+    meta:"timeout_meta", enc:"timeout_enc", pinCheck:"timeout_pin_check", duressCheck:"timeout_duress_check",
+    profile:"timeout_profile", answers:"timeout_answers", resources:"timeout_resources", plans:"timeout_plans",
+    disclaimer:"timeout_disclaimer_accepted", autoWipe:"timeout_autowipe", failed:"timeout_failed", lang:"timeout_lang", theme:"timeout_theme_dim"
   };
 
-  let unlocked = false;
-  let unlockedPassword = null;
-  let core = {
-    profile: { name: "Anonymous", trust: 100 },
-    answers: {},
-    resources: [],
-    plans: [],
-    settings: { shakeLock: false, autoWipe: 0 }
-  };
-  let failedAttempts = 0;
+  let unlocked=false, unlockedPassword=null, failedAttempts=0;
 
-  /* ---- Crypto helpers ---- */
-  function randBytes(len){ const b = new Uint8Array(len); crypto.getRandomValues(b); return b; }
+  // Default core
+  let core = { profile:{name:"Anonymous", trust:100}, answers:{}, resources:[], plans:[], settings:{ shakeLock:false, autoWipe:0 } };
+
+  /* ===== Crypto helpers (AES-GCM + PBKDF2) ===== */
+  function randBytes(n){ const b=new Uint8Array(n); crypto.getRandomValues(b); return b; }
   function toB64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
-  function fromB64(s){ const bin = atob(s); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return arr; }
+  function fromB64(s){ const bin=atob(s); const arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return arr; }
   async function deriveKey(password, salt, iterations=150000){
-    const enc = new TextEncoder();
-    const pwKey = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
-    return crypto.subtle.deriveKey({ name:"PBKDF2", salt, iterations, hash:"SHA-256" }, pwKey, { name:"AES-GCM", length:256 }, false, ["encrypt","decrypt"]);
+    const enc=new TextEncoder();
+    const pw = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({name:"PBKDF2", salt, iterations, hash:"SHA-256"}, pw, {name:"AES-GCM", length:256}, false, ["encrypt","decrypt"]);
   }
   async function encryptWithPassword(obj, password){
-    const salt = randBytes(16);
-    const iv = randBytes(12);
-    const key = await deriveKey(password, salt);
-    const data = new TextEncoder().encode(JSON.stringify(obj));
-    const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, data);
-    return { header:{ salt: toB64(salt.buffer), iv: toB64(iv.buffer), version:1 }, ciphertext: toB64(ct) };
+    const salt=randBytes(16), iv=randBytes(12);
+    const key=await deriveKey(password, salt);
+    const data=new TextEncoder().encode(JSON.stringify(obj));
+    const ct=await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, data);
+    return { header:{salt:toB64(salt), iv:toB64(iv), version:1}, ciphertext:toB64(ct) };
   }
   async function decryptWithPassword(blob, password){
-    const salt = fromB64(blob.header.salt);
-    const iv = fromB64(blob.header.iv);
-    const key = await deriveKey(password, salt);
-    const ct = fromB64(blob.ciphertext);
-    const plain = await crypto.subtle.decrypt({ name:"AES-GCM", iv }, key, ct);
+    const salt=fromB64(blob.header.salt), iv=fromB64(blob.header.iv);
+    const key=await deriveKey(password, salt);
+    const plain=await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, fromB64(blob.ciphertext));
     return JSON.parse(new TextDecoder().decode(plain));
   }
   async function createPinCheck(pin){
-    const salt = randBytes(12);
-    const key = await deriveKey(pin, salt, 100000);
-    const iv = randBytes(12);
-    const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, new TextEncoder().encode("timeout-check"));
-    return { salt: toB64(salt.buffer), iv: toB64(iv.buffer), ct: toB64(ct) };
+    const salt=randBytes(12), iv=randBytes(12);
+    const key=await deriveKey(pin, salt, 100000);
+    const ct=await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode("timeout-check"));
+    return { salt:toB64(salt), iv:toB64(iv), ct:toB64(ct) };
   }
   async function verifyPinCheck(pin, stored){
     try{
-      const salt = fromB64(stored.salt), iv = fromB64(stored.iv);
-      const key = await deriveKey(pin, salt, 100000);
-      const plain = await crypto.subtle.decrypt({ name:"AES-GCM", iv }, key, fromB64(stored.ct));
+      const salt=fromB64(stored.salt), iv=fromB64(stored.iv);
+      const key=await deriveKey(pin, salt, 100000);
+      const plain=await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, fromB64(stored.ct));
       return new TextDecoder().decode(plain) === "timeout-check";
     }catch(e){ return false; }
   }
-
   async function saveEncryptedCore(password){
     const pkg = await encryptWithPassword(core, password);
     localStorage.setItem(LS.enc, JSON.stringify(pkg));
   }
-  function getEncryptedBlob(){ try{ return JSON.parse(localStorage.getItem(LS.enc)); }catch{return null;} }
   async function loadEncryptedCore(password){
-    const blob = getEncryptedBlob();
+    const blob = JSON.parse(localStorage.getItem(LS.enc)||"null");
     if(!blob) return null;
     return decryptWithPassword(blob, password);
   }
 
+  /* ===== Defaults (first run) ===== */
   (async function initDefaults(){
     if(!localStorage.getItem(LS.pinCheck)){
       const pk = await createPinCheck("2580");
@@ -426,32 +406,44 @@
       const dk = await createPinCheck("1111");
       localStorage.setItem(LS.duressCheck, JSON.stringify(dk));
     }
+    if(!localStorage.getItem(LS.resources)){
+      // preload broad resources (EN/ES titles switch later in UI)
+      const R = [
+        {title:"National Domestic Violence Hotline (US)", desc:"24/7 confidential support", url:"https://www.thehotline.org/ 1-800-799-7233"},
+        {title:"RAINN Sexual Assault Hotline (US)", desc:"24/7 — chat & phone", url:"https://www.rainn.org/ 1-800-656-4673"},
+        {title:"Childhelp National Child Abuse Hotline (US)", desc:"24/7 — children & adults", url:"https://www.childhelp.org/ 1-800-422-4453"},
+        {title:"Elder Abuse Resource (NCEA)", desc:"Info & reporting paths", url:"https://ncea.acl.gov/"},
+        {title:"Local Social Services Finder", desc:"Locate nearby assistance", url:"https://www.211.org/"},
+        {title:"Emergency (If in immediate danger)", desc:"Call your local emergency number", url:"911"}
+      ];
+      localStorage.setItem(LS.resources, JSON.stringify(R));
+    }
   })();
 
-  /* ---- Decoy clock & skins ---- */
-  const flipHH = $("hh"), flipMM = $("mm"), flipSS = $("ss"), liveDate = $("liveDate");
-  const pad2 = (n)=> String(n).padStart(2,"0");
-  let lastClock = "000000";
+  /* ===== Decoy clock & skins ===== */
+  const flipHH=$("hh"), flipMM=$("mm"), flipSS=$("ss"), liveDate=$("liveDate");
+  const pad2 = n=> String(n).padStart(2,"0");
+  let lastClock="000000";
   function updateFlip(group, prev, next){
-    const a = group.children[0], b = group.children[1];
-    if(prev[0] !== next[0]) { a.textContent = next[0]; a.classList.add("tick"); setTimeout(()=>a.classList.remove("tick"),320); }
-    if(prev[1] !== next[1]) { b.textContent = next[1]; b.classList.add("tick"); setTimeout(()=>b.classList.remove("tick"),320); }
+    const a=group.children[0], b=group.children[1];
+    if(prev[0]!==next[0]) a.textContent=next[0];
+    if(prev[1]!==next[1]) b.textContent=next[1];
   }
   function renderClock(){
-    const d = new Date(); const h = pad2(d.getHours()), m = pad2(d.getMinutes()), s = pad2(d.getSeconds());
-    const now = h+m+s, prev = lastClock; lastClock = now;
+    const d=new Date(); const h=pad2(d.getHours()), m=pad2(d.getMinutes()), s=pad2(d.getSeconds());
+    const now=h+m+s, prev=lastClock; lastClock=now;
     updateFlip(flipHH, prev.slice(0,2), h);
     updateFlip(flipMM, prev.slice(2,4), m);
     updateFlip(flipSS, prev.slice(4,6), s);
-    const opts = { weekday:'short', month:'short', day:'numeric' };
-    liveDate.textContent = d.toLocaleDateString(undefined, opts);
+    const opts={weekday:'short', month:'short', day:'numeric'}; liveDate.textContent=d.toLocaleDateString(undefined,opts);
   }
   setInterval(renderClock,1000); renderClock();
 
-  let swRunning=false, swStart=0, swElapsed=0, swRAF=null;
-  function fmtMillis(ms){ const cs=Math.floor(ms/10)%100, sec=Math.floor(ms/1000)%60, min=Math.floor(ms/60000)%60, hr=Math.floor(ms/3600000); const hh=hr>0?String(hr).padStart(2,'0')+':':''; return `${hh}${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}.${String(cs).padStart(2,"0")}`; }
-  function swTick(){ const ms = swElapsed + (swRunning?(performance.now()-swStart):0); $("swDisplay").textContent = fmtMillis(ms); if(swRunning) swRAF = requestAnimationFrame(swTick); }
-  $("swStart").addEventListener("click", ()=>{ if(!swRunning){ swRunning=true; swStart=performance.now(); $("swStart").textContent="Pause"; swTick(); } else { swRunning=false; swElapsed += (performance.now()-swStart); cancelAnimationFrame(swRAF); $("swStart").textContent="Start"; }});
+  // Stopwatch
+  let swRunning=false, swStartT=0, swElapsed=0, swRAF=null;
+  const fmtMillis = ms => { const cs=Math.floor(ms/10)%100, sec=Math.floor(ms/1000)%60, min=Math.floor(ms/60000)%60, hr=Math.floor(ms/3600000); const hh=hr>0?String(hr).padStart(2,'0')+':':''; return `${hh}${String(min).padStart(2,"0")}:${String(sec).padStart(2,"0")}.${String(cs).padStart(2,"0")}`; }
+  function swTick(){ const ms=swElapsed + (swRunning?(performance.now()-swStartT):0); $("swDisplay").textContent=fmtMillis(ms); if(swRunning) swRAF=requestAnimationFrame(swTick); }
+  $("swStart").addEventListener("click", ()=>{ if(!swRunning){ swRunning=true; swStartT=performance.now(); $("swStart").textContent="Pause"; swTick(); } else { swRunning=false; swElapsed += (performance.now()-swStartT); cancelAnimationFrame(swRAF); $("swStart").textContent="Start"; }});
   $("swLap").addEventListener("click", ()=>{ const li=document.createElement("li"); li.textContent=$("swDisplay").textContent; $("swLaps").prepend(li); });
   $("swReset").addEventListener("click", ()=>{ swRunning=false; cancelAnimationFrame(swRAF); swElapsed=0; $("swDisplay").textContent="00:00.00"; $("swStart").textContent="Start"; $("swLaps").innerHTML=""; });
 
@@ -462,567 +454,161 @@
     if(s==="calc") $("skinCalc").classList.remove("hidden-soft");
     if(s==="notes") $("skinNotes").classList.remove("hidden-soft");
     if(s==="weather") $("skinWeather").classList.remove("hidden-soft");
-    const m = JSON.parse(localStorage.getItem(LS.meta) || "{}"); m.skin = s; localStorage.setItem(LS.meta, JSON.stringify(m));
+    const m = JSON.parse(localStorage.getItem(LS.meta)||"{}"); m.skin=s; localStorage.setItem(LS.meta, JSON.stringify(m));
   }
-  $("decoyTabClock").addEventListener("click", ()=> setSkin("clock"));
-  $("decoyTabStopwatch").addEventListener("click", ()=> setSkin("stopwatch"));
-  $("decoySkinCalc").addEventListener("click", ()=> setSkin("calc"));
-  $("decoySkinNotes").addEventListener("click", ()=> setSkin("notes"));
-  $("decoySkinWeather").addEventListener("click", ()=> setSkin("weather"));
-  setSkin((JSON.parse(localStorage.getItem(LS.meta) || "{}").skin) || "clock");
+  $("decoyTabClock").onclick = ()=> setSkin("clock");
+  $("decoyTabStopwatch").onclick = ()=> setSkin("stopwatch");
+  $("decoySkinCalc").onclick = ()=> setSkin("calc");
+  $("decoySkinNotes").onclick = ()=> setSkin("notes");
+  $("decoySkinWeather").onclick = ()=> setSkin("weather");
+  setSkin((JSON.parse(localStorage.getItem(LS.meta)||"{}").skin) || "clock");
 
-  /* ---- Long-press (mobile + desktop) ---- */
-  function addLongPress(el, action) {
-    let timer;
-    const start = () => { timer = setTimeout(action, 800); };
-    const cancel = () => { clearTimeout(timer); };
-    el.addEventListener("mousedown", start);
-    el.addEventListener("mouseup", cancel);
-    el.addEventListener("mouseleave", cancel);
-    el.addEventListener("touchstart", start);
-    el.addEventListener("touchend", cancel);
-    el.addEventListener("touchcancel", cancel);
+  // Simple calculator (decoy)
+  (function(){
+    const out=$("calcDisplay"); let expr="";
+    function show(v){ out.textContent=v; }
+    function push(x){ if(x==="="){ try{ const r=Function(`return (${expr.replace(/×/g,'*').replace(/÷/g,'/')})`)(); show(String(r)); expr=String(r); }catch{ show("0"); expr=""; } } else { if(expr==="0") expr=""; expr += x; show(expr); } }
+    document.querySelectorAll("#skinCalc .btn").forEach(b=> b.addEventListener("click", ()=> push(b.textContent.trim())));
+  })();
+
+  /* ===== Long-press unlock (robust) ===== */
+  function addLongPress(el, action){
+    if(!el) return; let t=null;
+    const start=()=>{ t=setTimeout(action,900); };
+    const stop =()=>{ if(t){ clearTimeout(t); t=null; } };
+    el.addEventListener("mousedown",start); el.addEventListener("mouseup",stop); el.addEventListener("mouseleave",stop);
+    el.addEventListener("touchstart",start,{passive:true}); el.addEventListener("touchend",stop); el.addEventListener("touchcancel",stop);
   }
-  const openPINModal = (mode="enter")=>{
-    $("pinError").textContent=""; $("pinInput").value=""; $("oldPin").value=$("newPin").value=$("newPin2").value="";
-    if(mode==="change"){ $("pinChangeFields").classList.remove("hidden-soft"); $("pinModalTitle").textContent = (lang==="en"?"Change PIN":"Cambiar PIN"); }
-    else { $("pinChangeFields").classList.add("hidden-soft"); $("pinModalTitle").textContent = (lang==="en"?"Enter PIN":"Introduce el PIN"); }
-    $("pinForm").dataset.mode = mode;
+  const openPINModal=(mode="enter")=>{
+    $("pinError").textContent=""; $("pinInput").value="";
+    $("oldPin").value=$("newPin").value=$("newPin2").value="";
+    $("pinChangeFields").classList.toggle("hidden-soft", mode!=="change");
+    $("pinModalTitle").textContent = (lang==="en" ? (mode==="change"?"Change PIN":"Enter PIN") : (mode==="change"?"Cambiar PIN":"Introduce el PIN"));
+    $("pinForm").dataset.mode=mode;
     $("pinModal").classList.remove("hidden-soft");
-    setTimeout(()=> $("pinInput").focus(), 50);
+    document.body.style.overflow="hidden";
+    setTimeout(()=>$("pinInput").focus(),50);
   };
-  const closePINModal = ()=> $("pinModal").classList.add("hidden-soft");
-
+  const closePINModal=()=>{ $("pinModal").classList.add("hidden-soft"); document.body.style.overflow="auto"; };
+  addLongPress($("decoyView"), ()=> openPINModal());
   addLongPress($("decoyTitle"), ()=> openPINModal());
   addLongPress($("flipClock"), ()=> openPINModal());
   addLongPress($("fakeNoteContent"), ()=> openPINModal());
-  addLongPress(document.querySelector(".card"), ()=> openPINModal());
 
-  $("pinCancelBtn").addEventListener("click", closePINModal);
+  $("pinCancelBtn").onclick = closePINModal;
 
   $("pinForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
-    const mode = $("pinForm").dataset.mode || "enter";
-    const val = $("pinInput").value.trim();
+    const mode=$("pinForm").dataset.mode||"enter";
+    const val=$("pinInput").value.trim();
     if(mode==="enter"){
-      if(!val){ $("pinError").textContent = (lang==="en"?"Incorrect PIN.":"PIN incorrecto."); return; }
-      const stored = localStorage.getItem(LS.pinCheck);
-      const duress = localStorage.getItem(LS.duressCheck);
+      const stored=localStorage.getItem(LS.pinCheck), duress=localStorage.getItem(LS.duressCheck);
       const ok = stored && await verifyPinCheck(val, JSON.parse(stored));
       if(ok){
-        try {
-          const data = await loadEncryptedCore(val);
-          if(data) core = data;
-          unlocked = true; unlockedPassword = val; failedAttempts = 0; localStorage.removeItem("timeout_failed");
-          closePINModal(); showRealApp(); refreshUI();
-        } catch(err){ $("pinError").textContent = (lang==="en"?"Incorrect PIN.":"PIN incorrecto."); recordFailedAttempt(); }
+        try{ const data=await loadEncryptedCore(val); if(data) core=data; unlocked=true; unlockedPassword=val; failedAttempts=0; localStorage.removeItem(LS.failed); closePINModal(); showRealApp(); refreshUI(); }
+        catch{ $("pinError").textContent=(lang==="en"?"Incorrect PIN.":"PIN incorrecto."); recordFailedAttempt(); }
       } else if(duress && await verifyPinCheck(val, JSON.parse(duress))){
-        closePINModal(); alert("Duress PIN entered — showing fake screen."); // keep decoy
+        // Duress: stay on decoy, quietly close modal
+        closePINModal();
       } else {
-        $("pinError").textContent = (lang==="en"?"Incorrect PIN.":"PIN incorrecto."); recordFailedAttempt();
+        $("pinError").textContent=(lang==="en"?"Incorrect PIN.":"PIN incorrecto."); recordFailedAttempt();
       }
     } else {
-      const old = $("oldPin").value.trim();
-      const newp = $("newPin").value.trim();
-      const new2 = $("newPin2").value.trim();
-      if(!old || !newp || newp.length<4){ $("pinError").textContent = (lang==="en"?"New PIN must be at least 4 characters.":"El PIN nuevo debe tener al menos 4 caracteres."); return; }
-      if(newp !== new2){ $("pinError").textContent = (lang==="en"?"PINs do not match.":"Los PIN no coinciden."); return; }
-      const stored = localStorage.getItem(LS.pinCheck);
-      if(!stored){ $("pinError").textContent = "No PIN set"; return; }
-      const ok = await verifyPinCheck(old, JSON.parse(stored));
-      if(!ok){ $("pinError").textContent = (lang==="en"?"Incorrect PIN.":"PIN incorrecto."); return; }
-      const newCheck = await createPinCheck(newp);
-      localStorage.setItem(LS.pinCheck, JSON.stringify(newCheck));
-      if(unlocked && unlockedPassword){ await saveEncryptedCore(newp); unlockedPassword = newp; }
-      closePINModal(); alert((lang==="en"?"PIN changed.":"PIN cambiado."));
+      const old=$("oldPin").value.trim(), np=$("newPin").value.trim(), np2=$("newPin2").value.trim();
+      if(!old || !np || np.length<4 || np!==np2){ $("pinError").textContent=(lang==="en"?"Check entries (min 4; must match).":"Verifica (mín 4; deben coincidir)."); return; }
+      const ok = await verifyPinCheck(old, JSON.parse(localStorage.getItem(LS.pinCheck)||"null"));
+      if(!ok){ $("pinError").textContent=(lang==="en"?"Incorrect current PIN.":"PIN actual incorrecto."); return; }
+      const newCheck=await createPinCheck(np); localStorage.setItem(LS.pinCheck, JSON.stringify(newCheck));
+      if(unlockedPassword){ await saveEncryptedCore(np); unlockedPassword=np; }
+      closePINModal(); alert(lang==="en"?"PIN changed.":"PIN cambiado.");
     }
   });
 
   async function recordFailedAttempt(){
-    failedAttempts = Number(localStorage.getItem("timeout_failed") || 0) + 1;
-    localStorage.setItem("timeout_failed", String(failedAttempts));
-    const limit = Number(localStorage.getItem(LS.autoWipe) || 0);
-    if(limit>0 && failedAttempts >= limit){
-      clearAllLocal(); alert("Local data wiped (auto-wipe)."); lockToDecoy();
+    failedAttempts = Number(localStorage.getItem(LS.failed)||0)+1;
+    localStorage.setItem(LS.failed, String(failedAttempts));
+    const limit = Number(localStorage.getItem(LS.autoWipe)||0);
+    if(limit>0 && failedAttempts>=limit){
+      clearAllLocal(); alert(lang==="en"?"Local data wiped (auto-wipe).":"Datos locales borrados (auto-borrado)."); lockToDecoy();
     }
   }
 
-  function showRealApp(){
-    $("decoyView").classList.add("hidden-soft");
-    $("realApp").classList.remove("hidden-soft");
-    setTab('home');
-    if(!localStorage.getItem(LS.disclaimer)){
-      $("firstRunDisc").classList.remove("hidden-soft");
-    }
-  }
-  function lockToDecoy(){
-    unlocked=false; unlockedPassword=null;
-    $("realApp").classList.add("hidden-soft");
-    $("decoyView").classList.remove("hidden-soft");
-    setTab('home');
-  }
-  $("lockBtn").addEventListener("click", lockToDecoy);
-  $("quickExitBtn").addEventListener("click", ()=> location.href="https://www.google.com/");
+  // Hash unlock
+  function hashUnlock(){ if(location.hash==="#unlock") openPINModal("enter"); }
+  window.addEventListener("hashchange", hashUnlock); hashUnlock();
 
-  $("acceptDisclaimer").addEventListener("click", ()=> { localStorage.setItem(LS.disclaimer,"1"); $("firstRunDisc").classList.add("hidden-soft"); });
-  $("declineDisclaimer").addEventListener("click", ()=> { $("firstRunDisc").classList.add("hidden-soft"); lockToDecoy(); });
+  /* ===== Disclaimer overlay ===== */
+  function showDisclaimerIfNeeded(){
+    if(localStorage.getItem(LS.disclaimer)==="1") return;
+    $("firstRunDisc").classList.remove("hidden-soft"); document.body.style.overflow="hidden";
+  }
+  function acceptDisclaimer(){ localStorage.setItem(LS.disclaimer,"1"); hideDisclaimer(); }
+  function hideDisclaimer(){ $("firstRunDisc").classList.add("hidden-soft"); document.body.style.overflow="auto"; }
+  $("acceptDisclaimer").onclick = acceptDisclaimer;
+
+  /* ===== Tabs & app state ===== */
+  function showRealApp(){ $("decoyView").classList.add("hidden-soft"); $("realApp").classList.remove("hidden-soft"); setTab('home'); showDisclaimerIfNeeded(); }
+  function lockToDecoy(){ unlocked=false; unlockedPassword=null; $("realApp").classList.add("hidden-soft"); $("decoyView").classList.remove("hidden-soft"); setTab('home'); }
+  $("lockBtn").onclick = lockToDecoy;
+  $("quickExitBtn").onclick = ()=> location.href="https://www.google.com/";
 
   function setTab(name){
-    const m = {home:$("tabHomeBtn"),checkin:$("tabCheckBtn"),plan:$("tabPlanBtn"),resources:$("tabResBtn"),profile:$("tabProfileBtn")};
-    Object.keys(m).forEach(k=> m[k].classList.toggle("active", k===name));
-    $("tab-home").classList.toggle("hidden-soft", name!=='home');
-    $("tab-checkin").classList.toggle("hidden-soft", name!=='checkin');
-    $("tab-plan").classList.toggle("hidden-soft", name!=='plan');
-    $("tab-resources").classList.toggle("hidden-soft", name!=='resources');
-    $("tab-profile").classList.toggle("hidden-soft", name!=='profile');
+    const ids={home:"tab-home",checkin:"tab-checkin",plan:"tab-plan",resources:"tab-resources",profile:"tab-profile"};
+    Object.values(ids).forEach(id=> $(id).classList.add("hidden-soft"));
+    $(ids[name]).classList.remove("hidden-soft");
+    // bottom bar active
+    ["bHome","bCheck","bPlan","bRes","bProf"].forEach(k=>{ const el=$(k); if(el) el.classList.toggle("active", (
+      (k==="bHome" && name==="home")||(k==="bCheck"&&name==="checkin")||(k==="bPlan"&&name==="plan")||(k==="bRes"&&name==="resources")||(k==="bProf"&&name==="profile")
+    )); });
   }
-  $("tabHomeBtn").addEventListener("click", ()=> setTab('home'));
-  $("tabCheckBtn").addEventListener("click", ()=> setTab('checkin'));
-  $("tabPlanBtn").addEventListener("click", ()=> setTab('plan'));
-  $("tabResBtn").addEventListener("click", ()=> setTab('resources'));
-  $("tabProfileBtn").addEventListener("click", ()=> setTab('profile'));
+
+  // Bottom bar bindings
+  $("bHome")?.addEventListener("click", ()=> setTab('home'));
+  $("bCheck")?.addEventListener("click", ()=> setTab('checkin'));
+  $("bPlan")?.addEventListener("click", ()=> setTab('plan'));
+  $("bRes")?.addEventListener("click", ()=> setTab('resources'));
+  $("bProf")?.addEventListener("click", ()=> setTab('profile'));
   $("goToCheckIn").addEventListener("click", ()=> setTab('checkin'));
 
-  const QUESTIONS = [
-    {id:"q1",key:"Are you currently safe where you are?", invert:true},
-    {id:"q2",key:"Has someone threatened you recently?"},
-    {id:"q3",key:"Have you experienced physical harm in past month?"},
-    {id:"q4",key:"Are you worried about your partner’s access to your phone?"},
-    {id:"q5",key:"Is anyone preventing you from leaving?"},
-    {id:"q6",key:"Do you have children at risk?"},
-    {id:"q7",key:"Do you feel isolated from help?"},
-    {id:"q8",key:"Would you like immediate local resources?"}
-  ];
-
-  const FEEDBACK = {
-    en:{
-      green:{title:"Small concerns — you’re doing okay", body:"Your answers show low immediate risk. Keep connected to trusted people and update your plan as needed."},
-      yellow:{title:"Some concerns — consider extra steps", body:"There are warning signs. Update your plan, tell a trusted person, and consider support services."},
-      red:{title:"High risk — prioritize safety now", body:"If you are in immediate danger, call local emergency services. Consider sending an encrypted summary to a trusted contact."}
-    },
-    es:{
-      green:{title:"Pocas preocupaciones — estás bien por ahora", body:"Bajo riesgo inmediato. Mantente conectada/o y actualiza tu plan cuando sea necesario."},
-      yellow:{title:"Algunas preocupaciones — pasos extra", body:"Hay señales de alerta. Actualiza tu plan, habla con alguien de confianza y considera servicios de apoyo."},
-      red:{title:"Alto riesgo — prioriza tu seguridad", body:"Si hay peligro inmediato, llama a emergencias. Considera enviar un resumen cifrado a alguien de confianza."}
-    }
-  };
-
-  const Q_PROMPTS = {
-    en:{
-      q1_yes:"Good — keep escape routes clear and know a safe place to go.",
-      q1_no:"You may be at immediate risk. Move to a public place or contact a trusted person.",
-      q2_yes:"Threats increase risk. Record dates/times safely.",
-      q2_no:"Positive — continue to monitor for changes.",
-      q3_yes:"Seek medical help and document injuries if safe.",
-      q3_no:"Good — keep prevention steps in your plan.",
-      q4_yes:"If your phone can be checked, avoid storing sensitive content and use quick-wipe.",
-      q4_no:"Maintain screen locks and privacy settings.",
-      q5_yes:"Plan discreet exits and ask trusted helpers.",
-      q5_no:"Keep plans ready if things change.",
-      q6_yes:"Include children in the plan: meeting places and caregivers.",
-      q6_no:"Focus on your own plan but keep essentials ready.",
-      q7_yes:"Try to contact one trusted person or a local group.",
-      q7_no:"Maintain those connections.",
-      q8_yes:"Visit Resources and copy hotline numbers instead of calling if logs are a concern.",
-      q8_no:"Resources remain available when you want them."
-    },
-    es:{
-      q1_yes:"Bien — mantén salidas libres y un lugar seguro en mente.",
-      q1_no:"Podrías estar en riesgo inmediato. Ve a un lugar público o contacta a alguien de confianza.",
-      q2_yes:"Las amenazas aumentan el riesgo. Anota fechas/horas de forma segura.",
-      q2_no:"Señal positiva — sigue observando cambios.",
-      q3_yes:"Busca atención médica y documenta lesiones si es seguro.",
-      q3_no:"Bien — mantén medidas de prevención.",
-      q4_yes:"Si pueden revisar tu teléfono, evita contenido sensible y usa borrado rápido.",
-      q4_no:"Mantén bloqueo de pantalla y privacidad.",
-      q5_yes:"Planifica salidas discretas y pide ayuda a personas de confianza.",
-      q5_no:"Ten planes listos por si cambia la situación.",
-      q6_yes:"Incluye a los niños: puntos de encuentro y cuidadores.",
-      q6_no:"Enfócate en tu plan y ten lo esencial listo.",
-      q7_yes:"Contacta a una persona de confianza o grupo local.",
-      q7_no:"Mantén esas conexiones.",
-      q8_yes:"Ve a Recursos y copia números en lugar de llamar si te preocupa el historial.",
-      q8_no:"Los recursos estarán disponibles cuando los necesites."
-    }
-  };
-
-  let lang = localStorage.getItem("timeout_lang") || "en";
-  function applyLang(){
-    $("langToggle").textContent = (lang==="en" ? "EN | ES" : "ES | EN");
-    $("hdrSub").textContent = (lang==="en" ? "Clock" : "Reloj");
-    buildQuestions(); renderResources(); renderPlans(); refreshUI();
+  // Language
+  let lang = localStorage.getItem(LS.lang)||"en";
+  function setLangText(){
+    $("langToggle").textContent = (lang==="en"?"EN | ES":"ES | EN");
+    $("hdrSub").textContent = (lang==="en"?"Clock":"Reloj");
+    $("quickExitBtn").textContent = (lang==="en"?"Home":"Inicio");
+    $("signedAsLbl").textContent = (lang==="en"?"Signed in as":"Has iniciado como");
+    $("trustLbl").textContent = (lang==="en"?"Trust":"Confianza");
+    $("homeTitle").textContent = (lang==="en"?"Welcome":"Bienvenida/o");
+    $("homeHi").textContent = (lang==="en"?"Hi":"Hola");
+    $("homeTrustCopy").textContent = (lang==="en"?"Your trust score is":"Tu nivel de confianza es");
+    $("checkTitle").textContent = (lang==="en"?"Safety Check-In":"Revisión de seguridad");
+    $("riskLbl").textContent = (lang==="en"?"Risk":"Riesgo");
+    $("trustPctLbl").textContent = (lang==="en"?"Trust":"Confianza");
+    $("demoLoadBtn").textContent = (lang==="en"?"Load Demo Answers":"Cargar respuestas de demo");
+    $("talkBtn").textContent = (lang==="en"?"Talk to the App":"Hablar con la app");
+    $("planTitle").textContent = (lang==="en"?"Safety Plans":"Planes de seguridad");
+    $("btnNewPlan").textContent = (lang==="en"?"New Plan":"Nuevo plan");
+    $("btnTemplates").textContent = (lang==="en"?"Templates":"Plantillas");
+    $("btnQuickGenerate").textContent = (lang==="en"?"Quick Generate":"Generar rápido");
+    $("resTitle").textContent = (lang==="en"?"My Resources":"Mis recursos");
+    $("profileTitle").textContent = (lang==="en"?"Profile & Security":"Perfil y seguridad");
+    $("displayNameLbl").textContent = (lang==="en"?"Display Name":"Nombre a mostrar");
+    $("securityTitle").textContent = (lang==="en"?"Security":"Seguridad");
+    $("changePinLbl").textContent = (lang==="en"?"Change PIN":"Cambiar PIN");
+    $("duressPinLbl").textContent = (lang==="en"?"Set Duress PIN":"Establecer PIN de coacción");
+    $("autoWipeLbl").textContent = (lang==="en"?"Auto-wipe after failed attempts":"Borrado automático tras intentos fallidos");
+    $("shakeLbl").textContent = (lang==="en"?"Shake-to-lock":"Agitar para bloquear");
+    $("discTitle").textContent = (lang==="en"?"Important Safety Notice":"Aviso de seguridad importante");
+    $("discBody").innerHTML = (lang==="en"
+      ?"This tool helps with planning and private check-ins. It is <strong>not</strong> a guarantee of safety or emergency response. If you are in immediate danger, call local emergency services. Use duress PIN and auto-wipe with caution. No system is 100% secure."
+      :"Esta herramienta ayuda con planes y revisiones privadas. <strong>No</strong> garantiza seguridad ni respuesta de emergencia. Si hay peligro inmediato, llama a emergencias. Usa el PIN de coacción y el borrado automático con cuidado. Ningún sistema es 100% seguro.");
+    $("acceptDisclaimer").textContent = (lang==="en"?"I Understand":"Entiendo");
+    $("verFoot").textContent = APP_VER;
   }
-  $("langToggle").onclick = () => {
-    lang = (lang === "en" ? "es" : "en");
-    localStorage.setItem("timeout_lang", lang);
-    applyLang();
-  };
+  $("langToggle").onclick = ()=>{ lang=(lang==="en"?"es":"en"); localStorage.setItem(LS.lang,lang); setLangText(); buildQuestions(); renderResources(); renderPlans(); renderFeedback(true); };
 
-  function buildQuestions(){
-    const box = $("questions"); box.innerHTML = "";
-    QUESTIONS.forEach((q,i)=>{
-      const row = document.createElement("div"); row.className = "card";
-      const label = document.createElement("div"); label.className = "font-semibold small mb-2"; label.textContent = `${i+1}. ${q.key}`;
-      const wrap = document.createElement("div"); wrap.style.display="flex"; wrap.style.gap="8px";
-      const yes = document.createElement("button"); yes.className="btn btn-ghost flex-1"; yes.textContent = (lang==="en"?"Yes":"Sí");
-      const no = document.createElement("button"); no.className="btn btn-ghost flex-1"; no.textContent = "No";
-      yes.addEventListener("click", ()=>{ core.answers[q.id]="yes"; mark(); updateScoresAndFeedback(); saveCoreEncryptedIfUnlocked(); });
-      no.addEventListener("click", ()=>{ core.answers[q.id]="no"; mark(); updateScoresAndFeedback(); saveCoreEncryptedIfUnlocked(); });
-      function mark(){
-        yes.classList.toggle("bg-green-600", core.answers[q.id]==="yes"); yes.classList.toggle("text-white", core.answers[q.id]==="yes");
-        no.classList.toggle("bg-rose-600", core.answers[q.id]==="no");   no.classList.toggle("text-white", core.answers[q.id]==="no");
-      }
-      if(core.answers[q.id]) mark();
-      row.appendChild(label); wrap.appendChild(yes); wrap.appendChild(no); row.appendChild(wrap); box.appendChild(row);
-    });
-  }
-
-  function computeRiskTrust(){
-    let risky = 0;
-    QUESTIONS.forEach(q=>{
-      const a = (core.answers[q.id]||"").toLowerCase();
-      if(!a) return;
-      if(q.invert){ if(a==="no") risky++; } else { if(a==="yes") risky++; }
-    });
-    const risk = Math.round((risky/QUESTIONS.length)*100);
-    const trust = 100 - risk;
-    return { risk, trust };
-  }
-
-  function updateScoresAndFeedback(){
-    const { risk, trust } = computeRiskTrust();
-    $("riskPct").textContent = `${risk}%`;
-    $("trustPct").textContent = `${trust}%`;
-    $("trustBadge").textContent = `${trust}%`;
-    core.profile.trust = trust;
-    saveCoreLocals();
-    renderFeedback();
-  }
-
-  function renderFeedback(){
-    const { risk } = computeRiskTrust();
-    let tier = "green"; if(risk>=66) tier="red"; else if(risk>=26) tier="yellow";
-    const f = FEEDBACK[lang][tier];
-    const fb = $("checkFeedback"); fb.innerHTML = "";
-    const wrap = document.createElement("div"); wrap.className = "card";
-    const title = document.createElement("div"); title.className = "font-semibold"; title.textContent = f.title;
-    const body = document.createElement("div"); body.className = "small mt-2"; body.textContent = f.body;
-    wrap.appendChild(title); wrap.appendChild(body);
-
-    const actions = document.createElement("div"); actions.style.marginTop="10px"; actions.style.display="flex"; actions.style.gap="8px";
-    const copyHotline = document.createElement("button"); copyHotline.className="btn btn-ghost"; copyHotline.textContent=(lang==="en"?"Copy local hotline":"Copiar línea local");
-    copyHotline.addEventListener("click", ()=> { navigator.clipboard?.writeText("1-800-555-1212"); alert((lang==="en"?"Number copied: ":"Número copiado: ")+"1-800-555-1212"); });
-    const quickPlanBtn = document.createElement("button"); quickPlanBtn.className="btn btn-primary"; quickPlanBtn.textContent=(lang==="en"?"Create quick plan":"Crear plan rápido");
-    quickPlanBtn.addEventListener("click", createQuickPlanFromAnswers);
-    const exportBtn = document.createElement("button"); exportBtn.className="btn btn-ghost"; exportBtn.textContent=(lang==="en"?"Export summary":"Exportar resumen");
-    exportBtn.addEventListener("click", ()=> exportEncryptedSnapshotPrompt());
-    if(tier==="green"){ actions.append(copyHotline, exportBtn); }
-    else if(tier==="yellow"){ actions.append(quickPlanBtn, copyHotline); }
-    else { actions.append(copyHotline, exportBtn); }
-
-    wrap.appendChild(actions);
-
-    const promptsWrap = document.createElement("div"); promptsWrap.style.marginTop="12px";
-    QUESTIONS.forEach((q)=>{
-      const a = core.answers[q.id]; if(!a) return;
-      const row = document.createElement("div"); row.className="p-2 card"; row.style.marginBottom="8px";
-      const qEl = document.createElement("div"); qEl.className="font-semibold small"; qEl.textContent=q.key;
-      const pEl = document.createElement("div"); pEl.className="small"; pEl.style.marginTop="6px";
-      const key = `${q.id}_${a==="yes"?"yes":"no"}`;
-      pEl.textContent = Q_PROMPTS[lang][key] || "";
-      row.appendChild(qEl); row.appendChild(pEl); promptsWrap.appendChild(row);
-    });
-    if(Object.keys(core.answers||{}).length===0){ const empty=document.createElement("div"); empty.className="small"; empty.textContent=(lang==="en"?"No answers yet.":"Aún no hay respuestas."); promptsWrap.appendChild(empty); }
-
-    fb.appendChild(wrap); fb.appendChild(promptsWrap);
-  }
-
-  $("demoLoadBtn").addEventListener("click", ()=>{
-    core.answers = { q1:"no", q2:"yes", q3:"no", q4:"yes", q5:"no", q6:"no", q7:"yes", q8:"yes" };
-    buildQuestions(); updateScoresAndFeedback(); setTab('checkin');
-  });
-
-  function createQuickPlanFromAnswers(){
-    const plan = {
-      id:"plan_"+Date.now(),
-      title:(lang==="en"?"Quick Plan":"Plan Rápido")+" "+new Date().toLocaleString(),
-      summary:"Auto-generated quick plan",
-      items:{ safePlace:(core.answers.q1==="no")?(lang==="en"?"Public place / friend's home":"Lugar público / casa de confianza"):(lang==="en"?"Home — keep exits clear":"Casa — mantén salidas claras"), contact:(lang==="en"?"Trusted contact: [name/number]":"Contacto de confianza: [nombre/número]"), bag:(lang==="en"?"ID, cash, keys, phone charger":"ID, dinero, llaves, cargador") }
-    };
-    core.plans = core.plans || [];
-    core.plans.push(plan);
-    saveCoreEncryptedIfUnlocked(); renderPlans();
-    alert(lang==="en"?"Quick plan created.":"Plan rápido creado.");
-  }
-
-  function renderPlans(){
-    const list = $("planList"); list.innerHTML="";
-    (core.plans||[]).forEach((p,i)=>{
-      const el = document.createElement("div"); el.className="p-3 card flex items-center justify-between gap-2";
-      const txt = document.createElement("div"); txt.innerHTML=`<div class="font-semibold">${p.title||"Plan"}</div><div class="small">${p.summary||""}</div>`;
-      const actions = document.createElement("div");
-      const open = document.createElement("button"); open.className="btn btn-ghost"; open.textContent=(lang==="en"?"Open":"Abrir"); open.addEventListener("click", ()=> openPlanEditor(i));
-      const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent=(lang==="en"?"Delete":"Eliminar"); del.addEventListener("click", ()=>{ core.plans.splice(i,1); saveCoreEncryptedIfUnlocked(); renderPlans(); });
-      actions.append(open,del); el.append(txt,actions); list.appendChild(el);
-    });
-  }
-  function openPlanEditor(index){
-    const p = core.plans[index];
-    const title = prompt((lang==="en"?"Plan title:":"Título del plan:"), p.title||"");
-    if(title===null) return;
-    const summary = prompt((lang==="en"?"Short summary:":"Resumen corto:"), p.summary||"");
-    core.plans[index] = { ...p, title, summary };
-    saveCoreEncryptedIfUnlocked(); renderPlans();
-  }
-
-  function renderResources(){
-    const list = $("resourceList"); list.innerHTML="";
-    (core.resources||[]).forEach((r,i)=>{
-      const li = document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
-      const txt = document.createElement("div");
-      const t = document.createElement("div"); t.className="font-semibold"; t.textContent=r.title||"Untitled";
-      const d = document.createElement("div"); d.className="small text-gray-300"; d.textContent=r.desc||"";
-      const u = document.createElement("a"); u.className="text-blue-400 underline small"; u.href=r.url||"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent=r.url||"";
-      txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
-      const del = document.createElement("button"); del.className="btn btn-ghost"; del.textContent=(lang==="en"?"Delete":"Eliminar");
-      del.addEventListener("click", ()=>{ core.resources.splice(i,1); saveCoreEncryptedIfUnlocked(); renderResources(); });
-      li.append(txt,del); list.appendChild(li);
-    });
-  }
-
-  $("btnAddResource").addEventListener("click",(e)=>{
-    e.preventDefault();
-    const it = { title:$("resTitleInput").value.trim(), desc:$("resDesc").value.trim(), url:$("resUrl").value.trim() };
-    if(!it.title){ alert((lang==="en"?"Title required":"Título requerido")); return; }
-    core.resources = core.resources || []; core.resources.push(it);
-    saveCoreEncryptedIfUnlocked(); renderResources();
-    $("resTitleInput").value=$("resDesc").value=$("resUrl").value="";
-  });
-  $("btnCopyHotline").addEventListener("click", ()=> { navigator.clipboard?.writeText("1-800-555-1212"); alert((lang==="en"?"Copied example hotline":"Línea de ejemplo copiada")+": 1-800-555-1212"); });
-
-  async function exportEncryptedSnapshotPrompt(){
-    if(!unlockedPassword){ alert((lang==="en"?"Unlock the app to export securely.":"Desbloquea la app para exportar de forma segura.")); return; }
-    const pass = prompt((lang==="en"?"Enter export passphrase (required to import):":"Introduce una contraseña para exportar (se requerirá para importar):"));
-    if(!pass) return;
-    const snapshot = { profile: core.profile, answers: core.answers, resources: core.resources, plans: core.plans, version: APP_VER };
-    const blob = await encryptWithPassword(snapshot, pass);
-    const file = new Blob([JSON.stringify(blob)], { type: "application/json" });
-    const url = URL.createObjectURL(file);
-    const a = document.createElement("a"); a.href = url; a.download = "timeout-export.json"; document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1000);
-  }
-  $("exportJson").addEventListener("click", exportEncryptedSnapshotPrompt);
-
-  $("importJsonBtn").addEventListener("click", async ()=>{
-    const f = $("importJsonFile").files[0];
-    if(!f){ alert((lang==="en"?"Select a file first.":"Selecciona un archivo primero.")); return; }
-    const txt = await f.text();
-    try{
-      const blob = JSON.parse(txt);
-      const pass = prompt((lang==="en"?"Enter import passphrase:":"Introduce la contraseña para importar:"));
-      if(!pass) return;
-      const data = await decryptWithPassword(blob, pass);
-      const replace = confirm((lang==="en"?"Replace local data? Cancel to merge.":"¿Reemplazar datos locales? Cancelar para fusionar."));
-      if(replace) core = data;
-      else{
-        core = Object.assign(core, data);
-        core.resources = [...(core.resources||[]), ...(data.resources||[])];
-        core.plans = [...(core.plans||[]), ...(data.plans||[])];
-      }
-      saveCoreEncryptedIfUnlocked(); buildQuestions(); renderResources(); renderPlans(); updateScoresAndFeedback();
-      alert((lang==="en"?"Import successful.":"Importación exitosa."));
-    }catch(e){ alert((lang==="en"?"Import failed or wrong passphrase.":"Importación fallida o contraseña incorrecta.")); }
-  });
-
-  function clearAllLocal(){
-    localStorage.removeItem(LS.enc);
-    localStorage.removeItem(LS.pinCheck);
-    localStorage.removeItem(LS.duressCheck);
-    localStorage.removeItem(LS.profile);
-    localStorage.removeItem(LS.answers);
-    localStorage.removeItem(LS.resources);
-    localStorage.removeItem(LS.plans);
-    localStorage.removeItem(LS.disclaimer);
-    localStorage.removeItem(LS.autoWipe);
-    localStorage.removeItem("timeout_failed");
-    core = { profile:{name:"Anonymous", trust:100}, answers:{}, resources:[], plans:[], settings:{} };
-    unlocked = false; unlockedPassword = null;
-  }
-  $("clearData").addEventListener("click", ()=> {
-    if(confirm((lang==="en"?"Clear ALL local data? This is irreversible.":"¿Borrar TODOS los datos locales? Esto es irreversible."))){
-      clearAllLocal(); lockToDecoy(); alert((lang==="en"?"Local data cleared.":"Datos locales borrados."));
-    }
-  });
-
-  async function saveCoreEncryptedIfUnlocked(){
-    if(!unlocked || !unlockedPassword){ saveCoreLocals(); return; }
-    await saveEncryptedCore(unlockedPassword);
-    saveCoreLocals();
-    try{ if(window.saveProfileMirror) saveProfileMirror(core.profile); }catch(e){}
-  }
-  function saveCoreLocals(){
-    localStorage.setItem(LS.profile, JSON.stringify(core.profile||{}));
-    localStorage.setItem(LS.answers, JSON.stringify(core.answers||{}));
-    localStorage.setItem(LS.resources, JSON.stringify(core.resources||[]));
-    localStorage.setItem(LS.plans, JSON.stringify(core.plans||[]));
-  }
-
-  function refreshUI(){
-    $("profileName").textContent = core.profile.name || "Anonymous";
-    $("homeName").textContent = core.profile.name || "Anonymous";
-    $("homeTrust").textContent = core.profile.trust || 100;
-    $("displayNameInput") && ($("displayNameInput").value = core.profile.name || "");
-    buildQuestions(); renderResources(); renderPlans(); updateScoresAndFeedback();
-  }
-
-  document.addEventListener("visibilitychange", ()=> { if(document.hidden && unlocked) lockToDecoy(); });
-
-  if(window.DeviceMotionEvent){
-    window.addEventListener('devicemotion', (e)=>{
-      if(!($("toggleShake")?.checked)) return;
-      const a = e.accelerationIncludingGravity; if(!a) return;
-      const s = Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z);
-      if(s>30){ const now=Date.now(); if(!window.__lastShake || now-window.__lastShake>1500){ window.__lastShake=now; lockToDecoy(); } }
-    });
-  }
-
-  $("saveProfile").addEventListener("click", ()=> {
-    core.profile.name = $("displayNameInput").value.trim() || "Anonymous";
-    saveCoreEncryptedIfUnlocked(); refreshUI(); alert((lang==="en"?"Profile saved.":"Perfil guardado."));
-  });
-  $("profileChangePinBtn").addEventListener("click", async ()=>{
-    const np = $("profileChangePin").value.trim();
-    if(!np || np.length<4){ alert((lang==="en"?"PIN must be at least 4 digits.":"El PIN debe tener al menos 4 dígitos.")); return; }
-    const chk = await createPinCheck(np);
-    localStorage.setItem(LS.pinCheck, JSON.stringify(chk));
-    if(unlockedPassword){ await saveEncryptedCore(np); unlockedPassword = np; }
-    $("profileChangePin").value=""; alert((lang==="en"?"PIN changed.":"PIN cambiado."));
-  });
-  $("profileSetDuress").addEventListener("click", async ()=>{
-    const dp = $("profileDuressPin").value.trim();
-    if(!dp){ alert((lang==="en"?"Enter duress PIN.":"Introduce PIN de coacción.")); return; }
-    const chk = await createPinCheck(dp);
-    localStorage.setItem(LS.duressCheck, JSON.stringify(chk));
-    $("profileDuressPin").value=""; alert((lang==="en"?"Duress PIN set.":"PIN de coacción establecido."));
-  });
-
-  $("autoWipeSelect").addEventListener("change", ()=> { localStorage.setItem(LS.autoWipe, $("autoWipeSelect").value); });
-
-  $("saveCheckIn").addEventListener("click", async ()=>{
-    await saveCoreEncryptedIfUnlocked();
-    try{ if(window.saveCheckinToFirestore) await window.saveCheckinToFirestore({ answers: core.answers, profile: core.profile }); }catch(e){}
-    alert((lang==="en"?"Check-in saved.":"Revisión guardada."));
-  });
-
-  $("goToCheckIn").addEventListener("click", ()=> setTab('checkin'));
-
-  (function boot(){
-    try{ const meta = JSON.parse(localStorage.getItem(LS.meta)||"{}"); if(meta.skin) setSkin(meta.skin); }catch{}
-    try{ core.profile = JSON.parse(localStorage.getItem(LS.profile)) || core.profile; }catch{}
-    try{ core.answers = JSON.parse(localStorage.getItem(LS.answers)) || core.answers; }catch{}
-    try{ core.resources = JSON.parse(localStorage.getItem(LS.resources)) || core.resources; }catch{}
-    try{ core.plans = JSON.parse(localStorage.getItem(LS.plans)) || core.plans; }catch{}
-    applyLang();
-  })();// Dev panel (optional)
-  const printDev = ()=> {
-    const el = $("devState"); if(!el) return;
-    el.textContent = JSON.stringify({ profile:core.profile, answers:core.answers, plans:core.plans, resources:core.resources }, null, 2);
-  };
-  setInterval(()=> printDev(), 1500);
-
-  // Close everything with ESC when unlocked
-  document.addEventListener("keydown", (e)=> { if(e.key==="Escape" && unlocked) lockToDecoy(); });
-  </script><!-- PATCH: force-close the Disclaimer overlay reliably -->
-<script>
-(function(){
-  // Ensure the disclaimer overlay can never get "stuck" on top
-  const closeDisclaimer = () => {
-    try {
-      localStorage.setItem('timeout_disclaimer_accepted','1');
-      const overlay = document.getElementById('firstRunDisc');
-      if (overlay) overlay.classList.add('hidden-soft');
-      document.body.style.overflow = 'auto';
-    } catch(e){}
-  };
-
-  // Rebind buttons safely (adds closures even if earlier code exists)
-  const accept = document.getElementById('acceptDisclaimer');
-  const decline = document.getElementById('declineDisclaimer');
-  if (accept) accept.onclick = closeDisclaimer;
-  if (decline) decline.onclick = () => {
-    const overlay = document.getElementById('firstRunDisc');
-    if (overlay) overlay.classList.add('hidden-soft');
-    // send back to decoy just in case
-    const real = document.getElementById('realApp');
-    const decoy = document.getElementById('decoyView');
-    if (real && decoy) { real.classList.add('hidden-soft'); decoy.classList.remove('hidden-soft'); }
-    document.body.style.overflow = 'auto';
-  };
-
-  // Extra safety: any tab click also hides it (in case it lingered)
-  ['tabHomeBtn','tabCheckBtn','tabPlanBtn','tabResBtn','tabProfileBtn'].forEach(id=>{
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('click', closeDisclaimer, { once:true });
-  });
-})();
-</script><!-- HARD KILL for stuck Disclaimer -->
-<script>
-(function(){
-  const KEY='timeout_disclaimer_accepted';
-  function hideOverlay(){
-    const el=document.getElementById('firstRunDisc');
-    if(!el) return;
-    el.classList.add('hidden-soft');
-    el.style.display='none';
-    el.style.pointerEvents='none';
-    try{ el.remove(); }catch(e){}
-    document.body.style.overflow='auto';
-  }
-  // If already accepted before, remove immediately
-  try{ if(localStorage.getItem(KEY)==='1'){ hideOverlay(); } }catch(e){}
-
-  // Rebind buttons to force-remove
-  const acc=document.getElementById('acceptDisclaimer');
-  const dec=document.getElementById('declineDisclaimer');
-  if(acc) acc.onclick=()=>{ try{localStorage.setItem(KEY,'1');}catch(e){} hideOverlay(); };
-  if(dec) dec.onclick=()=>{ hideOverlay();
-    const real=document.getElementById('realApp'), decoy=document.getElementById('decoyView');
-    if(real&&decoy){ real.classList.add('hidden-soft'); decoy.classList.remove('hidden-soft'); }
-  };
-
-  // Extra: any click inside main app hides it if it somehow lingers
-  ['tabHomeBtn','tabCheckBtn','tabPlanBtn','tabResBtn','tabProfileBtn','saveCheckIn','goToCheckIn','btnQuickGenerate']
-    .forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click', hideOverlay, {once:true}); });
-})();
-</script><!-- CONSOLIDATED PATCH: bilingual Qs + plans working + resources preload + talk tips + overlay & unlock fixes -->
-<script>
-(function(){
-  /* ---------- 0) UTIL ---------- */
-  const getLang = ()=> (localStorage.getItem("timeout_lang")||"en");
-  const isEN = ()=> getLang()==="en";
-
-  /* ---------- 1) PRELOAD RESOURCES (once) ---------- */
-  (function preloadResourcesOnce(){
-    const KEY="timeout_resources";
-    try{
-      const existing = JSON.parse(localStorage.getItem(KEY)||"[]");
-      if (Array.isArray(existing) && existing.length>0) return; // don't overwrite
-      const R = [
-        { title:isEN()?"National Domestic Violence Hotline (US)":"Línea Nacional de Violencia Doméstica (EE. UU.)", desc:isEN()?"24/7 confidential support":"Atención confidencial 24/7", url:"https://www.thehotline.org/ 1-800-799-7233" },
-        { title:isEN()?"RAINN Sexual Assault Hotline (US)":"RAINN Línea de Agresión Sexual (EE. UU.)", desc:isEN()?"24/7 — chat & phone":"24/7 — chat y teléfono", url:"https://www.rainn.org/ 1-800-656-4673" },
-        { title:isEN()?"Childhelp National Child Abuse Hotline (US)":"Childhelp Línea Nacional de Abuso Infantil (EE. UU.)", desc:isEN()?"24/7 — children & adults":"24/7 — para niños y adultos", url:"https://www.childhelp.org/ 1-800-422-4453" },
-        { title:isEN()?"Elder Abuse Resource (NCEA)":"Recurso para Abuso a Personas Mayores (NCEA)", desc:isEN()?"Info & reporting paths":"Información y vías de reporte", url:"https://ncea.acl.gov/" },
-        { title:isEN()?"Local Social Services Finder":"Buscador de Servicios Sociales Locales", desc:isEN()?"Locate nearby assistance":"Encuentra ayuda cercana", url:"https://www.211.org/" },
-        { title:isEN()?"Emergency (If in immediate danger)":"Emergencias (Si hay peligro inmediato)", desc:isEN()?"Call your local emergency number":"Llama al número de emergencias local", url:"911" }
-      ];
-      localStorage.setItem(KEY, JSON.stringify(R));
-      if (typeof window.renderResources === "function") window.renderResources();
-      document.dispatchEvent(new Event("resources-updated"));
-    }catch(e){}
-  })();
-
-  /* ---------- 2) TRUE BILINGUAL QUESTIONS (labels update) ---------- */
-  const Q_EN = [
+  // Questions + feedback
+  const QUESTIONS_EN=[
     "Are you currently safe where you are?",
     "Has someone threatened you recently?",
     "Have you experienced physical harm in past month?",
@@ -1032,7 +618,7 @@
     "Do you feel isolated from help?",
     "Would you like immediate local resources?"
   ];
-  const Q_ES = [
+  const QUESTIONS_ES=[
     "¿Estás segura/o donde estás ahora?",
     "¿Alguien te ha amenazado recientemente?",
     "¿Has sufrido daño físico en el último mes?",
@@ -1042,172 +628,304 @@
     "¿Te sientes aislada/o de la ayuda?",
     "¿Quieres recursos locales de inmediato?"
   ];
+  const QUESTIONS = [
+    {id:"q1", invert:true},
+    {id:"q2"},
+    {id:"q3"},
+    {id:"q4"},
+    {id:"q5"},
+    {id:"q6"},
+    {id:"q7"},
+    {id:"q8"}
+  ];
 
-  function relabelQuestions(){
-    const texts = isEN()? Q_EN : Q_ES;
-    const container = document.getElementById("questions");
-    if(!container) return;
-    const rows = Array.from(container.querySelectorAll(".card"));
-    rows.forEach((row, idx)=>{
-      const label = row.querySelector(".font-semibold.small");
-      if(label && texts[idx]) label.textContent = `${idx+1}. ${texts[idx]}`;
-      const btns = row.querySelectorAll("button");
-      if(btns.length>=2){
-        btns[0].textContent = isEN()?"Yes":"Sí";
-        btns[1].textContent = isEN()?"No":"No";
+  const FEEDBACK = {
+    en:{ green:{title:"Small concerns — you’re doing okay", body:"Low immediate risk. Stay connected and keep your plan ready."},
+         yellow:{title:"Some concerns — consider extra steps", body:"Warning signs present. Update your plan and tell a trusted person."},
+         red:{title:"High risk — prioritize safety now", body:"If in immediate danger, call emergency services. Consider sharing a summary with someone you trust."} },
+    es:{ green:{title:"Pocas preocupaciones — vas bien", body:"Riesgo bajo. Mantén conexiones y tu plan listo."},
+         yellow:{title:"Algunas preocupaciones — toma pasos extra", body:"Hay señales de alerta. Actualiza tu plan y habla con alguien de confianza."},
+         red:{title:"Alto riesgo — prioriza tu seguridad", body:"Si hay peligro inmediato, llama a emergencias. Considera compartir un resumen con alguien de confianza."} }
+  };
+
+  const Q_PROMPTS = {
+    en:{
+      q1_yes:"Good — keep exits clear and identify a safe place.",
+      q1_no:"You may be at immediate risk. Move to a public place or contact a trusted person.",
+      q2_yes:"Threats increase risk. Record details safely.",
+      q2_no:"Positive — continue to monitor.",
+      q3_yes:"Seek medical care and document injuries if safe.",
+      q3_no:"Keep prevention steps in your plan.",
+      q4_yes:"If your phone can be checked, avoid sensitive content and use quick-wipe.",
+      q4_no:"Maintain locks and privacy settings.",
+      q5_yes:"Plan discreet exits and ask trusted helpers.",
+      q5_no:"Keep plans ready if things change.",
+      q6_yes:"Include children: meeting points and caregivers.",
+      q6_no:"Focus on your own plan; keep essentials ready.",
+      q7_yes:"Reach out to one trusted person or local group today.",
+      q7_no:"Maintain those connections.",
+      q8_yes:"Use Resources; copy numbers if call logs worry you.",
+      q8_no:"Resources remain available when you want them."
+    },
+    es:{
+      q1_yes:"Bien — mantén salidas libres e identifica un lugar seguro.",
+      q1_no:"Podrías estar en riesgo inmediato. Ve a un lugar público o contacta a alguien de confianza.",
+      q2_yes:"Las amenazas aumentan el riesgo. Registra detalles de forma segura.",
+      q2_no:"Señal positiva — sigue observando.",
+      q3_yes:"Busca atención médica y documenta lesiones si es seguro.",
+      q3_no:"Mantén medidas de prevención.",
+      q4_yes:"Si pueden revisar tu teléfono, evita contenido sensible y usa borrado rápido.",
+      q4_no:"Mantén bloqueos y privacidad.",
+      q5_yes:"Planifica salidas discretas y pide ayuda.",
+      q5_no:"Ten planes listos por si cambia algo.",
+      q6_yes:"Incluye a niñas/os: puntos de encuentro y cuidadores.",
+      q6_no:"Enfócate en tu plan; ten lo esencial listo.",
+      q7_yes:"Contacta hoy a una persona o grupo local.",
+      q7_no:"Mantén esas conexiones.",
+      q8_yes:"Usa Recursos; copia números si te preocupan historiales.",
+      q8_no:"Los recursos estarán disponibles cuando los necesites."
+    }
+  };
+
+  function buildQuestions(){
+    const box=$("questions"); box.innerHTML="";
+    QUESTIONS.forEach((q,i)=>{
+      const row=document.createElement("div"); row.className="card";
+      const label=document.createElement("div"); label.className="font-semibold small mb-2";
+      label.textContent=`${i+1}. ${(lang==="en"?QUESTIONS_EN:QUESTIONS_ES)[i]}`;
+      const wrap=document.createElement("div"); wrap.className="flex gap-2";
+      const yes=document.createElement("button"); yes.className="btn btn-ghost flex-1"; yes.textContent=(lang==="en"?"Yes":"Sí");
+      const no=document.createElement("button");  no.className="btn btn-ghost flex-1";  no.textContent=(lang==="en"?"No":"No");
+      yes.onclick=()=>{ core.answers[q.id]="yes"; mark(); updateScoresAndFeedback(); saveCoreEncryptedIfUnlocked(); };
+      no.onclick =()=>{ core.answers[q.id]="no";  mark(); updateScoresAndFeedback(); saveCoreEncryptedIfUnlocked(); };
+      function mark(){
+        yes.classList.toggle("bg-green-600", core.answers[q.id]==="yes"); yes.classList.toggle("text-white", core.answers[q.id]==="yes");
+        no.classList.toggle("bg-rose-600", core.answers[q.id]==="no");    no.classList.toggle("text-white", core.answers[q.id]==="no");
       }
-    });
-    const t = document.getElementById("checkTitle");
-    if(t) t.textContent = isEN()? "Safety Check-In" : "Revisión de seguridad";
-    const demo = document.getElementById("demoLoadBtn");
-    if(demo) demo.textContent = isEN()? "Load Demo Answers" : "Cargar respuestas de demo";
-    const quickExitBtn = document.getElementById("quickExitBtn");
-    if(quickExitBtn) quickExitBtn.textContent = isEN()? "Home" : "Inicio";
-  }
-
-  // apply now and after language toggle
-  relabelQuestions();
-  const langToggle = document.getElementById("langToggle");
-  if(langToggle){
-    langToggle.addEventListener("click", ()=> setTimeout(relabelQuestions, 10));
-    langToggle.textContent = isEN()? "EN | ES" : "ES | EN";
-  }
-
-  /* ---------- 3) SAFETY PLAN BUTTONS (make them work) ---------- */
-  function plans(){ try{ return JSON.parse(localStorage.getItem("timeout_plans")||"[]"); }catch{ return []; } }
-  function setPlans(arr){ localStorage.setItem("timeout_plans", JSON.stringify(arr)); }
-  function renderPlansLite(){
-    const list = document.getElementById("planList"); if(!list) return;
-    const arr = plans();
-    list.innerHTML = "";
-    arr.forEach((p,i)=>{
-      const el = document.createElement("div");
-      el.className="p-3 card flex items-center justify-between gap-2";
-      const txt = document.createElement("div");
-      txt.innerHTML = `<div class="font-semibold">${p.title||"Plan"}</div><div class="small">${p.summary||""}</div>`;
-      const actions = document.createElement("div");
-      const open = document.createElement("button");
-      open.className="btn btn-ghost";
-      open.textContent = isEN()? "Open" : "Abrir";
-      open.onclick = ()=>{
-        const t = prompt(isEN()? "Title:" : "Título:", p.title||"");
-        if(t===null) return;
-        const s = prompt(isEN()? "Summary:" : "Resumen:", p.summary||"");
-        const arr2 = plans(); arr2[i] = { ...arr2[i], title:t, summary:s };
-        setPlans(arr2); renderPlansLite();
-      };
-      const del = document.createElement("button");
-      del.className="btn btn-ghost";
-      del.textContent = isEN()? "Delete" : "Eliminar";
-      del.onclick = ()=>{ const arr2 = plans(); arr2.splice(i,1); setPlans(arr2); renderPlansLite(); };
-      actions.append(open, del);
-      el.append(txt, actions);
-      list.appendChild(el);
+      if(core.answers[q.id]) mark();
+      row.append(label); wrap.append(yes,no); row.append(wrap); box.append(row);
     });
   }
-  renderPlansLite();
 
-  const btnNew = document.getElementById("btnNewPlan");
-  if(btnNew) btnNew.onclick = ()=>{
-    const t = prompt(isEN()? "Plan title:" : "Título del plan:");
-    if(!t) return;
-    const s = prompt(isEN()? "Short summary:" : "Resumen corto:") || "";
-    const arr = plans(); arr.push({ id:"plan_"+Date.now(), title:t, summary:s, items:{} }); setPlans(arr);
-    renderPlansLite(); alert(isEN()? "Plan created." : "Plan creado.");
+  function computeRiskTrust(){
+    let risky=0;
+    QUESTIONS.forEach((q,idx)=>{
+      const a=(core.answers[q.id]||"").toLowerCase(); if(!a) return;
+      if(q.invert){ if(a==="no") risky++; } else { if(a==="yes") risky++; }
+    });
+    const risk=Math.round((risky/QUESTIONS.length)*100); const trust=100-risk;
+    return {risk, trust};
+  }
+
+  function updateScoresAndFeedback(){
+    const {risk, trust}=computeRiskTrust();
+    $("riskPct").textContent=`${risk}%`;
+    $("trustPct").textContent=`${trust}%`;
+    $("trustBadge").textContent=`${trust}%`;
+    core.profile.trust=trust;
+    saveCoreLocals();
+    renderFeedback();
+  }
+
+  function renderFeedback(force){
+    const fb=$("checkFeedback");
+    if(force) fb.innerHTML="";
+    const { risk } = computeRiskTrust();
+    let tier="green"; if(risk>=66) tier="red"; else if(risk>=26) tier="yellow";
+    const f=FEEDBACK[lang][tier];
+    const wrap=document.createElement("div"); wrap.className="card";
+    const title=document.createElement("div"); title.className="font-semibold"; title.textContent=f.title;
+    const body=document.createElement("div"); body.className="small mt-2"; body.textContent=f.body;
+    wrap.append(title,body);
+
+    const actions=document.createElement("div"); actions.className="mt-3 flex gap-2";
+    const copyHotline=document.createElement("button"); copyHotline.className="btn btn-ghost"; copyHotline.textContent=(lang==="en"?"Copy local hotline":"Copiar línea local");
+    copyHotline.onclick=()=>{ navigator.clipboard?.writeText("1-800-799-7233"); alert((lang==="en"?"Number copied: ":"Número copiado: ")+"1-800-799-7233"); };
+    const quickPlanBtn=document.createElement("button"); quickPlanBtn.className="btn btn-primary"; quickPlanBtn.textContent=(lang==="en"?"Create quick plan":"Crear plan rápido");
+    quickPlanBtn.onclick=createQuickPlanFromAnswers;
+    if(tier==="green"){ actions.append(copyHotline); } else { actions.append(quickPlanBtn, copyHotline); }
+    wrap.append(actions); fb.prepend(wrap);
+
+    // Micro-prompts by answer
+    QUESTIONS.forEach((q,idx)=>{
+      const a=core.answers[q.id]; if(!a) return;
+      const row=document.createElement("div"); row.className="p-2 card mt-2";
+      const qEl=document.createElement("div"); qEl.className="font-semibold small"; qEl.textContent=(lang==="en"?QUESTIONS_EN:QUESTIONS_ES)[idx];
+      const pEl=document.createElement("div"); pEl.className="small mt-1";
+      const key=`${q.id}_${a==="yes"?"yes":"no"}`; pEl.textContent=Q_PROMPTS[lang][key]||"";
+      row.append(qEl,pEl); fb.append(row);
+    });
+  }
+
+  $("demoLoadBtn").onclick = ()=>{ core.answers={ q1:"no", q2:"yes", q3:"no", q4:"yes", q5:"no", q6:"no", q7:"yes", q8:"yes" }; buildQuestions(); updateScoresAndFeedback(); setTab('checkin'); };
+  $("saveCheckIn").onclick = async ()=>{
+    await saveCoreEncryptedIfUnlocked();
+    try{ if(window.saveCheckinToFirestore) await window.saveCheckinToFirestore({answers:core.answers, profile:core.profile}); }catch(e){}
+    alert(lang==="en"?"Check-in saved.":"Revisión guardada.");
+  };
+  $("clearCheckIn").onclick = ()=>{ core.answers={}; buildQuestions(); updateScoresAndFeedback(); };
+
+  // Talk to the app (rule-based supportive tips)
+  $("talkBtn").onclick = ()=>{
+    const box=$("checkFeedback"); const card=document.createElement("div"); card.className="card mt-2";
+    const h=document.createElement("div"); h.className="font-semibold"; h.textContent=(lang==="en"?"Quick suggestions":"Sugerencias rápidas");
+    const a=core.answers||{}; const lines=[];
+    if(a.q1==="no") lines.push(lang==="en"?"You might not be safe now. Move to a public place or contact someone you trust.":"Podrías no estar segura/o ahora. Ve a un lugar público o contacta a alguien de confianza.");
+    if(a.q2==="yes") lines.push(lang==="en"?"Threats raise risk. Note dates/times privately.":"Las amenazas elevan el riesgo. Anota fechas/horas en privado.");
+    if(a.q4==="yes") lines.push(lang==="en"?"Phone privacy: avoid sensitive content; use quick wipe if needed.":"Privacidad del teléfono: evita contenido sensible; usa borrado rápido si es necesario.");
+    if(a.q7==="yes") lines.push(lang==="en"?"Message one trusted person today.":"Escribe hoy a una persona de confianza.");
+    if(a.q8==="yes") lines.push(lang==="en"?"Open Resources; copy numbers if call logs worry you.":"Abre Recursos; copia números si te preocupan los historiales.");
+    if(lines.length===0) lines.push(lang==="en"?"Low immediate risk suggested. Keep your plan updated.":"Riesgo inmediato bajo. Mantén tu plan actualizado.");
+    const p=document.createElement("div"); p.className="small mt-2"; p.innerHTML=lines.map(l=>"• "+l).join("<br>");
+    card.append(h,p); box.prepend(card);
   };
 
-  const btnTemplates = document.getElementById("btnTemplates");
-  if(btnTemplates) btnTemplates.onclick = ()=>{
-    const templates = [
-      {title:isEN()?"Grab-and-Go Bag":"Bolsa de emergencia", summary:isEN()?"List items + hidden spot":"Lista de artículos + lugar oculto"},
-      {title:isEN()?"Trusted Contacts":"Contactos de confianza", summary:isEN()?"Names & numbers":"Nombres y teléfonos"},
-      {title:isEN()?"Safe Exit Plan":"Salida segura", summary:isEN()?"Safe place & transport":"Lugar seguro y transporte"}
+  // Plans
+  function renderPlans(){
+    const list=$("planList"); list.innerHTML="";
+    (core.plans||[]).forEach((p,i)=>{
+      const el=document.createElement("div"); el.className="p-3 card flex items-center justify-between gap-2";
+      const txt=document.createElement("div"); txt.innerHTML=`<div class="font-semibold">${p.title||"Plan"}</div><div class="small">${p.summary||""}</div>`;
+      const actions=document.createElement("div");
+      const open=document.createElement("button"); open.className="btn btn-ghost"; open.textContent=(lang==="en"?"Open":"Abrir");
+      open.onclick=()=>{ const t=prompt(lang==="en"?"Title:":"Título:", p.title||""); if(t===null) return; const s=prompt(lang==="en"?"Summary:":"Resumen:", p.summary||""); core.plans[i]={...p,title:t,summary:s}; saveCoreEncryptedIfUnlocked(); renderPlans(); };
+      const del=document.createElement("button"); del.className="btn btn-ghost"; del.textContent=(lang==="en"?"Delete":"Eliminar");
+      del.onclick=()=>{ core.plans.splice(i,1); saveCoreEncryptedIfUnlocked(); renderPlans(); };
+      actions.append(open,del); el.append(txt,actions); list.appendChild(el);
+    });
+  }
+  function addPlan(title, summary){ core.plans=core.plans||[]; core.plans.push({ id:"plan_"+Date.now(), title, summary, items:{} }); saveCoreEncryptedIfUnlocked(); renderPlans(); }
+  $("btnNewPlan").onclick = ()=>{ const t=prompt(lang==="en"?"Plan title:":"Título del plan:"); if(!t) return; const s=prompt(lang==="en"?"Short summary:":"Resumen corto:")||""; addPlan(t,s); alert(lang==="en"?"Plan created.":"Plan creado."); };
+  $("btnTemplates").onclick = ()=>{
+    const templates=[
+      {title:(lang==="en"?"Grab-and-Go Bag":"Bolsa de emergencia"), summary:(lang==="en"?"List items & hidden spot":"Lista de artículos y lugar oculto")},
+      {title:(lang==="en"?"Trusted Contacts":"Contactos de confianza"), summary:(lang==="en"?"Names & numbers":"Nombres y teléfonos")},
+      {title:(lang==="en"?"Safe Exit Plan":"Salida segura"), summary:(lang==="en"?"Safe place & transport":"Lugar seguro y transporte")}
     ];
-    const pick = prompt((isEN()?"Templates:\n":"Plantillas:\n")+templates.map((t,i)=>`${i+1}. ${t.title}`).join("\n")+"\n"+(isEN()?"Number:":"Número:"));
-    const n = Number(pick);
-    if(n>=1 && n<=templates.length){
-      const arr = plans(); arr.push({ id:"plan_"+Date.now(), ...templates[n-1], items:{} }); setPlans(arr);
-      renderPlansLite(); alert(isEN()? "Template added." : "Plantilla añadida.");
-    }
+    const pick=prompt((lang==="en"?"Templates:\n":"Plantillas:\n")+templates.map((t,i)=>`${i+1}. ${t.title}`).join("\n")+"\n"+(lang==="en"?"Number:":"Número:"));
+    const n=Number(pick); if(n>=1 && n<=templates.length){ const tpl=templates[n-1]; addPlan(tpl.title, tpl.summary); alert(lang==="en"?"Template added.":"Plantilla añadida."); }
+  };
+  function createQuickPlanFromAnswers(){
+    const a=core.answers||{}; const parts=[];
+    if(a.q1==="no") parts.push(lang==="en"?"Safe site: public place or trusted home.":"Sitio seguro: lugar público o casa de confianza.");
+    if(a.q2==="yes") parts.push(lang==="en"?"Record threats privately (date/time).":"Registra amenazas en privado (fecha/hora).");
+    if(a.q4==="yes") parts.push(lang==="en"?"Avoid sensitive content; consider quick-wipe.":"Evita contenido sensible; considera borrado rápido.");
+    if(parts.length===0) parts.push(lang==="en"?"Keep exits clear and contacts ready.":"Mantén salidas despejadas y contactos listos.");
+    addPlan(lang==="en"?"Quick Plan":"Plan Rápido", parts.join(" "));
+  }
+  $("btnQuickGenerate").onclick = ()=>{ createQuickPlanFromAnswers(); alert(lang==="en"?"Quick plan created.":"Plan rápido creado."); };
+
+  // Resources
+  function renderResources(){
+    const list=$("resourceList"); list.innerHTML="";
+    (core.resources||[]).forEach((r,i)=>{
+      const li=document.createElement("li"); li.className="p-3 card flex items-start justify-between gap-3";
+      const txt=document.createElement("div");
+      const t=document.createElement("div"); t.className="font-semibold"; t.textContent=r.title||"Untitled";
+      const d=document.createElement("div"); d.className="small text-gray-300"; d.textContent=r.desc||"";
+      const u=document.createElement("a"); u.className="text-blue-400 underline small"; u.href=(r.url && r.url.startsWith("http"))?r.url:"#"; u.target="_blank"; u.rel="noreferrer"; u.textContent=r.url||"";
+      txt.append(t); if(r.desc) txt.append(d); if(r.url) txt.append(u);
+      const del=document.createElement("button"); del.className="btn btn-ghost"; del.textContent=(lang==="en"?"Delete":"Eliminar");
+      del.onclick=()=>{ core.resources.splice(i,1); saveCoreEncryptedIfUnlocked(); renderResources(); };
+      li.append(txt,del); list.appendChild(li);
+    });
+  }
+  $("btnAddResource").onclick = (e)=>{ e.preventDefault(); const it={ title:$("resTitleInput").value.trim(), desc:$("resDesc").value.trim(), url:$("resUrl").value.trim() }; if(!it.title){ alert(lang==="en"?"Title required":"Título requerido"); return; } core.resources=core.resources||[]; core.resources.push(it); saveCoreEncryptedIfUnlocked(); renderResources(); $("resTitleInput").value=$("resDesc").value=$("resUrl").value=""; };
+  $("btnCopyHotline").onclick = ()=>{ navigator.clipboard?.writeText("1-800-799-7233"); alert((lang==="en"?"Copied: ":"Copiado: ")+"1-800-799-7233"); };
+
+  // Save/Export/Import
+  async function saveCoreEncryptedIfUnlocked(){ if(!unlocked || !unlockedPassword){ saveCoreLocals(); return; } await saveEncryptedCore(unlockedPassword); saveCoreLocals(); try{ if(window.saveProfileMirror) saveProfileMirror(core.profile); }catch(e){} }
+  function saveCoreLocals(){ localStorage.setItem(LS.profile, JSON.stringify(core.profile||{})); localStorage.setItem(LS.answers, JSON.stringify(core.answers||{})); localStorage.setItem(LS.resources, JSON.stringify(core.resources||[])); localStorage.setItem(LS.plans, JSON.stringify(core.plans||[])); }
+  $("saveAll").onclick = ()=> saveCoreEncryptedIfUnlocked().then(()=> alert(lang==="en"?"Saved.":"Guardado."));
+
+  $("saveProfile").onclick = ()=>{ core.profile.name=$("displayNameInput").value.trim()||"Anonymous"; saveCoreEncryptedIfUnlocked(); refreshUI(); alert(lang==="en"?"Profile saved.":"Perfil guardado."); };
+  $("profileChangePinBtn").onclick = async ()=>{ const np=$("profileChangePin").value.trim(); if(!np || np.length<4){ alert(lang==="en"?"PIN must be at least 4 digits.":"El PIN debe tener al menos 4 dígitos."); return; } const chk=await createPinCheck(np); localStorage.setItem(LS.pinCheck, JSON.stringify(chk)); if(unlockedPassword){ await saveEncryptedCore(np); unlockedPassword=np; } $("profileChangePin").value=""; alert(lang==="en"?"PIN changed.":"PIN cambiado."); };
+  $("profileSetDuress").onclick = async ()=>{ const dp=$("profileDuressPin").value.trim(); if(!dp){ alert(lang==="en"?"Enter duress PIN.":"Introduce PIN de coacción."); return; } const chk=await createPinCheck(dp); localStorage.setItem(LS.duressCheck, JSON.stringify(chk)); $("profileDuressPin").value=""; alert(lang==="en"?"Duress PIN set.":"PIN de coacción establecido."); };
+  $("autoWipeSelect").onchange = ()=> localStorage.setItem(LS.autoWipe, $("autoWipeSelect").value);
+
+  $("exportJson").onclick = async ()=>{
+    if(!unlockedPassword){ alert(lang==="en"?"Unlock to export securely.":"Desbloquea para exportar."); return; }
+    const pass=prompt(lang==="en"?"Enter export passphrase:":"Introduce contraseña para exportar:"); if(!pass) return;
+    const snapshot={ profile:core.profile, answers:core.answers, resources:core.resources, plans:core.plans, version:APP_VER };
+    const blob=await encryptWithPassword(snapshot, pass);
+    const file=new Blob([JSON.stringify(blob)],{type:"application/json"}); const url=URL.createObjectURL(file);
+    const a=document.createElement("a"); a.href=url; a.download="timeout-export.json"; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},800);
+  };
+  $("importJsonBtn").onclick = async ()=>{
+    const f=$("importJsonFile").files[0]; if(!f){ alert(lang==="en"?"Select a file first.":"Selecciona un archivo primero."); return; }
+    const txt=await f.text(); try{
+      const blob=JSON.parse(txt); const pass=prompt(lang==="en"?"Enter import passphrase:":"Introduce la contraseña para importar:"); if(!pass) return;
+      const data=await decryptWithPassword(blob, pass); const replace=confirm(lang==="en"?"Replace local data? Cancel = merge.":"¿Reemplazar datos locales? Cancelar = fusionar.");
+      if(replace) core=data; else { core=Object.assign(core,data); core.resources=[...(core.resources||[]),...(data.resources||[])]; core.plans=[...(core.plans||[]),...(data.plans||[])]; }
+      saveCoreEncryptedIfUnlocked(); buildQuestions(); renderResources(); renderPlans(); updateScoresAndFeedback(); alert(lang==="en"?"Import successful.":"Importación exitosa.");
+    }catch(e){ alert(lang==="en"?"Import failed or wrong passphrase.":"Falló la importación o contraseña incorrecta."); }
   };
 
-  const btnQuick = document.getElementById("btnQuickGenerate");
-  if(btnQuick) btnQuick.onclick = ()=>{
-    let a={}; try{ a = JSON.parse(localStorage.getItem("timeout_answers")||"{}"); }catch{}
-    const parts=[];
-    if(a.q1==="no") parts.push(isEN()? "Safe site: public place or trusted home." : "Sitio seguro: lugar público o casa de confianza.");
-    if(a.q2==="yes") parts.push(isEN()? "Record threats privately (date/time)." : "Registra amenazas en privado (fecha/hora).");
-    if(a.q4==="yes") parts.push(isEN()? "Avoid storing sensitive content; consider quick-wipe." : "Evita contenido sensible; considera borrado rápido.");
-    if(parts.length===0) parts.push(isEN()? "Keep exits clear and contacts ready." : "Mantén salidas despejadas y contactos listos.");
-    const arr = plans(); arr.push({ id:"plan_"+Date.now(), title:isEN()? "Quick Plan":"Plan Rápido", summary:parts.join(" "), items:{} }); setPlans(arr);
-    renderPlansLite(); alert(isEN()? "Quick plan created." : "Plan rápido creado.");
-  };
+  function clearAllLocal(){
+    [LS.enc,LS.pinCheck,LS.duressCheck,LS.profile,LS.answers,LS.resources,LS.plans,LS.disclaimer,LS.autoWipe,LS.failed].forEach(k=> localStorage.removeItem(k));
+    core={ profile:{name:"Anonymous",trust:100}, answers:{}, resources:[], plans:[], settings:{} };
+    unlocked=false; unlockedPassword=null;
+  }
+  $("clearData").onclick = ()=>{ if(confirm(lang==="en"?"Clear ALL local data?":"¿Borrar TODOS los datos locales?")){ clearAllLocal(); lockToDecoy(); alert(lang==="en"?"Local data cleared.":"Datos locales borrados."); } };
 
-  /* ---------- 4) TALK TO THE APP (rule-based supportive tips) ---------- */
-  const talkBtn = document.getElementById("talkBtn");
-  if(talkBtn) talkBtn.onclick = ()=>{
-    let a={}; try{ a = JSON.parse(localStorage.getItem("timeout_answers")||"{}"); }catch{}
-    const lines = [];
-    if(a.q1==="no") lines.push(isEN()? "You might not be safe now. Move to a public place or contact someone you trust." : "Podrías no estar segura/o ahora. Ve a un lugar público o contacta a alguien de confianza.");
-    if(a.q2==="yes") lines.push(isEN()? "Threats raise risk. Note dates/times privately." : "Las amenazas elevan el riesgo. Anota fechas/horas en privado.");
-    if(a.q4==="yes") lines.push(isEN()? "Phone privacy: avoid sensitive content; use quick wipe if needed." : "Privacidad del teléfono: evita contenido sensible; usa borrado rápido si es necesario.");
-    if(a.q7==="yes") lines.push(isEN()? "Message one trusted person today." : "Escribe hoy a una persona de confianza.");
-    if(a.q8==="yes") lines.push(isEN()? "Open Resources; copy numbers if call logs worry you." : "Abre Recursos; copia números si te preocupan los historiales.");
-    if(lines.length===0) lines.push(isEN()? "Low immediate risk suggested. Keep your plan updated." : "Riesgo inmediato bajo. Mantén tu plan actualizado.");
+  // Visibility auto-lock
+  document.addEventListener("visibilitychange", ()=>{ if(document.hidden && unlocked) lockToDecoy(); });
 
-    const box = document.getElementById("checkFeedback");
-    if(box){
-      const card = document.createElement("div"); card.className="card mt-2";
-      const h = document.createElement("div"); h.className="font-semibold"; h.textContent = isEN()? "Quick suggestions" : "Sugerencias rápidas";
-      const p = document.createElement("div"); p.className="small mt-2"; p.innerHTML = lines.map(l=>"• "+l).join("<br>");
-      card.append(h,p); box.prepend(card);
+  // Shake to lock
+  if(window.DeviceMotionEvent){
+    window.addEventListener("devicemotion", (e)=>{
+      if(!($("toggleShake")?.checked)) return;
+      const a=e.accelerationIncludingGravity; if(!a) return;
+      const s=Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z);
+      if(s>30){ const now=Date.now(); if(!window.__lastShake || now-window.__lastShake>1500){ window.__lastShake=now; lockToDecoy(); } }
+    });
+  }
+
+  function refreshUI(){
+    $("profileName").textContent=core.profile.name||"Anonymous";
+    $("homeName").textContent=core.profile.name||"Anonymous";
+    $("homeTrust").textContent=core.profile.trust||100;
+    $("displayNameInput").value=core.profile.name||"";
+    buildQuestions(); renderResources(); renderPlans(); updateScoresAndFeedback();
+  }
+
+  // Bottom bar HTML (kept here to ensure exists)
+  (function ensureBottomBar(){
+    if(document.getElementById("bottomNav")) return;
+    const wrap=document.createElement("div");
+    wrap.id="bottomNav"; wrap.className="bottom-bar";
+    wrap.innerHTML=`
+      <button id="bHome" class="bottom-btn active" aria-label="Home"><div class="bottom-ico">🏠</div><div>Home</div></button>
+      <button id="bCheck" class="bottom-btn" aria-label="Check-In"><div class="bottom-ico">✅</div><div>Check-In</div></button>
+      <button id="bPlan"  class="bottom-btn" aria-label="Plan"><div class="bottom-ico">📝</div><div>Plan</div></button>
+      <button id="bRes"   class="bottom-btn" aria-label="Resources"><div class="bottom-ico">📚</div><div>Resources</div></button>
+      <button id="bProf"  class="bottom-btn" aria-label="Profile"><div class="bottom-ico">👤</div><div>Profile</div></button>`;
+    document.body.appendChild(wrap);
+    $("bHome").onclick=()=>setTab('home'); $("bCheck").onclick=()=>setTab('checkin'); $("bPlan").onclick=()=>setTab('plan'); $("bRes").onclick=()=>setTab('resources'); $("bProf").onclick=()=>setTab('profile');
+  })();
+
+  // Theme toggle via long-press version pill
+  (function themeInit(){
+    const pill=$("versionPill"); const on=localStorage.getItem(LS.theme)==="1"; if(on) document.body.classList.add("theme-dim");
+    let t; function togg(){ const now=document.body.classList.toggle("theme-dim"); localStorage.setItem(LS.theme, now?"1":"0"); }
+    if(pill){
+      pill.addEventListener("mousedown", ()=>{ t=setTimeout(togg,900); });
+      ["mouseup","mouseleave"].forEach(ev=> pill.addEventListener(ev, ()=> clearTimeout(t)));
+      pill.addEventListener("touchstart", ()=>{ t=setTimeout(togg,900); }, {passive:true});
+      pill.addEventListener("touchend", ()=> clearTimeout(t));
+      pill.addEventListener("touchcancel", ()=> clearTimeout(t));
     }
-  };
+  })();
 
-  /* ---------- 5) OVERLAY FAILSAFE + HASH UNLOCK + WIDER LONG-PRESS ---------- */
-  function killDisclaimer(){
-    const el=document.getElementById('firstRunDisc');
-    if(el){ try{ el.classList.add('hidden-soft'); el.style.display='none'; el.remove(); }catch{} }
-    document.body.style.overflow='auto';
-  }
-  // bind close on accept/decline
-  const acc=document.getElementById('acceptDisclaimer');
-  const dec=document.getElementById('declineDisclaimer');
-  if(acc) acc.onclick = ()=>{ try{ localStorage.setItem('timeout_disclaimer_accepted','1'); }catch{} killDisclaimer(); };
-  if(dec) dec.onclick = ()=>{ killDisclaimer(); const real=$('realApp'), decoy=$('decoyView'); if(real&&decoy){ real.classList.add('hidden-soft'); decoy.classList.remove('hidden-soft'); } };
-
-  // also close overlay on common actions
-  ['saveCheckIn','btnQuickGenerate','btnTemplates','btnNewPlan','talkBtn'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.addEventListener('click', killDisclaimer, {capture:true});
-  });
-
-  // hash unlock: /#unlock opens PIN right away
-  function hashUnlock(){
-    if(location.hash === '#unlock'){
-      const modal = document.getElementById('pinModal');
-      if(modal) modal.classList.remove('hidden-soft');
-      const inp = document.getElementById('pinInput'); if(inp) setTimeout(()=>inp.focus(),50);
-    }
-  }
-  window.addEventListener('hashchange', hashUnlock); hashUnlock();
-
-  // widen long-press to whole decoy card
-  function addLongPress(el, action){
-    if(!el) return; let t;
-    const start=()=>{ t=setTimeout(action,800); }, stop=()=>clearTimeout(t);
-    el.addEventListener('mousedown',start); el.addEventListener('mouseup',stop); el.addEventListener('mouseleave',stop);
-    el.addEventListener('touchstart',start,{passive:true}); el.addEventListener('touchend',stop); el.addEventListener('touchcancel',stop);
-  }
-  const decoy = document.getElementById('decoyView');
-  addLongPress(decoy, ()=>{
-    const modal = document.getElementById('pinModal');
-    if(modal) modal.classList.remove('hidden-soft');
-    const inp = document.getElementById('pinInput'); if(inp) setTimeout(()=>inp.focus(),50);
-  });
-
-  // helper $
-  function $(id){ return document.getElementById(id); }
-})();
-</script>
+  // Boot
+  (function boot(){
+    try{ core.profile = JSON.parse(localStorage.getItem(LS.profile)) || core.profile; }catch{}
+    try{ core.answers = JSON.parse(localStorage.getItem(LS.answers)) || core.answers; }catch{}
+    try{ core.resources = JSON.parse(localStorage.getItem(LS.resources)) || core.resources; }catch{}
+    try{ core.plans = JSON.parse(localStorage.getItem(LS.plans)) || core.plans; }catch{}
+    lang = localStorage.getItem(LS.lang)||lang; setLangText();
+    const meta = JSON.parse(localStorage.getItem(LS.meta)||"{}"); if(meta.skin) setSkin(meta.skin);
+  })();
+  </script>
 </body>
 </html>
