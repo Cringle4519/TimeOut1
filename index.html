@@ -1227,6 +1227,131 @@
   // Trigger a clean rebuild once so fixes apply now
   setTimeout(()=>{ window.buildQuestions && window.buildQuestions(); window.renderPlans && window.renderPlans(); }, 80);
 })();
+</script><!-- PATCH: YES/NO toggle + dedup + Ask chips + Resource seeding -->
+<style>
+  /* Highlight selected YES/NO buttons */
+  .yn-btn.selected {
+    background:#2563eb !important; /* blue */
+    color:#fff !important;
+  }
+  /* Ask chip */
+  .ask-chip{ margin-left:8px; padding:.3rem .6rem; border-radius:999px; font-weight:600; }
+  /* Hide floating Ask button on small phones */
+  @media(max-width:420px){
+    #askFab{display:none!important;}
+  }
+</style>
+<script>
+(function(){
+  if(window.__timeout_fullPatch) return;
+  window.__timeout_fullPatch = true;
+  const $=id=>document.getElementById(id);
+
+  /* 1) YES/NO toggle highlight */
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('.yn-btn'); if(!b) return;
+    const qid=b.dataset.q; if(!qid) return;
+    document.querySelectorAll(`.yn-btn[data-q="${qid}"]`).forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+  });
+
+  /* 2) Deduplication for Quick Plan + Questions */
+  const origRenderPlans = window.renderPlans;
+  if(typeof origRenderPlans==='function' && !origRenderPlans.__dedup){
+    window.renderPlans=function(){
+      const c=$('plansList'); if(c) c.innerHTML=''; 
+      origRenderPlans.apply(this,arguments);
+    };
+    window.renderPlans.__dedup=true;
+  }
+  const origBuildQ=window.buildQuestions;
+  if(typeof origBuildQ==='function' && !origBuildQ.__dedup){
+    window.buildQuestions=function(){
+      const c=$('checkQuestions'); if(c) c.innerHTML='';
+      origBuildQ.apply(this,arguments);
+    };
+    window.buildQuestions.__dedup=true;
+  }
+
+  /* 3) Ask modal + chips */
+  function ensureAskModal(){
+    if($('askModal')) return true;
+    const lang=(localStorage.getItem('timeout_lang')||'en');
+    const m=document.createElement('div'); m.id='askModal'; m.className='overlay hidden-soft';
+    m.innerHTML=`
+      <div class="panel card p-3" style="max-width:520px;width:92vw">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-semibold">${lang==='en'?'Ask Support':'Pregunta al Apoyo'}</div>
+          <button id="askClose" class="btn btn-ghost">✕</button>
+        </div>
+        <div class="small mb-2">${lang==='en'?'General guidance only, not therapy or emergency.':'Orientación general, no terapia ni emergencia.'}</div>
+        <div id="askOut" style="max-height:42vh;overflow:auto" class="space-y-2"></div>
+        <div class="mt-3 flex gap-2">
+          <input id="askInput" class="card flex-1" placeholder="${lang==='en'?'Say or type a question…':'Di o escribe una pregunta…'}" />
+          <button id="askMic" class="btn btn-ghost">🎤</button>
+          <button id="askSend" class="btn btn-primary">${lang==='en'?'Send':'Enviar'}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+    const askOut=$('askOut');
+    function bubble(who,text){
+      const el=document.createElement('div');el.className='card p-2';
+      el.style.background=who==='user'?'#e8f7ee':'#fff';
+      el.innerHTML=`<div class="small" style="opacity:.6">${who==='user'?(lang==='en'?'You':'Tú'):(lang==='en'?'Support':'Apoyo')}</div><div style="margin-top:6px">${text}</div>`;
+      askOut.appendChild(el);askOut.scrollTop=askOut.scrollHeight;
+    }
+    function reply(q){
+      const es=lang==='es';const a=window.core?.answers||{};const s=(q||'').toLowerCase();
+      if(/safe|segur/.test(s)) return a.q1==='no' ? (es?"Ve a un lugar público y contacta a alguien de confianza.":"Go to a public place and contact a trusted person.") : (es?"Mantén tu plan y contactos listos.":"Keep your plan and contacts ready.");
+      if(/phone|tel[eé]fono|privac/.test(s)) return a.q4==='yes' ? (es?"Evita contenido sensible; usa borrado rápido.":"Avoid sensitive content; use quick-wipe.") : (es?"Revisa accesos y bloqueo.":"Review access and screen lock.");
+      if(/threat|amenaz/.test(s)) return a.q2==='yes' ? (es?"Registra fecha/hora en privado.":"Record date/time privately.") : (es?"Monitorea y actualiza tu plan.":"Monitor and update your plan.");
+      if(/help|ayuda|hotline|línea/.test(s)) return es?"Para apoyo confidencial, ve a Recursos; si hay peligro, llama a emergencias.":"For confidential help, open Resources; if in danger, call emergency.";
+      return es?"Gracias por compartir. Un paso pequeño: revisa tu plan o agrega un contacto de confianza.":"Thanks for sharing. A small step: review your plan or add a trusted contact.";
+    }
+    function send(){const q=$('askInput').value.trim();if(!q) return;bubble('user',q);$('askInput').value='';setTimeout(()=>bubble('bot',reply(q)),400);}
+    $('askSend').onclick=send;
+    $('askInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
+    $('askClose').onclick=()=>{$('askModal').classList.add('hidden-soft');document.body.style.overflow='auto';};
+    $('askMic').onclick=()=>{try{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR) throw 0;
+      const rec=new SR();rec.lang=(lang==='es'?'es-ES':'en-US');
+      rec.onresult=e=>{const t=e.results[0][0].transcript;$('askInput').value=t;send();};
+      rec.start();
+    }catch{alert(lang==='en'?'Voice not supported here.':'Voz no soportada.');}};
+    return true;
+  }
+  function openAsk(){ensureAskModal();const m=$('askModal');if(m){m.classList.remove('hidden-soft');document.body.style.overflow='hidden';$('askInput')?.focus();}}
+  function injectAskChip(titleId,chipId){
+    const titleEl=$(titleId);if(!titleEl||$(chipId)) return;
+    const chip=document.createElement('button');
+    chip.id=chipId;chip.className='btn btn-ghost ask-chip';chip.textContent='🎙️ Ask';
+    chip.onclick=openAsk;(titleEl.parentElement||titleEl).appendChild(chip);
+  }
+  injectAskChip('checkTitle','askChipCheck');
+  injectAskChip('planTitle','askChipPlan');
+
+  /* 4) Seed Resources tab if empty */
+  try {
+    const key='timeout_resources';
+    let arr=[]; try{arr=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){arr=[];}
+    if(!Array.isArray(arr)||arr.length===0){
+      arr=[
+        { title:"National Domestic Violence Hotline (US)", desc:"24/7 confidential help — call or chat", url:"https://www.thehotline.org/ 1-800-799-7233" },
+        { title:"RAINN Sexual Assault Hotline (US)", desc:"24/7 — phone + online chat", url:"https://www.rainn.org/ 1-800-656-4673" },
+        { title:"Childhelp National Child Abuse Hotline (US)", desc:"24/7 — children & adults", url:"https://www.childhelp.org/ 1-800-422-4453" },
+        { title:"StrongHearts Native Helpline (US)", desc:"DV/SA support for Native communities", url:"https://strongheartshelpline.org/ 1-844-762-8483" },
+        { title:"love is respect (US, teens/young adults)", desc:"Dating abuse support — call/text/chat", url:"https://www.loveisrespect.org/ 1-866-331-9474" },
+        { title:"National Deaf DV Hotline (US)", desc:"Deaf/Hard of Hearing support (ASL)", url:"https://thedeafhotline.org/ 1-855-812-1001" },
+        { title:"211 — Local Social Services Finder (US/Canada)", desc:"Housing, legal, financial, counseling", url:"https://www.211.org/" },
+        { title:"SAMHSA National Helpline (US)", desc:"Mental health & substance use support", url:"https://www.samhsa.gov/find-help/national-helpline 1-800-662-4357" },
+        { title:"Emergency (If in immediate danger)", desc:"Call your local emergency number", url:"911" }
+      ];
+      localStorage.setItem(key, JSON.stringify(arr));
+    }
+    if(window.core){window.core.resources=arr;}
+    if(typeof window.renderResources==='function') window.renderResources();
+  } catch(e){ console.error('Resource seeding failed',e); }
+
+})();
 </script>
 </body>
 </html>
