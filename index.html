@@ -8,13 +8,13 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root{
-    --brand:#2563eb;  /* default blue */
+    --brand:#2563eb;
     --brand-ink:#ffffff;
-    --ink:#1f2937;    /* slate-800 */
-    --muted:#6b7280;  /* slate-500 */
-    --paper:#fafaf9;  /* stone-50 */
-    --card:#ffffff;   /* white */
-    --edge:#e5e7eb;   /* gray-200 */
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --paper:#fafaf9;
+    --card:#ffffff;
+    --edge:#e5e7eb;
   }
   html,body{background:var(--paper); color:var(--ink);}
   .btn{ padding:.55rem .8rem; border:1px solid var(--edge); border-radius:.8rem; background:var(--card); font-size:.95rem; transition:transform .05s ease; }
@@ -25,38 +25,34 @@
   .card{ background:var(--card); border:1px solid var(--edge); border-radius:1rem; box-shadow:0 1px 2px rgba(0,0,0,.04); }
   .hidden-soft{ display:none !important; }
   .panel-scroll{ max-height:calc(100vh - 160px); overflow:auto; -webkit-overflow-scrolling:touch; }
-  .yn-btn.selected{ background:var(--brand) !important; color:var(--brand-ink) !important; border-color:var(--brand) !important; }
+  .yn-btn.selected{ background:var(--brand)!important; color:var(--brand-ink)!important; border-color:var(--brand)!important; }
   header .btn { min-width:44px; min-height:44px; }
   #hdrClock,#hdrWeather{ display:inline-flex; align-items:center; max-width:44vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .ask-chip{ margin-left:.5rem; padding:.35rem .6rem; border-radius:999px; font-weight:600; }
   .demo-qs button{ display:block; width:100%; text-align:left; margin:.3rem 0; padding:.45rem .6rem; border-radius:.5rem; background:#f3f4f6; }
   .kbd{ font:600 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas; background:#f3f4f6; border:1px solid #e5e7eb; padding:.1rem .35rem; border-radius:.4rem; }
-  *:focus{ outline:none; box-shadow:none; }
-  a,button{ -webkit-tap-highlight-color:transparent; }
   footer.small{ font-size:.72rem; color:#9ca3af; }
 </style>
 </head>
 <body>
-  <!-- Header -->
+  <!-- HEADER -->
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200">
     <div class="max-w-md mx-auto flex items-center justify-between px-3 py-2">
       <div class="flex items-center gap-2">
-        <button id="langToggle" class="btn btn-ghost" aria-label="Language">EN/ES</button>
+        <button id="langToggle" class="btn btn-ghost">EN/ES</button>
         <div id="hdrClock" class="text-sm font-medium">--:--</div>
       </div>
       <h1 id="appTitle" class="text-lg font-semibold select-none">TimeOut</h1>
       <div class="flex items-center gap-2">
         <div id="hdrWeather" class="text-sm">—</div>
-        <!-- Shown only when unlocked -->
-        <button id="btnQuickExit" class="btn btn-ghost hidden-soft" title="Quick Exit">Exit</button>
-        <button id="btnPanic" class="btn btn-ghost hidden-soft" title="Clear all & lock">Clear&Lock</button>
+        <button id="btnBack" class="btn btn-ghost hidden-soft">Back</button>
+        <button id="btnQuickExit" class="btn btn-ghost hidden-soft">Exit</button>
+        <button id="btnPanic" class="btn btn-ghost hidden-soft">Clear&Lock</button>
       </div>
     </div>
   </header>
 
-  <!-- Decoy View -->
+  <!-- DECOY VIEW -->
   <main id="decoyView" class="max-w-md mx-auto px-3 pt-4 pb-24">
-    <!-- Stopwatch -->
     <section class="card p-4 mb-3">
       <div class="flex items-center justify-between">
         <h2 class="text-base font-semibold">Timer</h2>
@@ -69,29 +65,24 @@
         <button id="decoyReset" class="btn">Reset</button>
       </div>
     </section>
-
-    <!-- Calculator -->
     <section class="card p-4 mb-3">
       <h2 class="text-base font-semibold mb-2">Calculator</h2>
       <input id="calcInput" class="w-full border rounded-lg px-3 py-2 mb-2" placeholder="e.g., 12+3*4" inputmode="numeric">
       <button id="calcEval" class="btn">=</button>
       <span id="calcOut" class="ml-3 font-mono"></span>
     </section>
-
-    <!-- Notes -->
     <section class="card p-4 mb-3">
       <h2 class="text-base font-semibold mb-2">Notes</h2>
       <textarea id="decoyNotes" class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="Quick notes…"></textarea>
     </section>
-
     <footer class="max-w-md mx-auto text-center mt-4">
       <div class="small">v1.3.5</div>
     </footer>
   </main>
 
-  <!-- Real App -->
+  <!-- REAL APP -->
   <main id="appView" class="max-w-md mx-auto px-3 pt-4 pb-28 hidden-soft">
-    <!-- Tabs: Home -->
+    <!-- Home -->
     <section id="tab-home" class="panel-scroll">
       <div class="card p-4 mb-3">
         <div class="flex items-center justify-between">
@@ -123,12 +114,12 @@
       </div>
     </section>
 
-    <!-- Tabs: Check-In -->
+    <!-- Check-In -->
     <section id="tab-checkin" class="panel-scroll hidden-soft">
       <div class="card p-4 mb-3">
         <div class="flex items-center">
           <h2 id="checkTitle" class="text-lg font-semibold">Check-In</h2>
-          <button class="btn btn-ghost ask-chip" id="askChipCheck" title="Ask support">🎙️ Ask</button>
+          <button class="btn btn-ghost" id="askChipCheck" title="Ask support">🎙️ Ask</button>
         </div>
         <p class="text-sm text-gray-600 mb-2">
           Answer 8 quick questions. Buttons highlight. Risk% updates live.
@@ -142,12 +133,12 @@
       </div>
     </section>
 
-    <!-- Tabs: Safety Plan -->
+    <!-- Plan -->
     <section id="tab-plan" class="panel-scroll hidden-soft">
       <div class="card p-4 mb-3">
         <div class="flex items-center">
           <h2 id="planTitle" class="text-lg font-semibold">Safety Plan</h2>
-          <button class="btn btn-ghost ask-chip" id="askChipPlan" title="Ask support">🎙️ Ask</button>
+          <button class="btn btn-ghost" id="askChipPlan" title="Ask support">🎙️ Ask</button>
         </div>
         <div class="mt-2 flex gap-2 flex-wrap">
           <button id="btnNewPlan" class="btn">New Plan</button>
@@ -167,7 +158,7 @@
       </div>
     </section>
 
-    <!-- Tabs: Resources -->
+    <!-- Resources -->
     <section id="tab-resources" class="panel-scroll hidden-soft">
       <div class="card p-4 mb-3">
         <h2 id="resTitle" class="text-lg font-semibold">Resources</h2>
@@ -181,7 +172,7 @@
       </div>
     </section>
 
-    <!-- Tabs: Profile -->
+    <!-- Profile -->
     <section id="tab-profile" class="panel-scroll hidden-soft">
       <div class="card p-4 mb-3">
         <h2 class="text-lg font-semibold">Profile</h2>
@@ -211,14 +202,14 @@
     </section>
   </main>
 
-  <!-- Bottom Tabs (hidden on decoy) -->
+  <!-- Bottom Tabs -->
   <nav id="bottomNav" class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 hidden-soft">
     <div class="max-w-md mx-auto grid grid-cols-5 text-sm">
-      <button onclick="setTab('home')" class="py-2 flex flex-col items-center"><span>🏠</span><span>Home</span></button>
-      <button onclick="setTab('checkin')" class="py-2 flex flex-col items-center"><span>✅</span><span>Check-In</span></button>
-      <button onclick="setTab('plan')" class="py-2 flex flex-col items-center"><span>🧭</span><span>Plan</span></button>
-      <button onclick="setTab('resources')" class="py-2 flex flex-col items-center"><span>📚</span><span>Resources</span></button>
-      <button onclick="setTab('profile')" class="py-2 flex flex-col items-center"><span>👤</span><span>Profile</span></button>
+      <button onclick="setTab('home')" class="py-2 flex flex-col items-center"><span>🏠</span><span id="navHome">Home</span></button>
+      <button onclick="setTab('checkin')" class="py-2 flex flex-col items-center"><span>✅</span><span id="navCheck">Check-In</span></button>
+      <button onclick="setTab('plan')" class="py-2 flex flex-col items-center"><span>🧭</span><span id="navPlan">Plan</span></button>
+      <button onclick="setTab('resources')" class="py-2 flex flex-col items-center"><span>📚</span><span id="navRes">Resources</span></button>
+      <button onclick="setTab('profile')" class="py-2 flex flex-col items-center"><span>👤</span><span id="navProf">Profile</span></button>
     </div>
   </nav>
 
@@ -239,7 +230,6 @@
 
   <!-- Ask Modal host -->
   <div id="askModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden-soft items-center justify-center"></div>
-
   <!-- Floating Ask -->
   <button id="askFab" class="btn btn-primary hidden-soft" style="position:fixed;right:16px;bottom:84px;z-index:55">🎙️ Ask</button>
 
@@ -286,27 +276,36 @@ $('themePick').addEventListener('change', e=>{ core.theme=e.target.value; saveLo
 $('langToggle').onclick = ()=>{
   core.lang = core.lang === 'en' ? 'es' : 'en';
   saveLocal();
-  applyLang();
+  applyAll(); // rebuild labels/questions/resources/ask modal
+  const askOpen = !$('askModal').classList.contains('hidden-soft');
+  if (askOpen) { $('askModal').dataset.ready=''; ensureAskModal(); }
 };
 function T(en, es){ return core.lang==='es'? es: en; }
 function applyLang(){
   $('langToggle').textContent = core.lang==='es'?'ES/EN':'EN/ES';
   $('btnQuickExit').textContent = T('Exit','Salir');
   $('btnPanic').textContent = T('Clear&Lock','Borrar y Bloquear');
+  $('btnBack').textContent = T('Back','Atrás');
   $('homeTitle').textContent = T('Welcome','Bienvenido/a');
   $('homeHello').textContent = T(`Hi, ${core.name}.`, `Hola, ${core.name}.`);
   $('resTitle').textContent = T('Resources','Recursos');
   $('checkTitle').textContent = T('Check-In','Autoevaluación');
   $('planTitle').textContent = T('Safety Plan','Plan de Seguridad');
-
-  // Demo questions text
+  $('navHome').textContent = T('Home','Inicio');
+  $('navCheck').textContent = T('Check-In','Autoeval.');
+  $('navPlan').textContent = T('Plan','Plan');
+  $('navRes').textContent = T('Resources','Recursos');
+  $('navProf').textContent = T('Profile','Perfil');
   const dqs = document.querySelectorAll('#demoQs .demo-qs button');
   if(dqs[0]) dqs[0].textContent = T('Am I safe if I leave now?','¿Estoy seguro/a si me voy ahora?');
   if(dqs[1]) dqs[1].textContent = T('Where can I get help tonight?','¿Dónde puedo obtener ayuda esta noche?');
   if(dqs[2]) dqs[2].textContent = T('What should I put in my go-bag?','¿Qué debo poner en mi bolsa de emergencia?');
+  // Buttons that can be relabeled quickly
+  document.querySelector('#btnLoadDemo')?.setAttribute('aria-label', T('Load Demo Answers','Cargar respuestas de demo'));
+  document.querySelector('#btnSaveCheckin')?.setAttribute('aria-label', T('Save Check-In','Guardar autoevaluación'));
 }
 
-/* ===================== HEADER: CLOCK & WEATHER ===================== */
+/* ===================== CLOCK & WEATHER ===================== */
 function tickClock(){
   const d = new Date();
   const h = d.getHours().toString().padStart(2,'0');
@@ -314,25 +313,20 @@ function tickClock(){
   $('hdrClock').textContent = `${h}:${m}`;
 }
 setInterval(tickClock, 1000); tickClock();
-// lightweight weather placeholder (no external API)
-(function setWeather(){
-  $('hdrWeather').textContent = T('⛅','⛅');
-})();
+(function setWeather(){ $('hdrWeather').textContent = '⛅'; })();
 
-/* ===================== DECOY: STOPWATCH / CALC / NOTES ===================== */
+/* ===================== DECOY: STOPWATCH/CALC/NOTES ===================== */
 let swInterval=null, swSeconds=25*60;
 function renderStopwatch(){ const mm=Math.floor(swSeconds/60).toString().padStart(2,'0'); const ss=(swSeconds%60).toString().padStart(2,'0'); $('decoyTimerDisplay').textContent=`${mm}:${ss}`;}
 $('decoyStart').onclick=()=>{ if(swInterval) return; swInterval=setInterval(()=>{ if(swSeconds>0){ swSeconds--; renderStopwatch(); }},1000); };
 $('decoyPause').onclick=()=>{ clearInterval(swInterval); swInterval=null; };
 $('decoyReset').onclick=()=>{ swSeconds=25*60; renderStopwatch(); };
 renderStopwatch();
-// calculator
 $('calcEval').onclick=()=>{ try{ const v=eval(($('calcInput').value||'').replace(/[^0-9+\-*/(). ]/g,'')); $('calcOut').textContent = isFinite(v)? v: '—'; }catch{ $('calcOut').textContent='—'; } };
-// notes
 $('decoyNotes').value = localStorage.getItem('timeout_decoy_notes') || '';
 $('decoyNotes').addEventListener('input', e=> localStorage.setItem('timeout_decoy_notes', e.target.value));
 
-/* ===================== UNLOCK FLOW (LONG PRESS + PIN) ===================== */
+/* ===================== UNLOCK (LONG PRESS + PIN) ===================== */
 let lpTimer=null;
 function bindLongPress(el){
   const start=()=>{ lpTimer=setTimeout(()=> openPinModal(), 800); };
@@ -342,7 +336,6 @@ function bindLongPress(el){
 }
 bindLongPress($('appTitle'));
 bindLongPress($('decoyTimerDisplay'));
-
 function openPinModal(){ $('pinModal').classList.remove('hidden-soft'); $('pinInput').value=''; $('pinInput').focus(); }
 function closePinModal(){ $('pinModal').classList.add('hidden-soft'); }
 $('pinClose').onclick=closePinModal; $('pinCancel').onclick=closePinModal;
@@ -361,6 +354,7 @@ function showRealApp(){
   $('bottomNav').classList.remove('hidden-soft');
   $('btnQuickExit').classList.remove('hidden-soft');
   $('btnPanic').classList.remove('hidden-soft');
+  $('btnBack').classList.remove('hidden-soft');
   $('askFab').classList.remove('hidden-soft');
   applyLang();
 }
@@ -369,13 +363,23 @@ function lockToDecoy(){
   $('bottomNav').classList.add('hidden-soft');
   $('btnQuickExit').classList.add('hidden-soft');
   $('btnPanic').classList.add('hidden-soft');
+  $('btnBack').classList.add('hidden-soft');
   $('askFab').classList.add('hidden-soft');
   $('decoyView').classList.remove('hidden-soft');
   closeAsk();
 }
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) lockToDecoy(); });
 $('btnQuickExit').onclick=()=>{ location.href='https://www.google.com/'; };
-$('btnPanic').onclick=()=>{ localStorage.removeItem('timeout_profile_name'); localStorage.removeItem('timeout_answers'); localStorage.removeItem('timeout_resources'); localStorage.removeItem('timeout_plans'); localStorage.removeItem('timeout_theme'); core.name='Anonymous'; core.answers={}; core.resources=[]; core.plans=[]; core.theme='blue'; saveLocal(); applyTheme(); lockToDecoy(); };
+$('btnPanic').onclick=()=>{ 
+  localStorage.removeItem('timeout_profile_name'); 
+  localStorage.removeItem('timeout_answers'); 
+  localStorage.removeItem('timeout_resources'); 
+  localStorage.removeItem('timeout_plans'); 
+  localStorage.removeItem('timeout_theme');
+  core.name='Anonymous'; core.answers={}; core.resources=[]; core.plans=[]; core.theme='blue';
+  saveLocal(); applyTheme(); lockToDecoy(); 
+};
+$('btnBack').onclick=()=>{ setTab('home'); };
 
 /* ===================== TABS ===================== */
 function setTab(name){
@@ -432,7 +436,6 @@ function buildQuestions(){
   getQuestions().forEach((q,i)=>{ box.insertAdjacentHTML('beforeend', qRow(i,q)); });
 }
 function computeRisk(){
-  // risk points: q1 'no' adds 1; q2,q3,q4,q5,q6,q7 'yes' add 1 each. (max 7)
   let risk = 0; const a = core.answers;
   if(a.q1==='no') risk += 1;
   ['q2','q3','q4','q5','q6','q7'].forEach(k=>{ if(a[k]==='yes') risk += 1; });
@@ -453,7 +456,6 @@ function updateScoresAndFeedback(){
     fb.insertAdjacentHTML('beforeend', `<div class="card p-3 text-sm">${T('Low risk reported — stay prepared and review your plan weekly.','Riesgo bajo — mantente preparado/a y revisa tu plan semanalmente.')}</div>`);
   }
 }
-// YES/NO buttons (highlight + save + recompute)
 document.addEventListener('click', (e)=>{
   const b = e.target.closest('.yn-btn'); if(!b) return;
   const qid = b.dataset.q; const val=b.dataset.v; if(!qid||!val) return;
@@ -481,7 +483,7 @@ function renderPlans(){
       <div class="card p-3">
         <div class="flex items-center justify-between">
           <div class="font-semibold">${p.title||T('Untitled','Sin título')}</div>
-          <button data-i="${idx}" class="btn btn-ghost text-rose-600 delPlan">Delete</button>
+          <button data-i="${idx}" class="btn btn-ghost text-rose-600 delPlan">${T('Delete','Eliminar')}</button>
         </div>
         ${steps? `<ul class="mt-2 text-sm">${steps}</ul>`:''}
       </div>`;
@@ -498,22 +500,21 @@ $('btnNewPlan').onclick=()=>{
   core.plans.push({title:t, steps}); saveLocal(); renderPlans();
 };
 $('btnTemplates').onclick=()=>{
-  const template = { title:'Grab & Go Bag', steps:['ID & documents','Keys & cash','Medications','Change of clothes','Backup phone numbers'] };
+  const template = { title:T('Grab & Go Bag','Bolsa de emergencia'), steps:[T('ID & documents','Identificación y documentos'),T('Keys & cash','Llaves y efectivo'),T('Medications','Medicamentos'),T('Change of clothes','Cambio de ropa'),T('Backup phone numbers','Números de teléfono de respaldo')] };
   core.plans.push(template); saveLocal(); renderPlans();
 };
 let qpGuard=false;
 $('btnQuickGenerate').onclick=()=>{
   if(qpGuard) return; qpGuard=true; setTimeout(()=>qpGuard=false,600);
   const a=core.answers; const steps=[];
-  if(a.q4==='yes') steps.push('Minimize sensitive content on phone; enable screen lock.');
-  if(a.q2==='yes' || a.q3==='yes') steps.push('Document dates/times privately; tell a trusted person.');
-  if(a.q1==='no') steps.push('Move to public place; call a hotline or trusted person.');
-  if(a.q6==='yes') steps.push('Set meeting point and alternate caregiver for children.');
-  if(steps.length===0) steps.push('Share location with a trusted person; review exits and transport.');
-  core.plans.push({title:'Quick Plan', steps}); saveLocal(); renderPlans(); toast(T('Quick plan created.','Plan rápido creado.'));
+  if(a.q4==='yes') steps.push(T('Minimize sensitive content on phone; enable screen lock.','Minimiza contenido sensible en el teléfono; activa el bloqueo de pantalla.'));
+  if(a.q2==='yes' || a.q3==='yes') steps.push(T('Document dates/times privately; tell a trusted person.','Documenta fechas/horas en privado; avisa a alguien de confianza.'));
+  if(a.q1==='no') steps.push(T('Move to public place; call a hotline or trusted person.','Muévete a un lugar público; llama a una línea de ayuda o a alguien de confianza.'));
+  if(a.q6==='yes') steps.push(T('Set meeting point and alternate caregiver for children.','Define punto de encuentro y cuidador alterno para los niños.'));
+  if(steps.length===0) steps.push(T('Share location with a trusted person; review exits and transport.','Comparte ubicación con alguien de confianza; revisa salidas y transporte.'));
+  core.plans.push({title:T('Quick Plan','Plan rápido'), steps}); saveLocal(); renderPlans(); toast(T('Quick plan created.','Plan rápido creado.'));
 };
-// demo question chips open Ask
-$('demoQs').addEventListener('click', e=>{
+document.getElementById('demoQs').addEventListener('click', e=>{
   const b=e.target.closest('button'); if(!b) return;
   openAsk(); setTimeout(()=>{ const i=$('askInput'); if(i){ i.value=b.textContent; i.focus(); }},250);
 });
@@ -547,9 +548,9 @@ function renderResources(){
           <div class="text-xs mt-1 break-all">${r.url}</div>
         </div>
         <div class="flex flex-col gap-2 shrink-0">
-          ${isTel? `<a class="btn" href="${r.url}">Call</a>` : `<button class="btn openRes" data-i="${i}">Open</button>`}
-          <button class="btn copyRes" data-i="${i}">Copy</button>
-          <button class="btn delRes text-rose-600" data-i="${i}">Delete</button>
+          ${isTel? `<a class="btn" href="${r.url}">${T('Call','Llamar')}</a>` : `<button class="btn openRes" data-i="${i}">${T('Open','Abrir')}</button>`}
+          <button class="btn copyRes" data-i="${i}">${T('Copy','Copiar')}</button>
+          <button class="btn delRes text-rose-600" data-i="${i}">${T('Delete','Eliminar')}</button>
         </div>
       </div>`;
     box.insertAdjacentHTML('beforeend', item);
@@ -566,7 +567,7 @@ $('btnAddResource').onclick=()=>{
   core.resources.push({title,desc,url}); saveLocal(); renderResources();
 };
 $('btnSeedLocal').onclick=()=>{
-  core.resources.push({title:"Local 211 — Services", desc:"Tap to open 211", url:"https://www.211.org/"}); saveLocal(); renderResources();
+  core.resources.push({title:T("Local 211 — Services","211 Local — Servicios"), desc:T("Tap to open 211","Pulsa para abrir 211"), url:"https://www.211.org/"}); saveLocal(); renderResources();
 };
 
 /* ===================== PROFILE ===================== */
@@ -649,7 +650,7 @@ function openAsk(){ ensureAskModal(); $('askModal').classList.remove('hidden-sof
 function closeAsk(){ $('askModal').classList.add('hidden-soft'); document.body.style.overflow='auto'; }
 $('askFab').onclick=openAsk; $('askChipCheck').onclick=openAsk; $('askChipPlan').onclick=openAsk;
 
-/* ===================== INIT ===================== */
+/* ===================== INIT & APPLY ===================== */
 function applyAll(){
   applyTheme();
   applyLang();
@@ -662,20 +663,20 @@ function init(){
   tickClock(); (function(){ $('hdrWeather').textContent = '⛅'; })();
   seedResourcesIfEmpty();
   if(!Array.isArray(core.plans) || core.plans.length===0){
-    core.plans=[{title:'Grab & Go Bag', steps:['ID & documents','Keys & cash','Medications','Change of clothes','Backup phone numbers']}];
+    core.plans=[{title:T('Grab & Go Bag','Bolsa de emergencia'), steps:[T('ID & documents','Identificación y documentos'),T('Keys & cash','Llaves y efectivo'),T('Medications','Medicamentos'),T('Change of clothes','Cambio de ropa'),T('Backup phone numbers','Números de teléfono de respaldo')]}];
     saveLocal();
   }
   applyAll();
 }
 init();
 
-/* ===================== VISIBILITY AUTO-LOCK ===================== */
+/* ===================== VISIBILITY AUTO-LOCK (dup safe) ===================== */
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) lockToDecoy(); });
 
-/* ===================== QUICK EXIT / PANIC (safety dup guards) ===================== */
+/* ===================== QUICK EXIT / PANIC (duplicate guards) ===================== */
 let qeGuard=false, pcGuard=false;
-$('btnQuickExit').onclick=()=>{ if(qeGuard) return; qeGuard=true; setTimeout(()=>qeGuard=false,500); location.href='https://www.google.com/'; };
-$('btnPanic').onclick=()=>{ if(pcGuard) return; pcGuard=true; setTimeout(()=>pcGuard=false,700);
+document.getElementById('btnQuickExit').onclick=()=>{ if(qeGuard) return; qeGuard=true; setTimeout(()=>qeGuard=false,500); location.href='https://www.google.com/'; };
+document.getElementById('btnPanic').onclick=()=>{ if(pcGuard) return; pcGuard=true; setTimeout(()=>pcGuard=false,700);
   localStorage.removeItem('timeout_profile_name'); 
   localStorage.removeItem('timeout_answers'); 
   localStorage.removeItem('timeout_resources'); 
