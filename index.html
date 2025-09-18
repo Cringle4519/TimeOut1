@@ -43,7 +43,7 @@
       </div>
       <h1 id="appTitle" class="text-lg font-semibold select-none">TimeOut</h1>
       <div class="flex items-center gap-2">
-        <div id="hdrWeather" class="text-sm">—</div>
+        <div id="hdrWeather" class="text-sm">⛅</div>
         <button id="btnBack" class="btn btn-ghost hidden-soft">Back</button>
         <button id="btnQuickExit" class="btn btn-ghost hidden-soft">Exit</button>
         <button id="btnPanic" class="btn btn-ghost hidden-soft">Clear&Lock</button>
@@ -105,12 +105,13 @@
           <button class="btn" onclick="setTab('plan')">Open Plan</button>
         </div>
       </div>
-      <div class="card p-4">
-        <h3 class="font-semibold mb-1">Important Safety Notice</h3>
-        <p class="text-sm text-gray-600">
+      <div id="safetyCard" class="card p-4">
+        <h3 class="font-semibold mb-1" id="safetyTitle">Important Safety Notice</h3>
+        <p class="text-sm text-gray-600" id="safetyText">
           This tool helps with planning and private check-ins. It is not emergency help or a guarantee of safety.
           If in danger, call local emergency services.
         </p>
+        <button id="btnAckSafety" class="btn btn-primary mt-3">I Understand</button>
       </div>
     </section>
 
@@ -300,9 +301,16 @@ function applyLang(){
   if(dqs[0]) dqs[0].textContent = T('Am I safe if I leave now?','¿Estoy seguro/a si me voy ahora?');
   if(dqs[1]) dqs[1].textContent = T('Where can I get help tonight?','¿Dónde puedo obtener ayuda esta noche?');
   if(dqs[2]) dqs[2].textContent = T('What should I put in my go-bag?','¿Qué debo poner en mi bolsa de emergencia?');
-  // Buttons that can be relabeled quickly
-  document.querySelector('#btnLoadDemo')?.setAttribute('aria-label', T('Load Demo Answers','Cargar respuestas de demo'));
-  document.querySelector('#btnSaveCheckin')?.setAttribute('aria-label', T('Save Check-In','Guardar autoevaluación'));
+  // Safety i18n
+  const sTitle = document.getElementById('safetyTitle');
+  const sText  = document.getElementById('safetyText');
+  const sBtn   = document.getElementById('btnAckSafety');
+  if (sTitle) sTitle.textContent = T('Important Safety Notice','Aviso importante de seguridad');
+  if (sText)  sText.textContent  = T(
+    'This tool helps with planning and private check-ins. It is not emergency help or a guarantee of safety. If in danger, call local emergency services.',
+    'Esta herramienta ayuda con la planificación y chequeos privados. No es ayuda de emergencia ni garantía de seguridad. En peligro, llama a emergencias locales.'
+  );
+  if (sBtn)   sBtn.textContent   = T('I Understand','Entiendo');
 }
 
 /* ===================== CLOCK & WEATHER ===================== */
@@ -379,7 +387,6 @@ $('btnPanic').onclick=()=>{
   core.name='Anonymous'; core.answers={}; core.resources=[]; core.plans=[]; core.theme='blue';
   saveLocal(); applyTheme(); lockToDecoy(); 
 };
-$('btnBack').onclick=()=>{ setTab('home'); };
 
 /* ===================== TABS ===================== */
 function setTab(name){
@@ -391,6 +398,19 @@ function setTab(name){
   if(name==='resources'){ renderResources(); }
 }
 window.setTab = setTab;
+
+/* ===================== SAFETY ACK (ONCE) ===================== */
+function applySafetyAckVisibility(){
+  const seen = localStorage.getItem('timeout_safety_ack') === '1';
+  const card = document.getElementById('safetyCard');
+  if (card) card.style.display = seen ? 'none' : '';
+}
+document.addEventListener('click', (e)=>{
+  if (e.target && e.target.id === 'btnAckSafety') {
+    localStorage.setItem('timeout_safety_ack','1');
+    applySafetyAckVisibility();
+  }
+});
 
 /* ===================== CHECK-IN ===================== */
 const QUESTIONS_EN = [
@@ -638,17 +658,32 @@ function ensureAskModal(){
     if(/threat|amenaz/.test(s)) return a.q2==='yes'? T('Record dates/times privately and tell a trusted person. Consider documenting safely off-device.','Registra fechas/horas en privado y cuéntaselo a alguien de confianza. Considera documentar fuera del teléfono.'): T('Monitor and update your plan if things change.','Monitorea y actualiza tu plan si algo cambia.');
     return T('Thanks for sharing. Small step: review your plan or add a trusted contact.','Gracias por compartir. Paso pequeño: revisa tu plan o agrega un contacto de confianza.');
   }
+  // Mic guard to avoid double-start on some devices
+  let _micBusy = false;
+  document.addEventListener('click', (e)=>{
+    if (e.target && e.target.id === 'askMic') _micBusy = false; // reset on mic tap
+  });
   function send(){ const i=$('askInput'); const q=i.value.trim(); if(!q) return; bubble('user',q); i.value=''; setTimeout(()=> bubble('bot', reply(q)), 300); }
   $('askSend').onclick=send; $('askInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); send(); } });
   $('askClose').onclick=closeAsk;
-  $('askMic').onclick=()=>{ try{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) throw 0;
-    const rec=new SR(); rec.lang=(core.lang==='es'?'es-ES':'en-US'); rec.onresult=e=>{ const t=e.results[0][0].transcript; $('askInput').value=t; send(); }; rec.start();
-  }catch{ alert(T('Voice not supported on this device.','Voz no soportada en este dispositivo.')); }};
+  $('askMic').onclick=()=>{ 
+    if (_micBusy) return; _micBusy = true;
+    try{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) throw 0;
+      const rec=new SR(); rec.lang=(core.lang==='es'?'es-ES':'en-US'); rec.onresult=e=>{ const t=e.results[0][0].transcript; $('askInput').value=t; send(); }; rec.start();
+    }catch{ alert(T('Voice not supported on this device.','Voz no soportada en este dispositivo.')); }
+  };
   return true;
 }
 function openAsk(){ ensureAskModal(); $('askModal').classList.remove('hidden-soft'); $('askInput')?.focus(); document.body.style.overflow='hidden'; }
 function closeAsk(){ $('askModal').classList.add('hidden-soft'); document.body.style.overflow='auto'; }
 $('askFab').onclick=openAsk; $('askChipCheck').onclick=openAsk; $('askChipPlan').onclick=openAsk;
+
+/* ===================== BACK BUTTON ===================== */
+$('btnBack').onclick=()=>{
+  closeAsk();          // close Ask modal if open
+  setTab('home');      // go to Home
+  window.scrollTo(0,0);
+};
 
 /* ===================== INIT & APPLY ===================== */
 function applyAll(){
@@ -658,6 +693,7 @@ function applyAll(){
   updateScoresAndFeedback();
   renderPlans();
   renderResources();
+  applySafetyAckVisibility();
 }
 function init(){
   tickClock(); (function(){ $('hdrWeather').textContent = '⛅'; })();
