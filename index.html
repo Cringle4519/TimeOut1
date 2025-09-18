@@ -1,726 +1,606 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>TimeOut</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Ccircle cx='48' cy='48' r='46' fill='%23fefce8' stroke='%23365b2c' stroke-width='4'/%3E%3Ctext x='50%25' y='56%25' text-anchor='middle' font-size='46' font-family='Arial' fill='%23365b2c'%3ET%3C/text%3E%3C/svg%3E" />
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
   :root{
-    --brand:#2563eb;
-    --brand-ink:#ffffff;
-    --ink:#1f2937;
-    --muted:#6b7280;
-    --paper:#fafaf9;
-    --card:#ffffff;
-    --edge:#e5e7eb;
+    --brand: #6b8e23;     /* olive accent */
+    --rose:  #e11d48;     /* rose accent */
+    --ink:   #1f2937;     /* text */
+    --muted: #6b7280;
+    --paper: #fdfcf7;     /* light cream */
+    --card:  #ffffff;
+    --edge:  #e5e7eb;
+    --ok:    #16a34a;
+    --warn:  #f59e0b;
+    --bad:   #dc2626;
   }
-  html,body{background:var(--paper); color:var(--ink);}
-  .btn{ padding:.55rem .8rem; border:1px solid var(--edge); border-radius:.8rem; background:var(--card); font-size:.95rem; transition:transform .05s ease; }
-  .btn:active{ transform:scale(.97); }
-  .btn-primary{ background:var(--brand); color:var(--brand-ink); border-color:var(--brand); }
-  .btn-ghost{ background:transparent; border-color:transparent; color:var(--muted); }
-  .btn-badge{ font-size:.8rem; padding:.25rem .5rem; border-radius:.5rem; border-color:#d1d5db; }
-  .card{ background:var(--card); border:1px solid var(--edge); border-radius:1rem; box-shadow:0 1px 2px rgba(0,0,0,.04); }
-  .hidden-soft{ display:none !important; }
-  .panel-scroll{ max-height:calc(100vh - 160px); overflow:auto; -webkit-overflow-scrolling:touch; }
-  .yn-btn.selected{ background:var(--brand)!important; color:var(--brand-ink)!important; border-color:var(--brand)!important; }
-  header .btn { min-width:44px; min-height:44px; }
-  #hdrClock,#hdrWeather{ display:inline-flex; align-items:center; max-width:44vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .demo-qs button{ display:block; width:100%; text-align:left; margin:.3rem 0; padding:.45rem .6rem; border-radius:.5rem; background:#f3f4f6; }
-  .kbd{ font:600 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas; background:#f3f4f6; border:1px solid #e5e7eb; padding:.1rem .35rem; border-radius:.4rem; }
-  footer.small{ font-size:.72rem; color:#9ca3af; }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif}
+  .app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+  header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--edge);z-index:20}
+  .bar{display:flex;align-items:center;gap:.5rem;padding:.75rem .75rem}
+  .title{margin:0;font-size:1rem;font-weight:700;letter-spacing:.2px}
+  .spacer{flex:1}
+  .btn{appearance:none;border:1px solid var(--edge);background:#fff;color:var(--ink);padding:.5rem .75rem;border-radius:.6rem;font-weight:600;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn-ghost{border-color:transparent;background:transparent}
+  .btn-danger{background:var(--bad);border-color:var(--bad);color:#fff}
+  .chip{font-size:.85rem;padding:.25rem .5rem;border-radius:999px;border:1px solid var(--edge);background:#fff}
+  .exit{font-size:.85rem}
+  .lang{font-size:.85rem}
+  main{flex:1;overflow:auto;padding:1rem}
+  .panel{display:none}
+  .panel.active{display:block}
+  .card{background:var(--card);border:1px solid var(--edge);border-radius:1rem;padding:1rem}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+  .stack{display:flex;flex-direction:column;gap:.75rem}
+  .nav{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--edge);display:flex}
+  .nav button{flex:1;padding:.75rem 0;font-weight:600;border:0;background:transparent;color:var(--ink)}
+  .nav .on{color:var(--brand)}
+  .meter{display:flex;gap:.5rem;align-items:center;font-size:.9rem}
+  .barline{flex:1;height:.5rem;background:#f3f4f6;border-radius:999px;overflow:hidden}
+  .barfill{height:100%;background:var(--brand);width:0%}
+  .muted{color:var(--muted)}
+  .yn{display:flex;gap:.5rem}
+  .yn .ynbtn{flex:1}
+  .selected{outline:2px solid var(--brand)}
+  .syn{background:#fff7f7;border:1px solid #fde2e2}
+  .good{background:#f0fdf4;border:1px solid #dcfce7}
+  .mid{background:#fffbeb;border:1px solid #fef3c7}
+  .bad{background:#fff1f2;border:1px solid #ffe4e6}
+  .hidden{display:none}
+  /* decoy timer */
+  .timer{font-variant-numeric:tabular-nums;letter-spacing:.5px;font-size:3rem;font-weight:800;text-align:center}
+  .sub{font-size:.85rem}
+  .row{display:flex;gap:.5rem;align-items:center;justify-content:center}
+  .pill{padding:.35rem .6rem;border:1px solid var(--edge);border-radius:999px;background:#fff}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:.85rem;border:1px solid var(--edge);padding:.1rem .35rem;border-radius:.4rem;background:#fff}
 </style>
 </head>
 <body>
-  <!-- HEADER -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-200">
-    <div class="max-w-md mx-auto flex items-center justify-between px-3 py-2">
-      <div class="flex items-center gap-2">
-        <button id="langToggle" class="btn btn-ghost">EN/ES</button>
-        <div id="hdrClock" class="text-sm font-medium">--:--</div>
-      </div>
-      <h1 id="appTitle" class="text-lg font-semibold select-none">TimeOut</h1>
-      <div class="flex items-center gap-2">
-        <div id="hdrWeather" class="text-sm">⛅</div>
-        <button id="btnBack" class="btn btn-ghost hidden-soft">Back</button>
-        <button id="btnQuickExit" class="btn btn-ghost hidden-soft">Exit</button>
-        <button id="btnPanic" class="btn btn-ghost hidden-soft">Clear&Lock</button>
-      </div>
+<div class="app" id="app">
+
+  <!-- Top bar: Back (in-app), Title, Lang, EXIT -->
+  <header>
+    <div class="bar">
+      <button id="btnBack" class="btn btn-ghost" title="Back">←</button>
+      <h1 class="title" id="appTitle">TimeOut</h1>
+      <div class="spacer"></div>
+      <select id="langSel" class="lang">
+        <option value="en">EN</option>
+        <option value="es">ES</option>
+      </select>
+      <button id="btnExit" class="btn btn-danger exit">EXIT</button>
     </div>
   </header>
 
-  <!-- DECOY VIEW -->
-  <main id="decoyView" class="max-w-md mx-auto px-3 pt-4 pb-24">
-    <section class="card p-4 mb-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-base font-semibold">Timer</h2>
-        <span class="text-xs text-gray-500">Long-press title or timer to unlock</span>
+  <main id="main">
+
+    <!-- HOME (decoy) -->
+    <section id="home" class="panel active">
+      <div class="stack">
+        <div class="card stack">
+          <div class="timer" id="clock">25:00</div>
+          <div class="row sub">
+            <span id="rounds" class="pill">Pomodoro • 1</span>
+            <span class="pill" id="statusPill">Focus</span>
+          </div>
+          <div class="row">
+            <button class="btn" id="btnStart">Start</button>
+            <button class="btn" id="btnPause">Pause</button>
+            <button class="btn" id="btnReset">Reset</button>
+          </div>
+          <div class="muted sub" id="hint">
+            Long-press the title to unlock. / Mantén presionado el título para desbloquear.
+          </div>
+        </div>
+
+        <!-- After unlock: summary card -->
+        <div id="homeUnlocked" class="card stack hidden">
+          <div class="meter">
+            <strong id="greet">Welcome</strong>
+            <div class="spacer"></div>
+            <span class="chip">v1.3.5</span>
+          </div>
+          <div class="meter">
+            <span id="riskLab">Risk</span>
+            <div class="barline"><div id="riskBar" class="barfill" style="background:var(--bad)"></div></div>
+            <strong id="riskNum">0%</strong>
+          </div>
+          <div class="meter">
+            <span id="trustLab">Trust</span>
+            <div class="barline"><div id="trustBar" class="barfill"></div></div>
+            <strong id="trustNum">100%</strong>
+          </div>
+          <div class="row">
+            <button class="btn btn-primary" onclick="nav('checkin')"
+              id="goCheck">Go to Check-In</button>
+            <button class="btn" onclick="nav('plan')" id="goPlan">Safety Plan</button>
+          </div>
+        </div>
       </div>
-      <div id="decoyTimerDisplay" class="text-5xl font-mono text-center my-3 select-none">25:00</div>
-      <div class="flex gap-2 justify-center">
-        <button id="decoyStart" class="btn">Start</button>
-        <button id="decoyPause" class="btn">Pause</button>
-        <button id="decoyReset" class="btn">Reset</button>
+    </section>
+
+    <!-- CHECK-IN -->
+    <section id="checkin" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <div class="row" style="justify-content:space-between">
+            <strong id="checkTitle">Check-In</strong>
+            <span class="chip" id="scoreChip">Risk 0% • Trust 100%</span>
+          </div>
+          <p class="muted" id="checkHint">
+            Answer each question. Buttons will highlight and feedback appears under each item.
+          </p>
+          <div id="qList" class="stack"></div>
+
+          <div id="synWrap" class="card syn hidden">
+            <div id="synBody" class="text"></div>
+            <div id="disc" class="muted" style="margin-top:.5rem;font-size:.85rem"></div>
+          </div>
+
+          <div class="row" style="justify-content:space-between">
+            <button class="btn" id="btnDemo">Load Demo Answers</button>
+            <button class="btn btn-primary" id="btnSave">Save Check-In</button>
+          </div>
+        </div>
       </div>
     </section>
-    <section class="card p-4 mb-3">
-      <h2 class="text-base font-semibold mb-2">Calculator</h2>
-      <input id="calcInput" class="w-full border rounded-lg px-3 py-2 mb-2" placeholder="e.g., 12+3*4" inputmode="numeric">
-      <button id="calcEval" class="btn">=</button>
-      <span id="calcOut" class="ml-3 font-mono"></span>
+
+    <!-- PLAN -->
+    <section id="plan" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <strong id="planTitle">Safety Plan</strong>
+          <div class="grid2">
+            <button class="btn" id="btnQuick">Quick Plan</button>
+            <button class="btn" id="btnTemplate">Template</button>
+          </div>
+          <textarea id="planNote" rows="6" class="card" placeholder="Plan notes…"
+            style="width:100%;"></textarea>
+          <div class="row" style="justify-content:space-between">
+            <button class="btn" id="btnPlanSave">Save Plan</button>
+            <button class="btn" id="btnPlanClear">Clear</button>
+          </div>
+        </div>
+      </div>
     </section>
-    <section class="card p-4 mb-3">
-      <h2 class="text-base font-semibold mb-2">Notes</h2>
-      <textarea id="decoyNotes" class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="Quick notes…"></textarea>
+
+    <!-- RESOURCES -->
+    <section id="resources" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <strong id="resTitle">Resources</strong>
+          <div id="resList" class="stack"></div>
+        </div>
+      </div>
     </section>
-    <footer class="max-w-md mx-auto text-center mt-4">
-      <div class="small">v1.3.5</div>
-    </footer>
+
+    <!-- PROFILE -->
+    <section id="profile" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <strong id="profTitle">Profile</strong>
+          <label>
+            <div class="muted" id="nameLab">Display name</div>
+            <input id="nameInput" class="card" style="width:100%;padding:.6rem" placeholder="Anonymous">
+          </label>
+          <label>
+            <div class="muted" id="pinLab">PIN (default 2580)</div>
+            <input id="pinInput" class="card" style="width:100%;padding:.6rem" placeholder="2580" inputmode="numeric" maxlength="8">
+          </label>
+          <div class="row" style="justify-content:space-between">
+            <button class="btn btn-primary" id="btnProfSave">Save Profile</button>
+            <button class="btn" id="btnWipe">Panic: Clear Data</button>
+          </div>
+          <div class="muted" style="font-size:.85rem">
+            Language / Idioma:
+            <span class="chip">EN/ES</span> — set via top-right selector.
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- REAL APP -->
-  <main id="appView" class="max-w-md mx-auto px-3 pt-4 pb-28 hidden-soft">
-    <!-- Home -->
-    <section id="tab-home" class="panel-scroll">
-      <div class="card p-4 mb-3">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold" id="homeTitle">Welcome</h2>
-          <span class="btn-badge" id="verBadge">v1.3.5</span>
-        </div>
-        <p class="text-sm text-gray-600 mb-3" id="homeHello">Hi, Anonymous.</p>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="card p-3">
-            <div class="text-sm text-gray-500">Risk</div>
-            <div id="riskPct" class="text-2xl font-mono">0%</div>
-          </div>
-          <div class="card p-3">
-            <div class="text-sm text-gray-500">Trust</div>
-            <div id="trustPct" class="text-2xl font-mono">100%</div>
-          </div>
-        </div>
-        <div class="mt-3 flex gap-2">
-          <button class="btn btn-primary" onclick="setTab('checkin')">Go to Check-In</button>
-          <button class="btn" onclick="setTab('plan')">Open Plan</button>
-        </div>
-      </div>
-      <div id="safetyCard" class="card p-4">
-        <h3 class="font-semibold mb-1" id="safetyTitle">Important Safety Notice</h3>
-        <p class="text-sm text-gray-600" id="safetyText">
-          This tool helps with planning and private check-ins. It is not emergency help or a guarantee of safety.
-          If in danger, call local emergency services.
-        </p>
-        <button id="btnAckSafety" class="btn btn-primary mt-3">I Understand</button>
-      </div>
-    </section>
-
-    <!-- Check-In -->
-    <section id="tab-checkin" class="panel-scroll hidden-soft">
-      <div class="card p-4 mb-3">
-        <div class="flex items-center">
-          <h2 id="checkTitle" class="text-lg font-semibold">Check-In</h2>
-          <button class="btn btn-ghost" id="askChipCheck" title="Ask support">🎙️ Ask</button>
-        </div>
-        <p class="text-sm text-gray-600 mb-2">
-          Answer 8 quick questions. Buttons highlight. Risk% updates live.
-        </p>
-        <div id="questions" class="space-y-2"></div>
-        <div id="checkFeedback" class="mt-3 space-y-2"></div>
-        <div class="mt-3 flex gap-2 flex-wrap">
-          <button id="btnLoadDemo" class="btn">Load Demo Answers</button>
-          <button id="btnSaveCheckin" class="btn btn-primary">Save Check-In</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Plan -->
-    <section id="tab-plan" class="panel-scroll hidden-soft">
-      <div class="card p-4 mb-3">
-        <div class="flex items-center">
-          <h2 id="planTitle" class="text-lg font-semibold">Safety Plan</h2>
-          <button class="btn btn-ghost" id="askChipPlan" title="Ask support">🎙️ Ask</button>
-        </div>
-        <div class="mt-2 flex gap-2 flex-wrap">
-          <button id="btnNewPlan" class="btn">New Plan</button>
-          <button id="btnTemplates" class="btn">Templates</button>
-          <button id="btnQuickGenerate" class="btn btn-primary">Quick Generate</button>
-        </div>
-        <div id="plansList" class="mt-3 space-y-2"></div>
-      </div>
-
-      <div id="demoQs" class="card p-4">
-        <div class="font-semibold mb-2">Example Questions</div>
-        <div class="demo-qs">
-          <button>Am I safe if I leave now?</button>
-          <button>Where can I get help tonight?</button>
-          <button>What should I put in my go-bag?</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Resources -->
-    <section id="tab-resources" class="panel-scroll hidden-soft">
-      <div class="card p-4 mb-3">
-        <h2 id="resTitle" class="text-lg font-semibold">Resources</h2>
-        <p class="text-sm text-gray-600 mb-2">Tap a resource to copy. Use “Call Hotline”.</p>
-        <div class="flex gap-2 mb-2 flex-wrap">
-          <button id="callHotlineBtn" class="btn">Call Hotline</button>
-          <button id="btnAddResource" class="btn">Add</button>
-          <button id="btnSeedLocal" class="btn">Add Local 211</button>
-        </div>
-        <div id="resList" class="space-y-2"></div>
-      </div>
-    </section>
-
-    <!-- Profile -->
-    <section id="tab-profile" class="panel-scroll hidden-soft">
-      <div class="card p-4 mb-3">
-        <h2 class="text-lg font-semibold">Profile</h2>
-        <label class="block text-sm mb-1">Display name</label>
-        <input id="profName" class="w-full border rounded-lg px-3 py-2 mb-3" placeholder="Anonymous">
-        <label class="block text-sm mb-1">Change PIN</label>
-        <div class="grid grid-cols-3 gap-2">
-          <input id="oldPin" class="border rounded-lg px-3 py-2" placeholder="Old" inputmode="numeric" maxlength="8">
-          <input id="newPin" class="border rounded-lg px-3 py-2" placeholder="New" inputmode="numeric" maxlength="8">
-          <input id="newPin2" class="border rounded-lg px-3 py-2" placeholder="Confirm" inputmode="numeric" maxlength="8">
-        </div>
-        <div class="mt-3 flex gap-2 flex-wrap">
-          <button id="btnSaveProfile" class="btn btn-primary">Save Profile</button>
-          <button id="btnExport" class="btn">Export JSON</button>
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-600">Theme:</span>
-            <select id="themePick" class="border rounded-lg px-2 py-2 text-sm">
-              <option value="blue">Blue</option>
-              <option value="teal">Teal</option>
-              <option value="rose">Rose</option>
-              <option value="amber">Amber</option>
-              <option value="violet">Violet</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Bottom Tabs -->
-  <nav id="bottomNav" class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-200 hidden-soft">
-    <div class="max-w-md mx-auto grid grid-cols-5 text-sm">
-      <button onclick="setTab('home')" class="py-2 flex flex-col items-center"><span>🏠</span><span id="navHome">Home</span></button>
-      <button onclick="setTab('checkin')" class="py-2 flex flex-col items-center"><span>✅</span><span id="navCheck">Check-In</span></button>
-      <button onclick="setTab('plan')" class="py-2 flex flex-col items-center"><span>🧭</span><span id="navPlan">Plan</span></button>
-      <button onclick="setTab('resources')" class="py-2 flex flex-col items-center"><span>📚</span><span id="navRes">Resources</span></button>
-      <button onclick="setTab('profile')" class="py-2 flex flex-col items-center"><span>👤</span><span id="navProf">Profile</span></button>
-    </div>
+  <!-- Bottom nav -->
+  <nav class="nav" id="nav">
+    <button id="tabHome" class="on" onclick="nav('home')">Home</button>
+    <button id="tabCheck" onclick="nav('checkin')">Check-In</button>
+    <button id="tabPlan" onclick="nav('plan')">Plan</button>
+    <button id="tabRes" onclick="nav('resources')">Resources</button>
+    <button id="tabProf" onclick="nav('profile')">Profile</button>
   </nav>
 
-  <!-- PIN Modal -->
-  <div id="pinModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden-soft items-center justify-center">
-    <div class="card p-4 w-[92vw] max-w-sm">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="font-semibold">Enter PIN</h3>
-        <button id="pinClose" class="btn btn-ghost">✕</button>
-      </div>
-      <input id="pinInput" class="w-full border rounded-lg px-3 py-2" inputmode="numeric" maxlength="8" placeholder="••••">
-      <div class="mt-3 flex gap-2">
-        <button id="pinOk" class="btn btn-primary">Unlock</button>
-        <button id="pinCancel" class="btn">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Ask Modal host -->
-  <div id="askModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden-soft items-center justify-center"></div>
-  <!-- Floating Ask -->
-  <button id="askFab" class="btn btn-primary hidden-soft" style="position:fixed;right:16px;bottom:84px;z-index:55">🎙️ Ask</button>
+</div>
 
 <script>
-/* ===================== CORE STATE ===================== */
-const core = {
-  lang: localStorage.getItem('timeout_lang') || 'en',
+/* ================ CORE STATE ================ */
+const S = {
   pin: localStorage.getItem('timeout_pin') || '2580',
-  name: localStorage.getItem('timeout_profile_name') || 'Anonymous',
+  name: localStorage.getItem('timeout_name') || 'Anonymous',
+  lang: localStorage.getItem('timeout_lang') || 'en',
+  unlocked: JSON.parse(localStorage.getItem('timeout_unlocked')||'false'),
   answers: JSON.parse(localStorage.getItem('timeout_answers')||'{}'),
-  resources: JSON.parse(localStorage.getItem('timeout_resources')||'[]'),
-  plans: JSON.parse(localStorage.getItem('timeout_plans')||'[]'),
-  theme: localStorage.getItem('timeout_theme') || 'blue',
-  risk: 0, trust: 100
+  plan: localStorage.getItem('timeout_plan') || '',
+  risk: 0, trust: 100,
+  stack: ['home'] // in-app back stack
 };
 const $ = id => document.getElementById(id);
-function saveLocal(){
-  localStorage.setItem('timeout_lang', core.lang);
-  localStorage.setItem('timeout_pin', core.pin);
-  localStorage.setItem('timeout_profile_name', core.name);
-  localStorage.setItem('timeout_answers', JSON.stringify(core.answers));
-  localStorage.setItem('timeout_resources', JSON.stringify(core.resources));
-  localStorage.setItem('timeout_plans', JSON.stringify(core.plans));
-  localStorage.setItem('timeout_theme', core.theme);
-}
-function toast(msg){ alert(msg); }
+const tr = (en,es)=> S.lang==='es'?es:en;
 
-/* ===================== THEME ===================== */
-function applyTheme(){
-  const map={
-    blue:{brand:'#2563eb',ink:'#ffffff'},
-    teal:{brand:'#0ea5a4',ink:'#002b2a'},
-    rose:{brand:'#e11d48',ink:'#ffffff'},
-    amber:{brand:'#f59e0b',ink:'#1f2937'},
-    violet:{brand:'#7c3aed',ink:'#ffffff'}
-  }[core.theme] || {brand:'#2563eb',ink:'#ffffff'};
-  document.documentElement.style.setProperty('--brand', map.brand);
-  document.documentElement.style.setProperty('--brand-ink', map.ink);
-  $('themePick').value = core.theme;
-}
-$('themePick').addEventListener('change', e=>{ core.theme=e.target.value; saveLocal(); applyTheme(); });
-
-/* ===================== LANGUAGE ===================== */
-$('langToggle').onclick = ()=>{
-  core.lang = core.lang === 'en' ? 'es' : 'en';
-  saveLocal();
-  applyAll(); // rebuild labels/questions/resources/ask modal
-  const askOpen = !$('askModal').classList.contains('hidden-soft');
-  if (askOpen) { $('askModal').dataset.ready=''; ensureAskModal(); }
-};
-function T(en, es){ return core.lang==='es'? es: en; }
-function applyLang(){
-  $('langToggle').textContent = core.lang==='es'?'ES/EN':'EN/ES';
-  $('btnQuickExit').textContent = T('Exit','Salir');
-  $('btnPanic').textContent = T('Clear&Lock','Borrar y Bloquear');
-  $('btnBack').textContent = T('Back','Atrás');
-  $('homeTitle').textContent = T('Welcome','Bienvenido/a');
-  $('homeHello').textContent = T(`Hi, ${core.name}.`, `Hola, ${core.name}.`);
-  $('resTitle').textContent = T('Resources','Recursos');
-  $('checkTitle').textContent = T('Check-In','Autoevaluación');
-  $('planTitle').textContent = T('Safety Plan','Plan de Seguridad');
-  $('navHome').textContent = T('Home','Inicio');
-  $('navCheck').textContent = T('Check-In','Autoeval.');
-  $('navPlan').textContent = T('Plan','Plan');
-  $('navRes').textContent = T('Resources','Recursos');
-  $('navProf').textContent = T('Profile','Perfil');
-  const dqs = document.querySelectorAll('#demoQs .demo-qs button');
-  if(dqs[0]) dqs[0].textContent = T('Am I safe if I leave now?','¿Estoy seguro/a si me voy ahora?');
-  if(dqs[1]) dqs[1].textContent = T('Where can I get help tonight?','¿Dónde puedo obtener ayuda esta noche?');
-  if(dqs[2]) dqs[2].textContent = T('What should I put in my go-bag?','¿Qué debo poner en mi bolsa de emergencia?');
-  // Safety i18n
-  const sTitle = document.getElementById('safetyTitle');
-  const sText  = document.getElementById('safetyText');
-  const sBtn   = document.getElementById('btnAckSafety');
-  if (sTitle) sTitle.textContent = T('Important Safety Notice','Aviso importante de seguridad');
-  if (sText)  sText.textContent  = T(
-    'This tool helps with planning and private check-ins. It is not emergency help or a guarantee of safety. If in danger, call local emergency services.',
-    'Esta herramienta ayuda con la planificación y chequeos privados. No es ayuda de emergencia ni garantía de seguridad. En peligro, llama a emergencias locales.'
-  );
-  if (sBtn)   sBtn.textContent   = T('I Understand','Entiendo');
-}
-
-/* ===================== CLOCK & WEATHER ===================== */
-function tickClock(){
-  const d = new Date();
-  const h = d.getHours().toString().padStart(2,'0');
-  const m = d.getMinutes().toString().padStart(2,'0');
-  $('hdrClock').textContent = `${h}:${m}`;
-}
-setInterval(tickClock, 1000); tickClock();
-(function setWeather(){ $('hdrWeather').textContent = '⛅'; })();
-
-/* ===================== DECOY: STOPWATCH/CALC/NOTES ===================== */
-let swInterval=null, swSeconds=25*60;
-function renderStopwatch(){ const mm=Math.floor(swSeconds/60).toString().padStart(2,'0'); const ss=(swSeconds%60).toString().padStart(2,'0'); $('decoyTimerDisplay').textContent=`${mm}:${ss}`;}
-$('decoyStart').onclick=()=>{ if(swInterval) return; swInterval=setInterval(()=>{ if(swSeconds>0){ swSeconds--; renderStopwatch(); }},1000); };
-$('decoyPause').onclick=()=>{ clearInterval(swInterval); swInterval=null; };
-$('decoyReset').onclick=()=>{ swSeconds=25*60; renderStopwatch(); };
-renderStopwatch();
-$('calcEval').onclick=()=>{ try{ const v=eval(($('calcInput').value||'').replace(/[^0-9+\-*/(). ]/g,'')); $('calcOut').textContent = isFinite(v)? v: '—'; }catch{ $('calcOut').textContent='—'; } };
-$('decoyNotes').value = localStorage.getItem('timeout_decoy_notes') || '';
-$('decoyNotes').addEventListener('input', e=> localStorage.setItem('timeout_decoy_notes', e.target.value));
-
-/* ===================== UNLOCK (LONG PRESS + PIN) ===================== */
-let lpTimer=null;
-function bindLongPress(el){
-  const start=()=>{ lpTimer=setTimeout(()=> openPinModal(), 800); };
-  const clear=()=>{ clearTimeout(lpTimer); };
-  el.addEventListener('mousedown',start); el.addEventListener('touchstart',start,{passive:true});
-  ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=> el.addEventListener(ev, clear));
-}
-bindLongPress($('appTitle'));
-bindLongPress($('decoyTimerDisplay'));
-function openPinModal(){ $('pinModal').classList.remove('hidden-soft'); $('pinInput').value=''; $('pinInput').focus(); }
-function closePinModal(){ $('pinModal').classList.add('hidden-soft'); }
-$('pinClose').onclick=closePinModal; $('pinCancel').onclick=closePinModal;
-$('pinOk').onclick=tryUnlock;
-$('pinInput').addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
-function tryUnlock(){
-  const v = $('pinInput').value.trim();
-  if(v===core.pin){ showRealApp(); closePinModal(); }
-  else { toast(T('Wrong PIN','PIN incorrecto')); }
-}
-
-/* ===================== LOCK/UNLOCK + SAFETY ===================== */
-function showRealApp(){
-  $('decoyView').classList.add('hidden-soft');
-  $('appView').classList.remove('hidden-soft');
-  $('bottomNav').classList.remove('hidden-soft');
-  $('btnQuickExit').classList.remove('hidden-soft');
-  $('btnPanic').classList.remove('hidden-soft');
-  $('btnBack').classList.remove('hidden-soft');
-  $('askFab').classList.remove('hidden-soft');
+/* ================ UI WIRING ================ */
+$('langSel').value = S.lang;
+$('langSel').addEventListener('change', e=>{
+  S.lang = e.target.value; saveState();
   applyLang();
+});
+$('btnExit').onclick = ()=> window.location.href='https://www.google.com';
+$('btnBack').onclick = ()=> {
+  // real in-app back (no Google); pop stack but keep at least one
+  if(S.stack.length>1){ S.stack.pop(); showPanel(S.stack.at(-1)); }
+};
+function nav(id){
+  showPanel(id);
+  if(S.stack.at(-1)!==id) S.stack.push(id);
 }
-function lockToDecoy(){
-  $('appView').classList.add('hidden-soft');
-  $('bottomNav').classList.add('hidden-soft');
-  $('btnQuickExit').classList.add('hidden-soft');
-  $('btnPanic').classList.add('hidden-soft');
-  $('btnBack').classList.add('hidden-soft');
-  $('askFab').classList.add('hidden-soft');
-  $('decoyView').classList.remove('hidden-soft');
-  closeAsk();
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  $(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+  ({home:'tabHome',checkin:'tabCheck',plan:'tabPlan',resources:'tabRes',profile:'tabProf'}[id]) && $( {home:'tabHome',checkin:'tabCheck',plan:'tabPlan',resources:'tabRes',profile:'tabProf'}[id] ).classList.add('on');
 }
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) lockToDecoy(); });
-$('btnQuickExit').onclick=()=>{ location.href='https://www.google.com/'; };
-$('btnPanic').onclick=()=>{ 
-  localStorage.removeItem('timeout_profile_name'); 
-  localStorage.removeItem('timeout_answers'); 
-  localStorage.removeItem('timeout_resources'); 
-  localStorage.removeItem('timeout_plans'); 
-  localStorage.removeItem('timeout_theme');
-  core.name='Anonymous'; core.answers={}; core.resources=[]; core.plans=[]; core.theme='blue';
-  saveLocal(); applyTheme(); lockToDecoy(); 
+
+/* ================ DEC0Y TIMER (Pomodoro) ================ */
+let t=25*60, tid=null, rounds=1, running=false;
+function drawTimer(){ const m=Math.floor(t/60), s=t%60; $('clock').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+function tick(){ if(t>0){ t--; drawTimer(); } else { clearInterval(tid); running=false; rounds++; $('rounds').textContent=tr(`Pomodoro • ${rounds}`,`Pomodoro • ${rounds}`); $('statusPill').textContent=tr('Break','Descanso'); t=5*60; drawTimer(); } }
+$('btnStart').onclick=()=>{ if(!running){ running=true; $('statusPill').textContent=tr('Focus','Enfoque'); tid=setInterval(tick,1000); } };
+$('btnPause').onclick=()=>{ running=false; clearInterval(tid); };
+$('btnReset').onclick=()=>{ running=false; clearInterval(tid); t=25*60; drawTimer(); $('statusPill').textContent=tr('Focus','Enfoque'); };
+drawTimer();
+
+/* Long-press title to unlock (keep same behavior) */
+let lpTimer=null; $('appTitle').addEventListener('touchstart',startLP,{passive:true});
+$('appTitle').addEventListener('mousedown',startLP);
+['touchend','touchcancel','mouseup','mouseleave'].forEach(ev=>$('appTitle').addEventListener(ev,()=>{clearTimeout(lpTimer)}));
+function startLP(){ clearTimeout(lpTimer); lpTimer=setTimeout(askPIN,800); }
+function askPIN(){
+  const p = prompt(tr('Enter PIN to unlock','Ingresa el PIN para desbloquear'));
+  if(p===null) return;
+  if(p===S.pin){ S.unlocked=true; saveState(); afterUnlock(); }
+  else { alert(tr('Incorrect PIN','PIN incorrecto')); }
+}
+function afterUnlock(){
+  $('homeUnlocked').classList.remove('hidden');
+  $('greet').textContent = tr('Welcome','Bienvenido/a') + ', ' + S.name;
+  updateMeters();
+}
+
+/* Hide sensitive on blur/visibility */
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ S.unlocked=false; saveState(); $('homeUnlocked').classList.add('hidden'); showPanel('home'); }});
+
+/* ================ CHECK-IN CONTENT ================ */
+const Q_EN = [
+"Do you feel safe in your home right now?",
+"Has your partner, or anyone close to you, threatened to harm you recently?",
+"Have you experienced physical harm in the past month?",
+"Is your phone, computer, or movement being monitored?",
+"Do you have children who could be at risk in your situation?",
+"Has anyone prevented you from leaving or restricted your freedom?",
+"Do you feel isolated from friends, family, or community support?",
+"Are finances being controlled in ways that limit your independence?",
+"Do you feel pressured to have sex or do things against your will?",
+"Has your partner ever harmed pets or threatened to harm them?",
+"Do you believe your partner has access to weapons?",
+"Have you been forced or pressured to keep abuse a secret?",
+"Do you worry that leaving could make things more dangerous for you?"
+];
+const Q_ES = [
+"¿Te sientes seguro/a en tu hogar en este momento?",
+"¿Tu pareja u otra persona cercana te ha amenazado con hacerte daño recientemente?",
+"¿Has sufrido daño físico en el último mes?",
+"¿Se monitorea tu teléfono, computadora o tus movimientos?",
+"¿Tienes hijos que podrían estar en riesgo en tu situación?",
+"¿Alguien te ha impedido salir o restringido tu libertad?",
+"¿Te sientes aislado/a de amigos, familia o apoyo comunitario?",
+"¿Controlan tus finanzas de forma que limite tu independencia?",
+"¿Sientes presión para tener relaciones sexuales o hacer cosas contra tu voluntad?",
+"¿Tu pareja ha lastimado o amenazado con lastimar mascotas?",
+"¿Crees que tu pareja tiene acceso a armas?",
+"¿Te han obligado o presionado a mantener en secreto el abuso?",
+"¿Te preocupa que irte pueda hacer la situación más peligrosa para ti?"
+];
+
+const FB_EN = {
+q1:{yes:"Good to hear you feel safe right now. Safety can change quickly; stay aware of shifts in behavior or environment. Keep simple exit options in mind.",
+    no:"Feeling unsafe at home is a major warning sign. Prioritize immediate safety, including identifying exits or safe rooms. Consider contacting trusted people or a hotline."},
+q2:{yes:"Threats are serious and often precede physical harm. Take them at face value even if framed as a joke. Plan for quick exits and safe contacts.",
+    no:"Positive there were no recent threats. Watch for intimidation or control that can replace direct threats. Staying alert helps you respond quickly."},
+q3:{yes:"Recent physical harm is a critical red flag. Your risk is elevated and urgent protection may be needed. If you feel unsafe, call emergency services.",
+    no:"Good that no recent physical harm occurred. Abuse can also be emotional, financial, or psychological. Stay mindful of non-physical warning signs."},
+q4:{yes:"Monitoring devices or movements is a strong control tactic that increases danger. Use safer devices and review shared accounts. Limit sensitive content on your phone.",
+    no:"No monitoring noticed is positive. Stay alert for unusual phone behavior or unexpected account logins and location knowledge."},
+q5:{yes:"Children exposed to violence face emotional and physical risks. Include them in your plan (school, caregiver, emergency contacts). Protecting yourself helps protect them.",
+    no:"Not having children at risk reduces immediate concerns, but your safety remains vital. Extend planning to children if that changes."},
+q6:{yes:"Being prevented from leaving is coercive control and may escalate. Identify safe exit strategies and a code word with trusted contacts. Consider places you can go on short notice.",
+    no:"Freedom of movement is protective. Stay mindful if new restrictions appear or pressures increase."},
+q7:{yes:"Isolation is common in abusive situations and increases dependence. Try small steps to reconnect with supportive people. Even one trusted contact can increase safety.",
+    no:"Staying connected is protective. Keep those relationships strong; they can be critical if things change."},
+q8:{yes:"Financial control can trap you in unsafe situations. Consider discreetly setting aside resources or contacting financial advocacy programs. Document restrictions if safe.",
+    no:"Financial independence is protective. Safeguard your accounts and stay alert for attempts to limit access."},
+q9:{yes:"Sexual coercion is a serious form of abuse and violates consent. You have the right to bodily autonomy. Seek medical or advocacy support if needed.",
+    no:"Not experiencing this is positive. Consent must always be freely given; recognize any future pressure as abuse."},
+q10:{yes:"Harming or threatening pets is intimidation and may signal escalation. Include pets in your safety plan if possible. Consider safe shelter options for animals.",
+     no:"Good to hear. Stay aware; threats to animals can emerge later as control tactics."},
+q11:{yes:"Access to weapons greatly increases lethal risk. Prioritize urgent safety planning and consider contacting authorities or advocates. Trust your instincts about danger.",
+     no:"No weapons access lowers immediate risk. Stay aware of any changes in access or escalation in other forms."},
+q12:{yes:"Pressure to keep abuse secret is designed to isolate you. Silence can increase risk and block support. Reaching out to trusted people is a safety step.",
+     no:"Not being pressured into secrecy is positive. Be cautious of guilt, shame, or intimidation tactics that may appear later."},
+q13:{yes:"Leaving can be the most dangerous time. Plan carefully and seek support from advocates to lower risk. Choose timing and routes that maximize safety.",
+     no:"Not fearing increased danger when leaving is encouraging. Still, have a plan so you can act quickly if circumstances shift."}
+};
+const FB_ES = {
+q1:{yes:"Es bueno que te sientas seguro/a ahora. La seguridad puede cambiar rápido; mantente atento/a a señales de cambio. Ten salidas simples en mente.",
+    no:"Sentirte inseguro/a en casa es una señal importante. Prioriza tu seguridad inmediata, identificando salidas o cuartos seguros. Considera contactar a personas de confianza o a una línea de ayuda."},
+q2:{yes:"Las amenazas son serias y a menudo preceden el daño físico. Tómalas literalmente, aunque parezcan bromas. Planea salidas rápidas y contactos seguros.",
+    no:"Es positivo que no haya amenazas recientes. Observa posibles intimidaciones o control que reemplacen amenazas directas. Mantenerte alerta ayuda a reaccionar a tiempo."},
+q3:{yes:"El daño físico reciente es una alerta crítica. Tu riesgo es alto y podrías necesitar protección urgente. Si te sientes en peligro, llama a emergencias.",
+    no:"Es bueno no haber sufrido daño físico reciente. Recuerda que el abuso también puede ser emocional, financiero o psicológico. Mantente atento/a a señales no físicas."},
+q4:{yes:"Monitorear dispositivos o movimientos es un control fuerte que aumenta el peligro. Usa dispositivos más seguros y revisa cuentas compartidas. Limita contenido sensible en el teléfono.",
+    no:"No notar monitoreo es positivo. Vigila comportamientos extraños del móvil o inicios de sesión inesperados y conocimiento de tu ubicación."},
+q5:{yes:"Los niños expuestos a violencia corren riesgos emocionales y físicos. Inclúyelos en tu plan (escuela, cuidador, contactos de emergencia). Protegerte también los protege.",
+    no:"No tener hijos en riesgo reduce preocupaciones inmediatas, pero tu seguridad sigue siendo vital. Extiende el plan si eso cambia."},
+q6:{yes:"Impedirte salir es control coercitivo y puede escalar. Define salidas seguras y una palabra clave con contactos de confianza. Piensa dónde podrías ir con poca anticipación.",
+    no:"La libertad de movimiento es protectora. Mantente atento/a si aparecen nuevas restricciones o aumentan las presiones."},
+q7:{yes:"La aislación es común en el abuso y aumenta la dependencia. Da pequeños pasos para reconectar con apoyos. Un solo contacto de confianza puede mejorar la seguridad.",
+    no:"Seguir conectado/a es protector. Fortalece esas relaciones; pueden ser cruciales si la situación cambia."},
+q8:{yes:"El control financiero puede atraparte en situaciones inseguras. Considera separar recursos discretamente o buscar asesoría financiera. Documenta restricciones si es seguro.",
+    no:"La independencia financiera protege. Resguarda tus cuentas y mantente alerta ante intentos de limitar acceso."},
+q9:{yes:"La coerción sexual es un abuso serio y viola el consentimiento. Tienes derecho a tu autonomía corporal. Busca apoyo médico o de defensa si lo necesitas.",
+    no:"No vivir esto es positivo. El consentimiento debe ser libre; reconoce cualquier presión futura como abuso."},
+q10:{yes:"Dañar o amenazar mascotas intimida y puede indicar escalamiento. Incluye mascotas en tu plan si es posible. Considera refugios seguros para animales.",
+     no:"Es buena noticia. Mantente atento/a; las amenazas a animales pueden aparecer más adelante como control."},
+q11:{yes:"El acceso a armas aumenta mucho el riesgo letal. Prioriza una planificación urgente de seguridad y considera contactar autoridades o defensores. Confía en tus instintos.",
+     no:"No tener acceso a armas reduce el riesgo inmediato. Mantente atento/a a cambios o a otras formas de escalada."},
+q12:{yes:"La presión para guardar el abuso en secreto busca aislarte. El silencio aumenta el riesgo y bloquea el apoyo. Contactar a alguien de confianza es un paso de seguridad.",
+     no:"No estar obligado/a al silencio es positivo. Cuídate de tácticas de culpa, vergüenza o intimidación que puedan aparecer."},
+q13:{yes:"Irte puede ser el momento más peligroso. Planea con cuidado y busca apoyo de defensores para reducir el riesgo. Elige tiempos y rutas que maximicen tu seguridad.",
+     no:"No temer mayor peligro al irte es alentador. Aun así, ten un plan para actuar si la situación cambia."}
 };
 
-/* ===================== TABS ===================== */
-function setTab(name){
-  ['home','checkin','plan','resources','profile'].forEach(t=>{
-    $('tab-'+t).classList.toggle('hidden-soft', t!==name);
-  });
-  if(name==='checkin'){ buildQuestions(); updateScoresAndFeedback(); }
-  if(name==='plan'){ renderPlans(); }
-  if(name==='resources'){ renderResources(); }
-}
-window.setTab = setTab;
+const SYN_EN = {
+  high:"Your answers suggest you may be facing serious and immediate risks. Your safety is a real concern. Please consider reaching out right away for support — if you ever feel in danger, call 911 or the National DV Hotline (1-800-799-7233). You are not alone; many have found help through hotlines, shelters, and trusted friends. Use this TimeOut to think about resources and next steps. Remember, you are not alone.",
+  mid:"Your answers suggest some challenges and warning signs. While the risk may not feel urgent, it’s important to stay prepared and watch for changes. Strengthen your support system and review your safety plan. Support is available whenever you need it. Use this TimeOut to reflect on your options and resources. Remember, you are not alone.",
+  low:"Your answers suggest fewer immediate risks, which is encouraging. Even so, circumstances can shift quickly, so staying aware and prepared is wise. This is a good time to review resources and line up support you can rely on if things change. Use this TimeOut to focus on your strengths and plan ahead. Remember, you are not alone.",
+  disclaimer:"Disclaimer: This guidance is for general safety awareness and is not a substitute for professional advice. If you are in immediate danger, call 911 or the National Domestic Violence Hotline at 1-800-799-7233."
+};
+const SYN_ES = {
+  high:"Tus respuestas sugieren riesgos serios e inmediatos. Tu seguridad es una preocupación real. Considera buscar apoyo de inmediato; si estás en peligro, llama al 911 o a la Línea Nacional contra la Violencia Doméstica (1-800-799-7233). No estás solo/a; muchas personas han encontrado ayuda en líneas, refugios y amistades de confianza. Usa este TimeOut para pensar en recursos y próximos pasos. Recuerda: no estás solo/a.",
+  mid:"Tus respuestas indican señales de alerta y algunos desafíos. Aunque el riesgo no parezca urgente, es importante estar preparado/a y observar cambios. Fortalece tu red de apoyo y revisa tu plan de seguridad. El apoyo está disponible cuando lo necesites. Usa este TimeOut para reflexionar sobre tus opciones y recursos. Recuerda: no estás solo/a.",
+  low:"Tus respuestas sugieren pocos riesgos inmediatos, lo cual es alentador. Aun así, la situación puede cambiar; mantenerse alerta y preparado/a es prudente. Es buen momento para revisar recursos y asegurar apoyos por si algo cambia. Usa este TimeOut para enfocarte en tus fortalezas y planear. Recuerda: no estás solo/a.",
+  disclaimer:"Aviso: Esta orientación es para concienciación general y no reemplaza el consejo profesional. Si estás en peligro inmediato, llama al 911 o a la Línea Nacional contra la Violencia Doméstica: 1-800-799-7233."
+};
 
-/* ===================== SAFETY ACK (ONCE) ===================== */
-function applySafetyAckVisibility(){
-  const seen = localStorage.getItem('timeout_safety_ack') === '1';
-  const card = document.getElementById('safetyCard');
-  if (card) card.style.display = seen ? 'none' : '';
-}
-document.addEventListener('click', (e)=>{
-  if (e.target && e.target.id === 'btnAckSafety') {
-    localStorage.setItem('timeout_safety_ack','1');
-    applySafetyAckVisibility();
-  }
-});
+function questions(){ return S.lang==='es'?Q_ES:Q_EN; }
+function fb(){ return S.lang==='es'?FB_ES:FB_EN; }
+function syn(){ return S.lang==='es'?SYN_ES:SYN_EN; }
 
-/* ===================== CHECK-IN ===================== */
-const QUESTIONS_EN = [
-  "Are you currently safe where you are?",
-  "Has someone threatened you recently?",
-  "Have you experienced physical harm in past month?",
-  "Are you worried about your partner’s access to your phone?",
-  "Is anyone preventing you from leaving?",
-  "Do you have children at risk?",
-  "Do you feel isolated from help?",
-  "Would you like immediate local resources?"
-];
-const QUESTIONS_ES = [
-  "¿Estás seguro/a donde te encuentras ahora?",
-  "¿Alguien te ha amenazado recientemente?",
-  "¿Has sufrido daño físico en el último mes?",
-  "¿Te preocupa que tu pareja tenga acceso a tu teléfono?",
-  "¿Alguien te impide salir?",
-  "¿Tienes hijos en riesgo?",
-  "¿Te sientes aislado/a de la ayuda?",
-  "¿Te gustaría recursos locales inmediatos?"
-];
-function getQuestions(){ return core.lang==='es' ? QUESTIONS_ES : QUESTIONS_EN; }
-
-function qRow(i, text){
-  const qid = 'q'+(i+1);
-  const yesSel = core.answers[qid]==='yes' ? 'selected' : '';
-  const noSel  = core.answers[qid]==='no'  ? 'selected' : '';
-  const yesLab = T('Yes','Sí');
-  const noLab  = T('No','No');
-  return `
-    <div class="card p-3">
-      <div class="mb-2 text-sm">${i+1}. ${text}</div>
-      <div class="flex gap-2">
-        <button class="btn yn-btn ${yesSel}" data-q="${qid}" data-v="yes">${yesLab}</button>
-        <button class="btn yn-btn ${noSel}"  data-q="${qid}" data-v="no">${noLab}</button>
+function buildQs(){
+  const box=$('qList'); box.innerHTML='';
+  questions().forEach((text,i)=>{
+    const qk='q'+(i+1);
+    const val=S.answers[qk]||'';
+    const ySel=val==='yes'?' selected':'';
+    const nSel=val==='no'?' selected':'';
+    const row=document.createElement('div');
+    row.className='card';
+    row.innerHTML=`
+      <div style="margin-bottom:.5rem">${i+1}. ${text}</div>
+      <div class="yn">
+        <button class="btn ynbtn${ySel}" data-k="${qk}" data-v="yes">${tr('Yes','Sí')}</button>
+        <button class="btn ynbtn${nSel}" data-k="${qk}" data-v="no">${tr('No','No')}</button>
       </div>
-    </div>`;
+      <div id="fb-${qk}" class="muted" style="margin-top:.5rem"></div>
+    `;
+    box.appendChild(row);
+    if(val) renderFB(qk,val);
+  });
+  updateScores();
 }
-function buildQuestions(){
-  const box = $('questions'); if(!box) return;
-  box.innerHTML = '';
-  getQuestions().forEach((q,i)=>{ box.insertAdjacentHTML('beforeend', qRow(i,q)); });
+function renderFB(k,val){
+  const dict=fb(); const el=$('fb-'+k);
+  const item = dict[k]; if(!item||!el) return;
+  el.textContent = item[val] || '';
 }
-function computeRisk(){
-  let risk = 0; const a = core.answers;
-  if(a.q1==='no') risk += 1;
-  ['q2','q3','q4','q5','q6','q7'].forEach(k=>{ if(a[k]==='yes') risk += 1; });
-  const pct = Math.round((risk/7)*100);
-  core.risk = pct; core.trust = 100 - pct;
-}
-function updateScoresAndFeedback(){
-  computeRisk();
-  $('riskPct').textContent = core.risk + '%';
-  $('trustPct').textContent = core.trust + '%';
-  const fb = $('checkFeedback'); if(!fb) return;
-  fb.innerHTML = '';
-  if(core.risk>=60){
-    fb.insertAdjacentHTML('beforeend', `<div class="card p-3 text-sm">⚠️ ${T('High risk — consider opening the Plan tab and contacting a hotline in Resources.','Riesgo alto — considera abrir la pestaña Plan y contactar una línea de ayuda en Recursos.')}</div>`);
-  } else if(core.risk>=30){
-    fb.insertAdjacentHTML('beforeend', `<div class="card p-3 text-sm">${T('Moderate risk — keep a go-bag and a trusted contact ready.','Riesgo moderado — prepara una bolsa de emergencia y un contacto de confianza.')}</div>`);
-  } else {
-    fb.insertAdjacentHTML('beforeend', `<div class="card p-3 text-sm">${T('Low risk reported — stay prepared and review your plan weekly.','Riesgo bajo — mantente preparado/a y revisa tu plan semanalmente.')}</div>`);
+function updateScores(){
+  // risk rule: q1 -> 'no' is risky; q2..q13 -> 'yes' is risky
+  let risky=0, total=13;
+  for(let i=1;i<=13;i++){
+    const k='q'+i, v=S.answers[k];
+    if(!v) continue;
+    if(i===1){ if(v==='no') risky++; }
+    else { if(v==='yes') risky++; }
   }
+  S.risk = Math.round((risky/total)*100);
+  S.trust = 100 - S.risk;
+  $('riskNum').textContent = S.risk+'%';
+  $('trustNum').textContent= S.trust+'%';
+  $('riskBar').style.width = S.risk+'%';
+  $('trustBar').style.width= S.trust+'%';
+  $('scoreChip').textContent = tr('Risk','Riesgo')+' '+S.risk+'% • '+tr('Trust','Confianza')+' '+S.trust+'%';
+
+  const wrap=$('synWrap'), body=$('synBody'), d=$('disc');
+  let text='';
+  const SNY=syn();
+  if(S.risk>=60){ text=SNY.high; wrap.classList.remove('good','mid'); wrap.classList.add('bad'); }
+  else if(S.risk>=30){ text=SNY.mid; wrap.classList.remove('good','bad'); wrap.classList.add('mid'); }
+  else { text=SNY.low; wrap.classList.remove('mid','bad'); wrap.classList.add('good'); }
+  if(Object.keys(S.answers).length>0){ wrap.classList.remove('hidden'); body.textContent=text; d.textContent=SNY.disclaimer; }
 }
+
+/* clicks for yn */
 document.addEventListener('click', (e)=>{
-  const b = e.target.closest('.yn-btn'); if(!b) return;
-  const qid = b.dataset.q; const val=b.dataset.v; if(!qid||!val) return;
-  core.answers[qid] = val; saveLocal();
-  document.querySelectorAll(`.yn-btn[data-q="${qid}"]`).forEach(x=>x.classList.remove('selected'));
-  b.classList.add('selected'); updateScoresAndFeedback();
-});
-$('btnLoadDemo').onclick=()=>{
-  core.answers = { q1:'no', q2:'yes', q3:'yes', q4:'yes', q5:'no', q6:'no', q7:'yes', q8:'yes' };
-  saveLocal(); buildQuestions(); updateScoresAndFeedback();
-};
-$('btnSaveCheckin').onclick=()=>{ saveLocal(); toast(T('Check-In saved.','Autoevaluación guardada.')); };
-
-/* ===================== SAFETY PLAN ===================== */
-function renderPlans(){
-  const list = $('plansList'); if(!list) return;
-  list.innerHTML='';
-  if(core.plans.length===0){
-    list.insertAdjacentHTML('beforeend', `<div class="text-sm text-gray-600">${T('No plans yet. Use New, Templates, or Quick Generate.','Aún no hay planes. Usa Nuevo, Plantillas o Generar Rápido.')}</div>`);
-    return;
-  }
-  core.plans.forEach((p,idx)=>{
-    const steps = (p.steps||[]).map(s=>`<li class="list-disc ml-5">${s}</li>`).join('');
-    const card = `
-      <div class="card p-3">
-        <div class="flex items-center justify-between">
-          <div class="font-semibold">${p.title||T('Untitled','Sin título')}</div>
-          <button data-i="${idx}" class="btn btn-ghost text-rose-600 delPlan">${T('Delete','Eliminar')}</button>
-        </div>
-        ${steps? `<ul class="mt-2 text-sm">${steps}</ul>`:''}
-      </div>`;
-    list.insertAdjacentHTML('beforeend', card);
-  });
-  list.querySelectorAll('.delPlan').forEach(btn=>{
-    btn.onclick=()=>{ const i=+btn.dataset.i; core.plans.splice(i,1); saveLocal(); renderPlans(); };
-  });
-}
-$('btnNewPlan').onclick=()=>{
-  const t = prompt(T('Plan title?','¿Título del plan?')) || T('Personal Plan','Plan personal');
-  const s = prompt(T('Steps (comma-separated):','Pasos (separados por comas):')) || '';
-  const steps = s.split(',').map(x=>x.trim()).filter(Boolean);
-  core.plans.push({title:t, steps}); saveLocal(); renderPlans();
-};
-$('btnTemplates').onclick=()=>{
-  const template = { title:T('Grab & Go Bag','Bolsa de emergencia'), steps:[T('ID & documents','Identificación y documentos'),T('Keys & cash','Llaves y efectivo'),T('Medications','Medicamentos'),T('Change of clothes','Cambio de ropa'),T('Backup phone numbers','Números de teléfono de respaldo')] };
-  core.plans.push(template); saveLocal(); renderPlans();
-};
-let qpGuard=false;
-$('btnQuickGenerate').onclick=()=>{
-  if(qpGuard) return; qpGuard=true; setTimeout(()=>qpGuard=false,600);
-  const a=core.answers; const steps=[];
-  if(a.q4==='yes') steps.push(T('Minimize sensitive content on phone; enable screen lock.','Minimiza contenido sensible en el teléfono; activa el bloqueo de pantalla.'));
-  if(a.q2==='yes' || a.q3==='yes') steps.push(T('Document dates/times privately; tell a trusted person.','Documenta fechas/horas en privado; avisa a alguien de confianza.'));
-  if(a.q1==='no') steps.push(T('Move to public place; call a hotline or trusted person.','Muévete a un lugar público; llama a una línea de ayuda o a alguien de confianza.'));
-  if(a.q6==='yes') steps.push(T('Set meeting point and alternate caregiver for children.','Define punto de encuentro y cuidador alterno para los niños.'));
-  if(steps.length===0) steps.push(T('Share location with a trusted person; review exits and transport.','Comparte ubicación con alguien de confianza; revisa salidas y transporte.'));
-  core.plans.push({title:T('Quick Plan','Plan rápido'), steps}); saveLocal(); renderPlans(); toast(T('Quick plan created.','Plan rápido creado.'));
-};
-document.getElementById('demoQs').addEventListener('click', e=>{
-  const b=e.target.closest('button'); if(!b) return;
-  openAsk(); setTimeout(()=>{ const i=$('askInput'); if(i){ i.value=b.textContent; i.focus(); }},250);
+  const b=e.target.closest('.ynbtn'); if(!b) return;
+  const k=b.dataset.k, v=b.dataset.v;
+  S.answers[k]=v; saveState();
+  // toggle selected
+  document.querySelectorAll(`.ynbtn[data-k="${k}"]`).forEach(x=>x.classList.remove('selected'));
+  b.classList.add('selected');
+  renderFB(k,v);
+  updateScores();
 });
 
-/* ===================== RESOURCES ===================== */
-function seedResourcesIfEmpty(){
-  if(!Array.isArray(core.resources) || core.resources.length===0){
-    core.resources = [
-      {title:"National Domestic Violence Hotline (US)", desc:"24/7 confidential help — call or chat", url:"tel:+18007997233"},
-      {title:"RAINN Sexual Assault Hotline (US)", desc:"24/7 — phone + online chat", url:"tel:+18006564673"},
-      {title:"Childhelp National Child Abuse Hotline (US)", desc:"24/7 — children & adults", url:"tel:+18004224453"},
-      {title:"StrongHearts Native Helpline (US)", desc:"Support for Native communities", url:"tel:+18447628483"},
-      {title:"love is respect (US)", desc:"Dating abuse support — call/text/chat", url:"https://www.loveisrespect.org/"},
-      {title:"National Deaf DV Hotline (US)", desc:"Deaf/Hard of Hearing support (ASL)", url:"https://thedeafhotline.org/"},
-      {title:"211 — Local Services (US/Canada)", desc:"Housing, legal, financial, counseling", url:"https://www.211.org/"},
-      {title:"SAMHSA Helpline (US)", desc:"Mental health & substance use", url:"tel:+18006624357"},
-      {title:"Emergency", desc:"Call your local emergency number", url:"tel:911"}
-    ];
-    saveLocal();
-  }
-}
-function renderResources(){
+/* demo answers */
+$('btnDemo').onclick=()=>{
+  S.answers = {
+    q1:'no', q2:'yes', q3:'no', q4:'yes', q5:'no',
+    q6:'yes', q7:'yes', q8:'no', q9:'no', q10:'no',
+    q11:'no', q12:'yes', q13:'yes'
+  };
+  saveState(); buildQs();
+};
+/* save check-in (local only in this build) */
+$('btnSave').onclick=()=>{
+  saveState();
+  alert(tr('Check-In saved.','Autoevaluación guardada.'));
+};
+
+/* ================ PLAN ================ */
+$('planNote').value = S.plan;
+$('btnQuick').onclick=()=>{
+  const quick = tr(
+`Quick Plan
+• Keep phone charged; location off when safe.
+• Code word with trusted contact.
+• Copies of IDs and cash in a safe place.
+• Pre-identify 2 safe places to go.`,
+`Plan Rápido
+• Mantén el teléfono cargado; ubicación desactivada cuando sea seguro.
+• Palabra clave con un contacto de confianza.
+• Copias de identificaciones y efectivo en un lugar seguro.
+• Identifica 2 lugares seguros para ir.`);
+  $('planNote').value = quick;
+};
+$('btnTemplate').onclick=()=>{
+  const tmpl = tr(
+`Template
+1) Warning signs I notice:
+2) People I can contact:
+3) Safe places I can go:
+4) Items to take (docs, meds, cash):
+5) Steps if danger increases:`,
+`Plantilla
+1) Señales de alerta que noto:
+2) Personas a quienes contactar:
+3) Lugares seguros a donde ir:
+4) Artículos para llevar (docs, medicinas, efectivo):
+5) Pasos si el peligro aumenta:`);
+  $('planNote').value = tmpl;
+};
+$('btnPlanSave').onclick=()=>{ S.plan=$('planNote').value; saveState(); alert(tr('Plan saved.','Plan guardado.')); };
+$('btnPlanClear').onclick=()=>{ $('planNote').value=''; S.plan=''; saveState(); };
+
+/* ================ RESOURCES (preloaded EN/ES) ================ */
+const RES = [
+  {en:{t:"National DV Hotline",d:"24/7 confidential support",u:"tel:18007997233"},
+   es:{t:"Línea Nacional contra la Violencia Doméstica",d:"Apoyo confidencial 24/7",u:"tel:18007997233"}},
+  {en:{t:"RAINN (Sexual Assault)",d:"24/7 hotline",u:"tel:8006564673"},
+   es:{t:"RAINN (Asalto sexual)",d:"Línea 24/7",u:"tel:8006564673"}},
+  {en:{t:"Childhelp",d:"Child abuse hotline",u:"tel:8004224453"},
+   es:{t:"Childhelp",d:"Línea contra abuso infantil",u:"tel:8004224453"}},
+  {en:{t:"StrongHearts Native Helpline",d:"Support for Native communities",u:"tel:8447628483"},
+   es:{t:"StrongHearts Native Helpline",d:"Apoyo para comunidades nativas",u:"tel:8447628483"}}
+];
+function drawRes(){
   const box=$('resList'); box.innerHTML='';
-  core.resources.forEach((r,i)=>{
-    const isTel = /^tel:/i.test(r.url||'');
-    const item = `
-      <div class="card p-3 flex items-start justify-between gap-2">
-        <div class="min-w-0">
-          <div class="font-semibold truncate">${r.title}</div>
-          <div class="text-sm text-gray-600">${r.desc||''}</div>
-          <div class="text-xs mt-1 break-all">${r.url}</div>
-        </div>
-        <div class="flex flex-col gap-2 shrink-0">
-          ${isTel? `<a class="btn" href="${r.url}">${T('Call','Llamar')}</a>` : `<button class="btn openRes" data-i="${i}">${T('Open','Abrir')}</button>`}
-          <button class="btn copyRes" data-i="${i}">${T('Copy','Copiar')}</button>
-          <button class="btn delRes text-rose-600" data-i="${i}">${T('Delete','Eliminar')}</button>
-        </div>
+  RES.forEach(r=>{
+    const v = S.lang==='es'?r.es:r.en;
+    const item=document.createElement('div');
+    item.className='card';
+    item.innerHTML=`<strong>${v.t}</strong><div class="muted">${v.d}</div>
+      <div class="row" style="justify-content:flex-start">
+        <a class="btn btn-primary" href="${v.u}">${tr('Call','Llamar')}</a>
       </div>`;
-    box.insertAdjacentHTML('beforeend', item);
+    box.appendChild(item);
   });
-  box.querySelectorAll('.copyRes').forEach(b=> b.onclick=()=>{ const i=+b.dataset.i; navigator.clipboard.writeText(core.resources[i].url||''); toast(T('Copied.','Copiado.')); });
-  box.querySelectorAll('.delRes').forEach(b=> b.onclick=()=>{ const i=+b.dataset.i; core.resources.splice(i,1); saveLocal(); renderResources(); });
-  box.querySelectorAll('.openRes').forEach(b=> b.onclick=()=>{ const i=+b.dataset.i; const u=core.resources[i].url; if(u) location.href=u; });
 }
-$('callHotlineBtn').onclick=()=>{ location.href='tel:+18007997233'; };
-$('btnAddResource').onclick=()=>{
-  const title = prompt(T('Title','Título'))||''; if(!title) return;
-  const desc  = prompt(T('Description (optional)','Descripción (opcional)'))||'';
-  const url   = prompt(T('Link or phone (prefix phone with tel:)','Enlace o teléfono (prefijo tel:)'))||'';
-  core.resources.push({title,desc,url}); saveLocal(); renderResources();
+
+/* ================ PROFILE ================ */
+$('nameInput').value = S.name;
+$('pinInput').value = S.pin;
+$('btnProfSave').onclick=()=>{
+  S.name = $('nameInput').value.trim()||'Anonymous';
+  const np = $('pinInput').value.trim()||'2580';
+  S.pin = np; saveState();
+  alert(tr('Profile saved.','Perfil guardado.'));
 };
-$('btnSeedLocal').onclick=()=>{
-  core.resources.push({title:T("Local 211 — Services","211 Local — Servicios"), desc:T("Tap to open 211","Pulsa para abrir 211"), url:"https://www.211.org/"}); saveLocal(); renderResources();
+$('btnWipe').onclick=()=>{
+  if(confirm(tr('Clear all local data?','¿Borrar todos los datos locales?'))){
+    localStorage.removeItem('timeout_pin');
+    localStorage.removeItem('timeout_name');
+    localStorage.removeItem('timeout_lang');
+    localStorage.removeItem('timeout_unlocked');
+    localStorage.removeItem('timeout_answers');
+    localStorage.removeItem('timeout_plan');
+    Object.assign(S,{pin:'2580',name:'Anonymous',lang:'en',unlocked:false,answers:{},plan:'',risk:0,trust:100,stack:['home']});
+    location.reload();
+  }
 };
 
-/* ===================== PROFILE ===================== */
-$('profName').value = core.name;
-$('themePick').value = core.theme;
-$('btnSaveProfile').onclick=()=>{
-  core.name = $('profName').value.trim() || 'Anonymous';
-  const old = $('oldPin').value.trim();
-  const np  = $('newPin').value.trim();
-  const np2 = $('newPin2').value.trim();
-  if(np || np2 || old){
-    if(old!==core.pin) return toast(T('Old PIN is wrong.','PIN anterior incorrecto.'));
-    if(np.length<4 || np!==np2) return toast(T('New PIN mismatch or too short.','Nuevo PIN no coincide o es muy corto.'));
-    core.pin = np;
-  }
-  saveLocal();
-  applyLang();
-  toast(T('Profile saved.','Perfil guardado.'));
-};
-$('btnExport').onclick=()=>{
-  const data = {
-    profile:{name:core.name},
-    answers:core.answers,
-    risk:core.risk, trust:core.trust,
-    resources:core.resources,
-    plans:core.plans,
-    theme:core.theme,
-    app:"TimeOut", version:"v1.3.5"
-  };
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='timeout_export.json'; a.click(); URL.revokeObjectURL(a.href);
-};
-
-/* ===================== ASK SUPPORT (VOICE/TEXT DEMO) ===================== */
-function ensureAskModal(){
-  const host = $('askModal');
-  if(host.dataset.ready==='1') return true;
-  host.dataset.ready='1';
-  host.innerHTML = `
-    <div class="card p-4 w-[92vw] max-w-md mx-auto">
-      <div class="flex items-center justify-between mb-2">
-        <div class="font-semibold">${T('Ask Support','Chat de apoyo')}</div>
-        <button id="askClose" class="btn btn-ghost">✕</button>
-      </div>
-      <div class="text-xs text-gray-600 mb-2">${T('General guidance only; not therapy or emergency. If in danger, call emergency services.','Orientación general; no es terapia ni emergencia. Si hay peligro, llama a emergencias.')}</div>
-      <div id="askOut" class="space-y-2 max-h-[42vh] overflow-auto"></div>
-      <div class="mt-3 flex gap-2">
-        <input id="askInput" class="flex-1 border rounded-lg px-3 py-2" placeholder="${T('Say or type a question…','Di o escribe una pregunta…')}">
-        <button id="askMic" class="btn btn-ghost" title="${T('Speak','Hablar')}">🎤</button>
-        <button id="askSend" class="btn btn-primary">${T('Send','Enviar')}</button>
-      </div>
-      <div class="mt-3 text-xs text-gray-600">${T('Try saying:','Prueba decir:')}
-        <span class="kbd">${T('Where can I get help tonight?','¿Dónde puedo obtener ayuda esta noche?')}</span>
-        <span class="kbd">${T('What should I put in my go-bag?','¿Qué pongo en mi bolsa?')}</span>
-      </div>
-    </div>`;
-  function bubble(who,text){
-    const el=document.createElement('div'); el.className='card p-2'; el.style.background=who==='user'?'#e8f7ee':'#fff';
-    el.innerHTML=`<div class="text-xs text-gray-500">${who==='user'?T('You','Tú'):T('Support','Apoyo')}</div><div class="mt-1">${text}</div>`;
-    $('askOut').appendChild(el); $('askOut').scrollTop = $('askOut').scrollHeight;
-  }
-  function reply(q){
-    const a = core.answers, s=(q||'').toLowerCase();
-    if(/go-?bag|bolsa/.test(s)) return T('Pack ID, keys, cash, meds, a charger, and spare clothes. Hide it or leave it with someone you trust.','Empaca identificación, llaves, dinero, medicinas, cargador y ropa extra. Escóndela o déjala con alguien de confianza.');
-    if(/help|ayuda|hotline|línea/.test(s)) return T('If at risk, call emergency. See Resources for hotlines; 211 can connect you locally.','Si hay riesgo, llama a emergencias. En Recursos hay líneas de ayuda; 211 conecta con servicios locales.');
-    if(/safe|segur|leave|salir/.test(s)) return T('Leaving can be risky — plan exits, keep essentials ready, and tell someone you trust when you go.','Salir puede ser riesgoso — planea salidas, ten lo esencial listo y avisa a alguien de confianza cuando salgas.');
-    if(/phone|privac|privacy|tel[eé]fono/.test(s)) return a.q4==='yes'? T('Limit sensitive content, use a strong passcode, and consider quick-wipe options.','Limita contenido sensible, usa un código fuerte y considera opciones de borrado rápido.'): T('Use screen lock and review accounts/sign-ins.','Usa bloqueo de pantalla y revisa cuentas/accesos.');
-    if(/threat|amenaz/.test(s)) return a.q2==='yes'? T('Record dates/times privately and tell a trusted person. Consider documenting safely off-device.','Registra fechas/horas en privado y cuéntaselo a alguien de confianza. Considera documentar fuera del teléfono.'): T('Monitor and update your plan if things change.','Monitorea y actualiza tu plan si algo cambia.');
-    return T('Thanks for sharing. Small step: review your plan or add a trusted contact.','Gracias por compartir. Paso pequeño: revisa tu plan o agrega un contacto de confianza.');
-  }
-  // Mic guard to avoid double-start on some devices
-  let _micBusy = false;
-  document.addEventListener('click', (e)=>{
-    if (e.target && e.target.id === 'askMic') _micBusy = false; // reset on mic tap
-  });
-  function send(){ const i=$('askInput'); const q=i.value.trim(); if(!q) return; bubble('user',q); i.value=''; setTimeout(()=> bubble('bot', reply(q)), 300); }
-  $('askSend').onclick=send; $('askInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); send(); } });
-  $('askClose').onclick=closeAsk;
-  $('askMic').onclick=()=>{ 
-    if (_micBusy) return; _micBusy = true;
-    try{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) throw 0;
-      const rec=new SR(); rec.lang=(core.lang==='es'?'es-ES':'en-US'); rec.onresult=e=>{ const t=e.results[0][0].transcript; $('askInput').value=t; send(); }; rec.start();
-    }catch{ alert(T('Voice not supported on this device.','Voz no soportada en este dispositivo.')); }
-  };
-  return true;
+/* ================ LANG APPLY ================ */
+function applyLang(){
+  $('appTitle').textContent='TimeOut';
+  $('btnExit').textContent='EXIT';
+  $('btnBack').title = tr('Back','Atrás');
+  $('statusPill').textContent = tr('Focus','Enfoque');
+  $('hint').textContent = tr('Long-press the title to unlock.','Mantén presionado el título para desbloquear.');
+  $('greet').textContent = tr('Welcome','Bienvenido/a')+', '+S.name;
+  $('riskLab').textContent = tr('Risk','Riesgo');
+  $('trustLab').textContent= tr('Trust','Confianza');
+  $('goCheck').textContent = tr('Go to Check-In','Ir a Autoevaluación');
+  $('goPlan').textContent  = tr('Safety Plan','Plan de Seguridad');
+  $('checkTitle').textContent = tr('Check-In','Autoevaluación');
+  $('checkHint').textContent  = tr('Answer each question. Buttons will highlight and feedback appears under each item.','Responde cada pregunta. Los botones se iluminan y aparece orientación debajo de cada una.');
+  $('btnDemo').textContent = tr('Load Demo Answers','Cargar respuestas de demostración');
+  $('btnSave').textContent = tr('Save Check-In','Guardar autoevaluación');
+  $('planTitle').textContent = tr('Safety Plan','Plan de Seguridad');
+  $('resTitle').textContent  = tr('Resources','Recursos');
+  $('profTitle').textContent = tr('Profile','Perfil');
+  $('nameLab').textContent   = tr('Display name','Nombre para mostrar');
+  $('pinLab').textContent    = tr('PIN (default 2580)','PIN (predeterminado 2580)');
+  $('btnPlanSave').textContent = tr('Save Plan','Guardar plan');
+  $('btnPlanClear').textContent= tr('Clear','Borrar');
+  $('tabHome').textContent   = tr('Home','Inicio');
+  $('tabCheck').textContent  = tr('Check-In','Autoeval.');
+  $('tabPlan').textContent   = tr('Plan','Plan');
+  $('tabRes').textContent    = tr('Resources','Recursos');
+  $('tabProf').textContent   = tr('Profile','Perfil');
+  $('scoreChip').textContent = tr('Risk','Riesgo')+' '+S.risk+'% • '+tr('Trust','Confianza')+' '+S.trust+'%';
+  buildQs();
+  drawRes();
 }
-function openAsk(){ ensureAskModal(); $('askModal').classList.remove('hidden-soft'); $('askInput')?.focus(); document.body.style.overflow='hidden'; }
-function closeAsk(){ $('askModal').classList.add('hidden-soft'); document.body.style.overflow='auto'; }
-$('askFab').onclick=openAsk; $('askChipCheck').onclick=openAsk; $('askChipPlan').onclick=openAsk;
 
-/* ===================== BACK BUTTON ===================== */
-$('btnBack').onclick=()=>{
-  closeAsk();          // close Ask modal if open
-  setTab('home');      // go to Home
-  window.scrollTo(0,0);
-};
-
-/* ===================== INIT & APPLY ===================== */
-function applyAll(){
-  applyTheme();
-  applyLang();
-  buildQuestions();
-  updateScoresAndFeedback();
-  renderPlans();
-  renderResources();
-  applySafetyAckVisibility();
+/* ================ SAVE/LOAD ================ */
+function saveState(){
+  localStorage.setItem('timeout_pin',S.pin);
+  localStorage.setItem('timeout_name',S.name);
+  localStorage.setItem('timeout_lang',S.lang);
+  localStorage.setItem('timeout_unlocked',JSON.stringify(S.unlocked));
+  localStorage.setItem('timeout_answers',JSON.stringify(S.answers));
+  localStorage.setItem('timeout_plan',S.plan||$('planNote').value||'');
 }
-function init(){
-  tickClock(); (function(){ $('hdrWeather').textContent = '⛅'; })();
-  seedResourcesIfEmpty();
-  if(!Array.isArray(core.plans) || core.plans.length===0){
-    core.plans=[{title:T('Grab & Go Bag','Bolsa de emergencia'), steps:[T('ID & documents','Identificación y documentos'),T('Keys & cash','Llaves y efectivo'),T('Medications','Medicamentos'),T('Change of clothes','Cambio de ropa'),T('Backup phone numbers','Números de teléfono de respaldo')]}];
-    saveLocal();
-  }
-  applyAll();
-}
-init();
 
-/* ===================== VISIBILITY AUTO-LOCK (dup safe) ===================== */
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) lockToDecoy(); });
+/* Init */
+applyLang();
+drawRes();
+if(S.unlocked) afterUnlock();
 
-/* ===================== QUICK EXIT / PANIC (duplicate guards) ===================== */
-let qeGuard=false, pcGuard=false;
-document.getElementById('btnQuickExit').onclick=()=>{ if(qeGuard) return; qeGuard=true; setTimeout(()=>qeGuard=false,500); location.href='https://www.google.com/'; };
-document.getElementById('btnPanic').onclick=()=>{ if(pcGuard) return; pcGuard=true; setTimeout(()=>pcGuard=false,700);
-  localStorage.removeItem('timeout_profile_name'); 
-  localStorage.removeItem('timeout_answers'); 
-  localStorage.removeItem('timeout_resources'); 
-  localStorage.removeItem('timeout_plans'); 
-  localStorage.removeItem('timeout_theme');
-  core.name='Anonymous'; core.answers={}; core.resources=[]; core.plans=[]; core.theme='blue';
-  saveLocal(); applyTheme(); lockToDecoy(); 
-};
+/* Ensure EXIT visible on all pages (already in header). Ensure back stays in-app via stack. */
 </script>
 </body>
 </html>
