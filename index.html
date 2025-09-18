@@ -1,17 +1,16 @@
 <!doctype html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TimeOut</title>
 <style>
   :root{
-    --brand:#6b8e23;      /* olive */
-    --rose:#e11d48;       /* rose */
-    --ink:#1f2937;
+    --brand:#6b8e23;      /* olive accent */
+    --rose:#e11d48;       /* EXIT / danger */
+    --ink:#1f2937;        /* text */
     --muted:#6b7280;
-    --paper:#fdfcf7;      /* calm background */
+    --paper:#fcfbf7;      /* warm light bg */
     --card:#ffffff;
     --edge:#e5e7eb;
     --ok:#16a34a;
@@ -20,16 +19,16 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif}
-  .app{max-width:480px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
+  .app{max-width:800px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
   header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--edge);z-index:20}
-  .bar{display:flex;align-items:center;gap:.5rem;padding:.75rem}
+  .bar{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem}
   .title{margin:0;font-size:1rem;font-weight:800;letter-spacing:.2px;user-select:none}
   .spacer{flex:1}
-  .btn{appearance:none;border:1px solid var(--edge);background:#fff;color:var(--ink);padding:.5rem .75rem;border-radius:.6rem;font-weight:600;cursor:pointer}
+  .btn{appearance:none;border:1px solid var(--edge);background:#fff;color:var(--ink);padding:.5rem .8rem;border-radius:.6rem;font-weight:600;cursor:pointer}
   .btn:active{transform:translateY(1px)}
   .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
   .btn-ghost{border-color:transparent;background:transparent}
-  .btn-danger{background:var(--bad);border-color:var(--bad);color:#fff}
+  .btn-danger{background:var(--rose);border-color:var(--rose);color:#fff}
   .chip{font-size:.8rem;padding:.25rem .5rem;border-radius:999px;border:1px solid var(--edge);background:#fff}
   .lang{font-size:.9rem}
   main{flex:1;overflow:auto;padding:1rem}
@@ -44,17 +43,40 @@
   .nav button{flex:1;padding:.75rem 0;font-weight:700;border:0;background:transparent;color:var(--ink)}
   .nav .on{color:var(--brand)}
   .muted{color:var(--muted)}
-  .hidden{display:none}/* decoy timer */ .timer{font-variant-numeric:tabular-nums;letter-spacing:.5px;font-size:3rem;font-weight:900;text-align:center} .pill{padding:.35rem .6rem;border:1px solid var(--edge);border-radius:999px;background:#fff}
+  .hidden{display:none}
 
-/* yes/no */ .yn{display:flex;gap:.5rem} .yn .ynbtn{flex:1} .selected{outline:2px solid var(--brand)}
+  /* decoy timer */
+  .timer{font-variant-numeric:tabular-nums;letter-spacing:.5px;font-size:3rem;font-weight:900;text-align:center}
+  .pill{padding:.35rem .6rem;border:1px solid var(--edge);border-radius:999px;background:#fff}
 
-/* bars */ .meter{display:flex;gap:.5rem;align-items:center;font-size:.9rem} .barline{flex:1;height:.5rem;background:#f3f4f6;border-radius:999px;overflow:hidden} .barfill{height:100%;background:var(--brand);width:0%}
+  /* yes/no */
+  .yn{display:flex;gap:.5rem}
+  .yn .ynbtn{flex:1}
+  .selected{outline:2px solid var(--brand)}
 
-/* synopsis */ .syn{padding:1rem;border-radius:1rem;border:1px solid #fde2e2;background:#fff7f7} .syn.good{border-color:#dcfce7;background:#f0fdf4} .syn.mid{border-color:#fef3c7;background:#fffbeb} .syn.bad{border-color:#ffe4e6;background:#fff1f2} </style>
+  /* meters */
+  .meter{display:flex;gap:.5rem;align-items:center;font-size:.9rem}
+  .barline{flex:1;height:.5rem;background:#f3f4f6;border-radius:999px;overflow:hidden}
+  .barfill{height:100%;background:var(--brand);width:0%}
 
+  /* synopsis */
+  .syn{padding:1rem;border-radius:1rem;border:1px solid #fde2e2;background:#fff7f7}
+  .syn.good{border-color:#dcfce7;background:#f0fdf4}
+  .syn.mid{border-color:#fef3c7;background:#fffbeb}
+  .syn.bad{border-color:#ffe4e6;background:#fff1f2}
+
+  @media (min-width:600px){
+    .title{font-size:1.1rem}
+    .timer{font-size:3.5rem}
+    main{padding:1.25rem}
+  }
+</style>
 </head>
 <body>
-<div class="app" id="app">  <!-- Top bar -->  <header>
+<div class="app" id="app">
+
+  <!-- Top bar -->
+  <header>
     <div class="bar">
       <button id="btnBack" class="btn btn-ghost" title="Back" aria-label="Back">←</button>
       <h1 id="appTitle" class="title">TimeOut</h1>
@@ -65,131 +87,142 @@
       </select>
       <button id="btnExit" class="btn btn-danger" aria-label="Exit">EXIT</button>
     </div>
-  </header>  <main id="main"><!-- HOME (Decoy first) -->
-<section id="home" class="panel active">
-  <div class="stack">
-    <!-- Decoy card -->
-    <div class="card stack" id="decoy">
-      <div class="timer" id="clock">25:00</div>
-      <div class="row">
-        <span id="rounds" class="pill">Pomodoro • 1</span>
-        <span class="pill" id="statusPill">Focus</span>
-      </div>
-      <div class="rowc">
-        <button class="btn" id="btnStart">Start</button>
-        <button class="btn" id="btnPause">Pause</button>
-        <button class="btn" id="btnReset">Reset</button>
-      </div>
-      <div class="muted" id="hint" style="text-align:center">
-        Long-press the title to unlock. / Mantén presionado el título para desbloquear.
-      </div>
-    </div>
+  </header>
 
-    <!-- Unlocked summary appears only after PIN -->
-    <div id="homeUnlocked" class="card stack hidden">
-      <div class="row">
-        <strong id="greet">Welcome, Anonymous</strong>
-        <span class="chip">v1.3.5</span>
-      </div>
-      <div class="meter">
-        <span id="riskLab">Risk</span>
-        <div class="barline"><div id="riskBar" class="barfill" style="background:var(--bad)"></div></div>
-        <strong id="riskNum">0%</strong>
-      </div>
-      <div class="meter">
-        <span id="trustLab">Trust</span>
-        <div class="barline"><div id="trustBar" class="barfill"></div></div>
-        <strong id="trustNum">100%</strong>
-      </div>
-      <div class="rowc">
-        <button class="btn btn-primary" onclick="nav('checkin')" id="goCheck">Go to Check-In</button>
-        <button class="btn" onclick="nav('plan')" id="goPlan">Safety Plan</button>
-      </div>
-    </div>
-  </div>
-</section>
+  <main id="main">
 
-<!-- CHECK-IN -->
-<section id="checkin" class="panel">
-  <div class="stack">
-    <div class="card stack">
-      <div class="row">
-        <strong id="checkTitle">Check-In</strong>
-        <span class="chip" id="scoreChip">Risk 0% • Trust 100%</span>
-      </div>
-      <p class="muted" id="checkHint">Answer each question. Buttons will highlight; guidance shows under each.</p>
-      <div id="qList" class="stack"></div>
+    <!-- HOME (Decoy first) -->
+    <section id="home" class="panel active">
+      <div class="stack">
+        <!-- Decoy card -->
+        <div class="card stack" id="decoy">
+          <div class="timer" id="clock">25:00</div>
+          <div class="row">
+            <span id="rounds" class="pill">Pomodoro • 1</span>
+            <span class="pill" id="statusPill">Focus</span>
+          </div>
+          <div class="rowc">
+            <button class="btn" id="btnStart">Start</button>
+            <button class="btn" id="btnPause">Pause</button>
+            <button class="btn" id="btnReset">Reset</button>
+          </div>
+          <div class="muted" id="hint" style="text-align:center">
+            Long-press the title to unlock. / Mantén presionado el título para desbloquear.
+          </div>
+        </div>
 
-      <div id="synWrap" class="syn hidden" aria-live="polite">
-        <div id="synBody"></div>
-        <div id="disc" class="muted" style="margin-top:.5rem;font-size:.85rem"></div>
+        <!-- Unlocked summary appears only after PIN -->
+        <div id="homeUnlocked" class="card stack hidden">
+          <div class="row">
+            <strong id="greet">Welcome, Anonymous</strong>
+            <span class="chip">v1.3.5</span>
+          </div>
+          <div class="meter">
+            <span id="riskLab">Risk</span>
+            <div class="barline"><div id="riskBar" class="barfill" style="background:var(--bad)"></div></div>
+            <strong id="riskNum">0%</strong>
+          </div>
+          <div class="meter">
+            <span id="trustLab">Trust</span>
+            <div class="barline"><div id="trustBar" class="barfill"></div></div>
+            <strong id="trustNum">100%</strong>
+          </div>
+          <div class="rowc">
+            <button class="btn btn-primary" onclick="nav('checkin')" id="goCheck">Go to Check-In</button>
+            <button class="btn" onclick="nav('plan')" id="goPlan">Safety Plan</button>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="row">
-        <button class="btn" id="btnDemo">Load Demo Answers</button>
-        <button class="btn btn-primary" id="btnSave">Save Check-In</button>
+    <!-- CHECK-IN -->
+    <section id="checkin" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <div class="row">
+            <strong id="checkTitle">Check-In</strong>
+            <span class="chip" id="scoreChip">Risk 0% • Trust 100%</span>
+          </div>
+          <p class="muted" id="checkHint">Answer each question. Buttons will highlight; guidance shows under each.</p>
+          <div id="qList" class="stack"></div>
+
+          <div id="synWrap" class="syn hidden" aria-live="polite">
+            <div id="synBody"></div>
+            <div id="disc" class="muted" style="margin-top:.5rem;font-size:.85rem"></div>
+          </div>
+
+          <div class="row">
+            <button class="btn" id="btnDemo">Load Demo Answers</button>
+            <button class="btn btn-primary" id="btnSave">Save Check-In</button>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- SAFETY PLAN -->
-<section id="plan" class="panel">
-  <div class="stack">
-    <div class="card stack">
-      <strong id="planTitle">Safety Plan</strong>
-      <div class="grid2">
-        <button class="btn" id="btnQuick">Quick Plan</button>
-        <button class="btn" id="btnTemplate">Template</button>
+    <!-- SAFETY PLAN -->
+    <section id="plan" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <strong id="planTitle">Safety Plan</strong>
+          <div class="grid2">
+            <button class="btn" id="btnQuick">Quick Plan</button>
+            <button class="btn" id="btnTemplate">Template</button>
+          </div>
+          <textarea id="planNote" rows="8" class="card" placeholder="Plan notes…" style="width:100%;"></textarea>
+          <div class="row">
+            <button class="btn btn-primary" id="btnPlanSave">Save Plan</button>
+            <button class="btn" id="btnPlanClear">Clear</button>
+          </div>
+        </div>
       </div>
-      <textarea id="planNote" rows="8" class="card" placeholder="Plan notes…" style="width:100%;"></textarea>
-      <div class="row">
-        <button class="btn btn-primary" id="btnPlanSave">Save Plan</button>
-        <button class="btn" id="btnPlanClear">Clear</button>
+    </section>
+
+    <!-- RESOURCES -->
+    <section id="resources" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <strong id="resTitle">Resources</strong>
+          <div id="resList" class="stack"></div>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- RESOURCES -->
-<section id="resources" class="panel">
-  <div class="stack">
-    <div class="card stack">
-      <strong id="resTitle">Resources</strong>
-      <div id="resList" class="stack"></div>
-    </div>
-  </div>
-</section>
-
-<!-- PROFILE -->
-<section id="profile" class="panel">
-  <div class="stack">
-    <div class="card stack">
-      <strong id="profTitle">Profile</strong>
-      <label>
-        <div class="muted" id="nameLab">Display name</div>
-        <input id="nameInput" class="card" style="width:100%;padding:.6rem" placeholder="Anonymous">
-      </label>
-      <label>
-        <div class="muted" id="pinLab">PIN (default 2580)</div>
-        <input id="pinInput" class="card" style="width:100%;padding:.6rem" placeholder="2580" inputmode="numeric" maxlength="8">
-      </label>
-      <div class="row">
-        <button class="btn btn-primary" id="btnProfSave">Save Profile</button>
-        <button class="btn" id="btnWipe">Panic: Clear Data</button>
+    <!-- PROFILE -->
+    <section id="profile" class="panel">
+      <div class="stack">
+        <div class="card stack">
+          <strong id="profTitle">Profile</strong>
+          <label>
+            <div class="muted" id="nameLab">Display name</div>
+            <input id="nameInput" class="card" style="width:100%;padding:.6rem" placeholder="Anonymous">
+          </label>
+          <label>
+            <div class="muted" id="pinLab">PIN (default 2580)</div>
+            <input id="pinInput" class="card" style="width:100%;padding:.6rem" placeholder="2580" inputmode="numeric" maxlength="8">
+          </label>
+          <div class="row">
+            <button class="btn btn-primary" id="btnProfSave">Save Profile</button>
+            <button class="btn" id="btnWipe">Panic: Clear Data</button>
+          </div>
+          <div class="muted" style="font-size:.85rem">Language / Idioma: <span class="chip">EN/ES</span> — use the top-right selector.</div>
+        </div>
       </div>
-      <div class="muted" style="font-size:.85rem">Language / Idioma: <span class="chip">EN/ES</span> — set via top-right selector.</div>
-    </div>
-  </div>
-</section>
+    </section>
 
-  </main>  <!-- Bottom nav (hidden until unlocked) -->  <nav class="nav" id="bottomNav">
+  </main>
+
+  <!-- Bottom nav (hidden until unlocked) -->
+  <nav class="nav" id="bottomNav" style="display:none">
     <button id="tabHome" class="on" onclick="nav('home')">Home</button>
     <button id="tabCheck" onclick="nav('checkin')">Check-In</button>
     <button id="tabPlan" onclick="nav('plan')">Plan</button>
     <button id="tabRes" onclick="nav('resources')">Resources</button>
     <button id="tabProf" onclick="nav('profile')">Profile</button>
-  </nav></div><script>
+  </nav>
+
+</div>
+
+<script>
 /* ================ STATE ================ */
 const S = {
   pin: localStorage.getItem('timeout_pin') || '2580',
@@ -217,7 +250,7 @@ function setNavVisible(on){ $('bottomNav').style.display = on ? 'flex' : 'none';
 
 /* ================ NAV ================ */
 function nav(id){
-  if(!S.unlocked && id!=='home') return; // guard: no entry before unlock
+  if(!S.unlocked && id!=='home') return; // locked gate
   showPanel(id);
   if(S.stack.at(-1)!==id) S.stack.push(id);
 }
@@ -238,23 +271,31 @@ $('btnPause').onclick=()=>{ running=false; clearInterval(tid); };
 $('btnReset').onclick=()=>{ running=false; clearInterval(tid); t=25*60; drawTimer(); $('statusPill').textContent=tr('Focus','Enfoque'); };
 drawTimer();
 
-/* ================ UNLOCK: long-press title (robust) ================ */
-let lpTimer=null; const LP_MS=800; const titleEl = $('appTitle');
-function startLP(){ clearTimeout(lpTimer); lpTimer=setTimeout(pinPrompt,LP_MS); }
-['pointerdown','mousedown','touchstart'].forEach(ev=> titleEl.addEventListener(ev,startLP,{passive:true}));
-['pointerup','pointercancel','mouseup','mouseleave','touchend','touchcancel'].forEach(ev=> titleEl.addEventListener(ev,()=>clearTimeout(lpTimer)));
-
+/* ================ UNLOCK: robust long-press (~800ms) ================ */
 function pinPrompt(){
   const p = prompt(tr('Enter PIN to unlock','Ingresa el PIN para desbloquear'));
   if(p===null) return;
   if(p===S.pin){ S.unlocked=true; save(); afterUnlock(); }
   else { alert(tr('Incorrect PIN','PIN incorrecto')); }
 }
+(function(){ // robust across iOS/Android/Desktop
+  const el = $('appTitle');
+  let t = null;
+  const start = () => { t = setTimeout(pinPrompt, 800); };
+  const clear = () => { if (t) clearTimeout(t); t = null; };
+  el.addEventListener('mousedown', start);
+  el.addEventListener('mouseup', clear);
+  el.addEventListener('mouseleave', clear);
+  el.addEventListener('touchstart', start, {passive:true});
+  el.addEventListener('touchend', clear);
+  el.addEventListener('touchcancel', clear);
+})();
+
 function afterUnlock(){
   $('homeUnlocked').classList.remove('hidden');
   $('greet').textContent = tr('Welcome','Bienvenido/a')+', '+S.name;
   setNavVisible(true);
-  updateMeters();
+  updateScores();
 }
 
 /* Auto-hide sensitive when backgrounded */
@@ -267,7 +308,7 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
-/* ================ CHECK-IN (13 Qs) ================ */
+/* ================ CHECK-IN (16 Qs) ================ */
 const Q_EN = [
 "Do you feel safe in your home right now?",
 "Has your partner, or anyone close to you, threatened to harm you recently?",
@@ -281,7 +322,10 @@ const Q_EN = [
 "Has your partner ever harmed pets or threatened to harm them?",
 "Do you believe your partner has access to weapons?",
 "Have you been forced or pressured to keep abuse a secret?",
-"Do you worry that leaving could make things more dangerous for you?"
+"Do you worry that leaving could make things more dangerous for you?",
+"Do you have a safe place you could go on short notice?",
+"Is alcohol or drug use making conflicts feel more dangerous?",
+"Have incidents become more frequent or severe in the last 3 months?"
 ];
 const Q_ES = [
 "¿Te sientes seguro/a en tu hogar en este momento?",
@@ -296,77 +340,92 @@ const Q_ES = [
 "¿Tu pareja ha lastimado o amenazado con lastimar mascotas?",
 "¿Crees que tu pareja tiene acceso a armas?",
 "¿Te han obligado o presionado a mantener en secreto el abuso?",
-"¿Te preocupa que irte pueda hacer la situación más peligrosa para ti?"
+"¿Te preocupa que irte pueda hacer la situación más peligrosa para ti?",
+"¿Tienes un lugar seguro al que puedas ir con poco aviso?",
+"¿El consumo de alcohol o drogas hace que los conflictos sean más peligrosos?",
+"¿Los incidentes se han vuelto más frecuentes o graves en los últimos 3 meses?"
 ];
 
 const FB_EN = {
-q1:{yes:"Good to hear you feel safe right now. Safety can change quickly; stay aware. Keep simple exit options in mind.",
-    no:"Feeling unsafe at home is a major warning sign. Prioritize immediate safety and identify exits/safe rooms. Consider contacting trusted people or a hotline."},
-q2:{yes:"Threats are serious and can precede physical harm. Take them at face value, even if framed as jokes. Plan quick exits and safe contacts.",
-    no:"Positive there were no recent threats. Watch for intimidation or control that can replace direct threats."},
-q3:{yes:"Recent physical harm is a critical red flag. Your risk is elevated; urgent protection may be needed. If you feel unsafe, call emergency services.",
-    no:"Good that no recent physical harm occurred. Abuse can be emotional, financial, or psychological."},
-q4:{yes:"Monitoring your devices or movements is a strong control tactic. Use safer devices and review shared accounts. Limit sensitive content on your phone.",
-    no:"No monitoring noticed is positive. Stay alert for unusual device behavior or unexpected logins."},
-q5:{yes:"Children exposed to violence face emotional and physical risks. Include them in your plan (school, caregiver, emergency contacts).",
-    no:"Not having children at risk reduces immediate concern, but your safety remains vital."},
-q6:{yes:"Being prevented from leaving is coercive control and may escalate. Identify safe exits and a code word with trusted contacts.",
-    no:"Freedom of movement is protective. Stay mindful if new restrictions appear."},
-q7:{yes:"Isolation increases risk. Try small steps to reconnect with supportive people. Even one trusted contact helps.",
-    no:"Staying connected is protective. Keep relationships strong."},
-q8:{yes:"Financial control can trap you in unsafe situations. Discreetly set aside resources or contact advocacy programs.",
-    no:"Financial independence is protective. Safeguard accounts."},
-q9:{yes:"Sexual coercion violates consent. You have the right to bodily autonomy. Seek medical or advocacy support if needed.",
-    no:"Not experiencing this is positive. Consent must always be freely given."},
-q10:{yes:"Harming or threatening pets signals escalation. Include pets in your safety plan. Consider safe shelter options for animals.",
-     no:"Good to hear. Stay aware; threats to animals can emerge later."},
-q11:{yes:"Access to weapons greatly increases lethal risk. Prioritize urgent safety planning and consider contacting authorities.",
-     no:"No weapons access lowers immediate risk. Stay aware of changes."},
-q12:{yes:"Pressure to keep abuse secret isolates you. Reaching out to trusted people is a safety step.",
-     no:"Not being pressured into secrecy is positive."},
-q13:{yes:"Leaving can be the most dangerous time. Plan carefully and seek advocate support to lower risk.",
-     no:"Not fearing increased danger when leaving is encouraging. Still, have a plan."}
+q1:{yes:"Glad you feel safe right now. Keep simple exit options in mind; safety can change quickly.",
+    no:"Feeling unsafe at home is a major warning sign. Prioritize immediate safety and identify exits/safe rooms."},
+q2:{yes:"Threats are serious and may precede harm. Take them literally, even if framed as ‘jokes’.",
+    no:"Good there are no recent threats. Watch for intimidation or control behaviors."},
+q3:{yes:"Recent physical harm is critical. Consider urgent protection and medical/advocacy support.",
+    no:"No recent physical harm noted; remember emotional and financial abuse still matter."},
+q4:{yes:"Monitoring devices/movement is coercive. Use safer devices and review shared accounts.",
+    no:"No monitoring noticed is positive—stay alert for unusual logins or settings."},
+q5:{yes:"Children at risk increases urgency. Include school/caregiver and emergency contacts in your plan.",
+    no:"No children at risk reduces immediate concern; your safety still matters."},
+q6:{yes:"Being prevented from leaving is coercive control. Plan safe exits and a code word with contacts.",
+    no:"Freedom of movement is protective. Note any new restrictions."},
+q7:{yes:"Isolation increases risk. Reconnect with one trusted person if you can.",
+    no:"Staying connected is protective. Keep support active."},
+q8:{yes:"Financial control traps people. Consider discreet savings and seek advocacy programs.",
+    no:"Financial independence is protective. Safeguard accounts/passwords."},
+q9:{yes:"Sexual coercion violates consent. You have the right to bodily autonomy; support is available.",
+    no:"Not experiencing sexual pressure is positive. Consent must be freely given."},
+q10:{yes:"Harming/threatening pets is escalation. Add pets to your safety plan and consider safe shelter.",
+     no:"Good to hear. Stay aware if threats to animals appear later."},
+q11:{yes:"Weapon access increases lethal risk. Prioritize urgent planning and consider authorities.",
+     no:"No weapon access reduces immediate risk but remain vigilant."},
+q12:{yes:"Pressure to keep abuse secret isolates you. Reaching out is a safety step.",
+     no:"Not being forced to hide abuse is protective."},
+q13:{yes:"Leaving can be the most dangerous time. Plan carefully and seek advocate support.",
+     no:"Not fearing increased danger when leaving is encouraging. Still, prepare."},
+q14:{yes:"Having a safe place is protective. Identify routes/transport and backups.",
+     no:"Consider identifying at least one safe place you could go quickly."},
+q15:{yes:"Substance use can escalate conflict. Plan safer times/places and supports.",
+     no:"Lower substance-related escalation is protective—stay aware."},
+q16:{yes:"Increasing frequency/severity signals escalation. Prioritize safety planning now.",
+     no:"No recent escalation is encouraging; continue monitoring patterns."}
 };
 const FB_ES = {
-q1:{yes:"Es bueno que te sientas seguro/a ahora. La seguridad puede cambiar; mantente atento/a. Ten salidas simples en mente.",
-    no:"Sentirte inseguro/a en casa es una señal importante. Prioriza tu seguridad inmediata e identifica salidas/cuartos seguros."},
-q2:{yes:"Las amenazas son serias y pueden preceder el daño físico. Tómalas literalmente, aunque parezcan bromas.",
-    no:"Es positivo que no haya amenazas recientes. Observa intimidación o control."},
-q3:{yes:"El daño físico reciente es una alerta crítica. Tu riesgo es alto; podrías necesitar protección urgente.",
-    no:"Es bueno no haber sufrido daño físico reciente. El abuso también puede ser emocional o financiero."},
-q4:{yes:"Monitorear dispositivos o movimientos es un control fuerte. Usa dispositivos más seguros y revisa cuentas compartidas.",
-    no:"No notar monitoreo es positivo. Vigila comportamientos extraños del móvil o inicios de sesión."},
-q5:{yes:"Los niños expuestos a violencia enfrentan riesgos. Inclúyelos en tu plan (escuela, cuidador, contactos).",
-    no:"No tener hijos en riesgo reduce la preocupación inmediata."},
-q6:{yes:"Impedirte salir es control coercitivo y puede escalar. Define salidas seguras y una palabra clave con contactos.",
-    no:"La libertad de movimiento es protectora."},
-q7:{yes:"La aislación aumenta el riesgo. Da pasos pequeños para reconectar con apoyos.",
-    no:"Seguir conectado/a es protector."},
-q8:{yes:"El control financiero puede atraparte. Considera reservar recursos discretamente o buscar asesoría.",
-    no:"La independencia financiera protege."},
-q9:{yes:"La coerción sexual viola el consentimiento. Tienes derecho a tu autonomía corporal.",
-    no:"No vivir esto es positivo."},
-q10:{yes:"Dañar o amenazar mascotas indica escalamiento. Inclúyelas en tu plan.",
-     no:"Es buena noticia. Mantente atento/a."},
+q1:{yes:"Bien que te sientas seguro/a ahora. La seguridad puede cambiar; ten salidas simples en mente.",
+    no:"Sentirte inseguro/a en casa es una gran alerta. Prioriza salidas y cuartos seguros."},
+q2:{yes:"Las amenazas son serias y pueden preceder daño. Tómalas literalmente.",
+    no:"Es positivo que no haya amenazas recientes. Observa conductas de control."},
+q3:{yes:"Daño físico reciente es crítico. Considera protección urgente y apoyo médico/asesoría.",
+    no:"Sin daño físico reciente; el abuso emocional/financiero también importa."},
+q4:{yes:"Monitorear dispositivos/movimiento es coercitivo. Usa equipos más seguros y revisa cuentas.",
+    no:"No notar monitoreo es positivo; vigila inicios de sesión extraños."},
+q5:{yes:"Niños en riesgo aumenta la urgencia. Inclúyelos en el plan (escuela, cuidador, contactos).",
+    no:"No hay niños en riesgo; tu seguridad sigue siendo clave."},
+q6:{yes:"Impedirte salir es control coercitivo. Define salidas y palabra clave con contactos.",
+    no:"La libertad de movimiento protege. Observa si surgen restricciones."},
+q7:{yes:"La aislación aumenta el riesgo. Reconecta al menos con una persona de confianza.",
+    no:"Seguir conectado/a protege. Mantén el apoyo activo."},
+q8:{yes:"El control financiero atrapa. Considera ahorros discretos y busca asesoría.",
+    no:"La independencia financiera protege. Asegura cuentas/contraseñas."},
+q9:{yes:"La coerción sexual viola el consentimiento. Hay apoyo disponible.",
+    no:"No sentir presión sexual es positivo. El consentimiento debe ser libre."},
+q10:{yes:"Dañar/amenazar mascotas es escalamiento. Inclúyelas en tu plan; busca refugio para animales.",
+     no:"Bien. Mantente atento/a si aparecen amenazas a mascotas."},
 q11:{yes:"El acceso a armas aumenta el riesgo letal. Prioriza planificación urgente.",
-     no:"No tener acceso a armas reduce el riesgo inmediato."},
-q12:{yes:"La presión para guardar el abuso en secreto te aísla. Contactar a alguien de confianza es un paso de seguridad.",
-     no:"No estar obligado/a al silencio es positivo."},
+     no:"Sin acceso a armas reduce el riesgo inmediato; sigue atento/a."},
+q12:{yes:"La presión para guardar secreto te aísla. Hablar con alguien es un paso de seguridad.",
+     no:"No estar obligado/a al silencio protege."},
 q13:{yes:"Irte puede ser el momento más peligroso. Planea con cuidado y busca apoyo.",
-     no:"No temer mayor peligro al irte es alentador."}
+     no:"No temer más peligro al irte es alentador; aun así prepárate."},
+q14:{yes:"Tener un lugar seguro protege. Identifica rutas/transporte y alternativas.",
+     no:"Considera definir al menos un lugar seguro para ir rápidamente."},
+q15:{yes:"El uso de sustancias puede escalar el conflicto. Planifica momentos/espacios más seguros.",
+     no:"Menor escalada por sustancias protege—sigue atento/a."},
+q16:{yes:"Mayor frecuencia/gravedad indica escalamiento. Prioriza la planificación ahora.",
+     no:"Sin escalamiento reciente es alentador; sigue monitoreando."}
 };
 
 const SYN_EN = {
-  high:"Your answers suggest you may be facing serious and immediate risks. Your safety is a real concern. Please consider reaching out right away for support — if you ever feel in danger, call 911 or the National DV Hotline (1-800-799-7233). You are not alone; many have found help through hotlines, shelters, and trusted friends. Use this TimeOut to think about resources and next steps. Remember, you are not alone.",
-  mid:"Your answers suggest some challenges and warning signs. While the risk may not feel urgent, it’s important to stay prepared and watch for changes. Strengthen your support system and review your safety plan. Support is available whenever you need it. Use this TimeOut to reflect on your options and resources. Remember, you are not alone.",
-  low:"Your answers suggest fewer immediate risks, which is encouraging. Even so, circumstances can shift quickly, so staying aware and prepared is wise. This is a good time to review resources and line up support you can rely on if things change. Use this TimeOut to focus on your strengths and plan ahead. Remember, you are not alone.",
-  disc:"Disclaimer: This guidance is for general safety awareness and is not a substitute for professional advice. If you are in immediate danger, call 911 or the National Domestic Violence Hotline at 1-800-799-7233."
+  high:"Your answers suggest serious, immediate risks. Your safety is a real concern. If you’re in danger, call 911 or the National DV Hotline (1-800-799-7233). Support is available through hotlines, shelters, and trusted people. Use this TimeOut to consider resources and next steps. Remember, you are not alone.",
+  mid:"Your answers show warning signs. Risk may not feel urgent, but staying prepared matters. Strengthen your support system and review your safety plan. Use this TimeOut to reflect on options and resources. You are not alone.",
+  low:"Your answers suggest fewer immediate risks. Situations can shift; staying aware and prepared is wise. Use this TimeOut to line up support and review resources. You are not alone.",
+  disc:"Disclaimer: This guidance supports safety awareness and is not a substitute for professional advice. If you are in immediate danger, call 911 or the National Domestic Violence Hotline at 1-800-799-7233."
 };
 const SYN_ES = {
-  high:"Tus respuestas sugieren riesgos serios e inmediatos. Tu seguridad es una preocupación real. Considera buscar apoyo de inmediato; si estás en peligro, llama al 911 o a la Línea Nacional contra la Violencia Doméstica (1-800-799-7233). No estás solo/a; muchas personas han encontrado ayuda. Usa este TimeOut para pensar en recursos y próximos pasos. Recuerda: no estás solo/a.",
-  mid:"Tus respuestas indican señales de alerta y algunos desafíos. Aunque el riesgo no parezca urgente, es importante estar preparado/a y observar cambios. Fortalece tu red de apoyo y revisa tu plan. Usa este TimeOut para reflexionar sobre tus opciones. Recuerda: no estás solo/a.",
-  low:"Tus respuestas sugieren pocos riesgos inmediatos, lo cual es alentador. Aun así, la situación puede cambiar; mantenerse alerta y preparado/a es prudente. Usa este TimeOut para enfocarte en tus fortalezas y planear. Recuerda: no estás solo/a.",
-  disc:"Aviso: Esta orientación es para concienciación general y no reemplaza el consejo profesional. Si estás en peligro inmediato, llama al 911 o a la Línea Nacional contra la Violencia Doméstica: 1-800-799-7233."
+  high:"Tus respuestas sugieren riesgos serios e inmediatos. Tu seguridad es una preocupación real. Si estás en peligro, llama al 911 o a la Línea Nacional contra la Violencia Doméstica (1-800-799-7233). Hay apoyo en líneas de ayuda, refugios y personas de confianza. Usa este TimeOut para considerar recursos y próximos pasos. No estás solo/a.",
+  mid:"Tus respuestas muestran señales de alerta. Aunque el riesgo no parezca urgente, estar preparado/a es importante. Fortalece tu red de apoyo y revisa tu plan. Usa este TimeOut para reflexionar sobre opciones y recursos. No estás solo/a.",
+  low:"Tus respuestas sugieren pocos riesgos inmediatos. La situación puede cambiar; mantenerse atento/a y preparado/a es prudente. Usa este TimeOut para organizar apoyos y revisar recursos. No estás solo/a.",
+  disc:"Aviso: Esta orientación apoya la conciencia de seguridad y no reemplaza el consejo profesional. Si estás en peligro inmediato, llama al 911 o a la Línea Nacional contra la Violencia Doméstica: 1-800-799-7233."
 };
 function questions(){ return S.lang==='es'?Q_ES:Q_EN; }
 function fb(){ return S.lang==='es'?FB_ES:FB_EN; }
@@ -400,8 +459,8 @@ function renderFB(k,val){
   el.textContent=item[val]||'';
 }
 function computeRisk(){
-  let risky=0,total=13;
-  for(let i=1;i<=13;i++){
+  let risky=0,total=questions().length;
+  for(let i=1;i<=total;i++){
     const k='q'+i, v=S.answers[k];
     if(!v) continue;
     if(i===1){ if(v==='no') risky++; } else { if(v==='yes') risky++; }
@@ -432,7 +491,7 @@ function updateScores(){
     wrap.classList.add('hidden');
   }
 }
-/* yn button toggles */
+/* yn toggles + highlight */
 document.addEventListener('click',(e)=>{
   const b=e.target.closest('.ynbtn'); if(!b) return;
   const k=b.dataset.k, v=b.dataset.v;
@@ -447,7 +506,7 @@ $('btnDemo').onclick=()=>{
   S.answers={
     q1:'no', q2:'yes', q3:'no', q4:'yes', q5:'no',
     q6:'yes', q7:'yes', q8:'no', q9:'no', q10:'no',
-    q11:'no', q12:'yes', q13:'yes'
+    q11:'no', q12:'yes', q13:'yes', q14:'no', q15:'yes', q16:'yes'
   };
   save(); buildQs();
 };
@@ -576,11 +635,13 @@ function save(){
   localStorage.setItem('timeout_plan',S.plan||$('planNote').value||'');
 }
 
-/* INIT */
+/* INIT: force locked every load + reliable start on decoy */
+S.unlocked = false;  // ← always start locked (fixes “already unlocked” issue)
+save();
 applyLang();
 drawRes();
-setNavVisible(S.unlocked);
-if(S.unlocked) afterUnlock();
-showPanel('home'); // ensure decoy first
-</script></body>
+setNavVisible(false);   // keep tabs hidden until PIN
+showPanel('home');      // ensure decoy first
+</script>
+</body>
 </html>
