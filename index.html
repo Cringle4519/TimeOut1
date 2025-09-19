@@ -228,7 +228,7 @@ const S = {
   pin: localStorage.getItem('timeout_pin') || '2580',
   name: localStorage.getItem('timeout_name') || 'Anonymous',
   lang: localStorage.getItem('timeout_lang') || 'en',
-  unlocked: JSON.parse(localStorage.getItem('timeout_unlocked')||'false'),
+  unlocked: false, // always start locked
   answers: JSON.parse(localStorage.getItem('timeout_answers')||'{}'),
   plan: localStorage.getItem('timeout_plan') || '',
   risk: 0, trust: 100,
@@ -237,13 +237,18 @@ const S = {
 const $ = id => document.getElementById(id);
 const tr = (en,es)=> S.lang==='es'?es:en;
 
+/* persist initial lock */
+save();
+
 /* ================ TOP BAR & GLOBAL ================ */
 $('langSel').value = S.lang;
 $('langSel').addEventListener('change', e=>{
   S.lang = e.target.value; save(); applyLang();
 });
 $('btnExit').onclick = ()=> location.href='https://www.google.com';
-$('btnBack').onclick = ()=> { if(S.stack.length>1){ S.stack.pop(); showPanel(S.stack.at(-1)); } };
+$('btnBack').onclick = ()=> {
+  if(S.stack.length>1){ S.stack.pop(); showPanel(S.stack.at(-1)); }
+};
 
 /* Hide bottom nav until unlocked */
 function setNavVisible(on){ $('bottomNav').style.display = on ? 'flex' : 'none'; }
@@ -636,8 +641,6 @@ function save(){
 }
 
 /* INIT: force locked every load + reliable start on decoy */
-S.unlocked = false;  // ← always start locked (fixes “already unlocked” issue)
-save();
 applyLang();
 drawRes();
 setNavVisible(false);   // keep tabs hidden until PIN
