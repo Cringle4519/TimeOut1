@@ -31,6 +31,8 @@
   .demo-qs button{ display:block; width:100%; text-align:left; margin:.3rem 0; padding:.45rem .6rem; border-radius:.5rem; background:#f3f4f6; }
   .kbd{ font:600 .78rem/1.2 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas; background:#f3f4f6; border:1px solid #e5e7eb; padding:.1rem .35rem; border-radius:.4rem; }
   footer.small{ font-size:.72rem; color:#9ca3af; }
+  /* ensure PIN modal centers when shown */
+  #pinModal{ display:flex; }
 </style>
 </head>
 <body>
@@ -122,16 +124,11 @@
           <h2 id="checkTitle" class="text-lg font-semibold">Check-In</h2>
           <button class="btn btn-ghost" id="askChipCheck" title="Ask support">🎙️ Ask</button>
         </div>
-        <p class="text-sm text-gray-600 mb-2">
-          Answer the questions. Buttons highlight. Risk% updates live. Guidance appears as you answer.
+        <p class="text-sm text-gray-600 mb-2" id="checkSub">
+          Answer 13 quick questions. Buttons highlight. Risk% updates live. You’ll see short guidance for each answer and a brief summary at the end.
         </p>
-
-        <!-- Questions -->
         <div id="questions" class="space-y-2"></div>
-
-        <!-- Per-question guidance appears above; overall synopsis here -->
         <div id="checkFeedback" class="mt-3 space-y-2"></div>
-
         <div class="mt-3 flex gap-2 flex-wrap">
           <button id="btnLoadDemo" class="btn">Load Demo Answers</button>
           <button id="btnSaveCheckin" class="btn btn-primary">Save Check-In</button>
@@ -224,12 +221,12 @@
     <div class="card p-4 w-[92vw] max-w-sm">
       <div class="flex items-center justify-between mb-2">
         <h3 class="font-semibold">Enter PIN</h3>
-        <button id="pinClose" class="btn btn-ghost" type="button">✕</button>
+        <button id="pinClose" class="btn btn-ghost">✕</button>
       </div>
       <input id="pinInput" class="w-full border rounded-lg px-3 py-2" inputmode="numeric" maxlength="8" placeholder="••••">
       <div class="mt-3 flex gap-2">
-        <button id="pinOk" class="btn btn-primary" type="button">Unlock</button>
-        <button id="pinCancel" class="btn" type="button">Cancel</button>
+        <button id="pinOk" class="btn btn-primary">Unlock</button>
+        <button id="pinCancel" class="btn">Cancel</button>
       </div>
     </div>
   </div>
@@ -282,7 +279,7 @@ $('themePick').addEventListener('change', e=>{ core.theme=e.target.value; saveLo
 $('langToggle').onclick = ()=>{
   core.lang = core.lang === 'en' ? 'es' : 'en';
   saveLocal();
-  applyAll();
+  applyAll(); // rebuild labels/questions/resources/ask modal
   const askOpen = !$('askModal').classList.contains('hidden-soft');
   if (askOpen) { $('askModal').dataset.ready=''; ensureAskModal(); }
 };
@@ -302,6 +299,10 @@ function applyLang(){
   $('navPlan').textContent = T('Plan','Plan');
   $('navRes').textContent = T('Resources','Recursos');
   $('navProf').textContent = T('Profile','Perfil');
+  $('checkSub').textContent = T(
+    'Answer 13 quick questions. Buttons highlight. Risk% updates live. You’ll see short guidance for each answer and a brief summary at the end.',
+    'Responde 13 preguntas rápidas. Los botones se resaltan. El porcentaje de riesgo se actualiza en vivo. Verás una guía breve por respuesta y un resumen al final.'
+  );
   const dqs = document.querySelectorAll('#demoQs .demo-qs button');
   if(dqs[0]) dqs[0].textContent = T('Am I safe if I leave now?','¿Estoy seguro/a si me voy ahora?');
   if(dqs[1]) dqs[1].textContent = T('Where can I get help tonight?','¿Dónde puedo obtener ayuda esta noche?');
@@ -343,23 +344,22 @@ $('decoyNotes').addEventListener('input', e=> localStorage.setItem('timeout_deco
 let lpTimer=null;
 function bindLongPress(el){
   const start=()=>{ lpTimer=setTimeout(()=> openPinModal(), 800); };
-  const clear=()=>{ clearTimeout(lpTimer); };
+  const clear=()=>{ clearTimeout(lpTimer); lpTimer=null; };
   el.addEventListener('mousedown',start); el.addEventListener('touchstart',start,{passive:true});
   ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=> el.addEventListener(ev, clear));
 }
 bindLongPress($('appTitle'));
 bindLongPress($('decoyTimerDisplay'));
-function openPinModal(){ $('pinModal').classList.remove('hidden-soft'); $('pinInput').value=''; $('pinInput').focus(); }
-function closePinModal(){
-  clearTimeout(lpTimer);
-  const modal=$('pinModal'); if(!modal) return;
-  modal.classList.add('hidden-soft');
+function openPinModal(){
+  const m=$('pinModal');
+  m.classList.remove('hidden-soft');
+  $('pinInput').value='';
+  setTimeout(()=> $('pinInput').focus(), 10);
 }
+function closePinModal(){ $('pinModal').classList.add('hidden-soft'); }
 $('pinClose').onclick=closePinModal; $('pinCancel').onclick=closePinModal;
 $('pinOk').onclick=tryUnlock;
 $('pinInput').addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
-$('pinModal').addEventListener('click', (e)=>{ if(e.target===$('pinModal')) closePinModal(); });
-document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && !$('pinModal').classList.contains('hidden-soft')) closePinModal(); });
 function tryUnlock(){
   const v = $('pinInput').value.trim();
   if(v===core.pin){ showRealApp(); closePinModal(); }
@@ -423,185 +423,230 @@ document.addEventListener('click', (e)=>{
   }
 });
 
-/* ===================== CHECK-IN: 13 near-clinical questions ===================== */
-const Q13_EN = [
-  {k:'q1',  t:'Are you safe in your current location right now?', w:2, pos:'If you can move to a place with other people (or a locked room), do so. Keep keys, phone, and shoes nearby.' , neg:'Good—still keep exits visible and a charged phone accessible.'},
-  {k:'q2',  t:'Has a partner or family member threatened you in the past 30 days?', w:2, pos:'Record dates/times privately and tell a trusted person. Consider storing notes off this device.', neg:'If threats arise, note details and update your plan.'},
-  {k:'q3',  t:'In the past 30 days, have you experienced any physical harm (pushing, hitting, restraining)?', w:3, pos:'Seek medical care if needed and document injuries safely. Consider urgent support resources.', neg:'If this changes, increase safety steps and seek help.'},
-  {k:'q4',  t:'Has the person ever used or threatened to use a weapon?', w:3, pos:'High concern. Avoid confrontation, prioritize exits, and contact emergency services if unsafe.', neg:'If weapons become involved, treat as urgent risk.'},
-  {k:'q5',  t:'Is the person increasingly controlling (movement, money, phone, or contacts)?', w:2, pos:'Control often escalates. Hide critical info, set a trusted code word, and prepare a go-bag.', neg:'Maintain independence where possible and review finances.'},
-  {k:'q6',  t:'Do you believe the person monitors your phone or accounts?', w:2, pos:'Change passwords from a safe device. Turn off location sharing and review account logins.', neg:'Keep devices locked and review privacy settings.'},
-  {k:'q7',  t:'Has the person forced or coerced sexual activity?', w:3, pos:'This is sexual assault. Consider confidential medical care and advocacy support.', neg:'If this occurs, specialized support is available.'},
-  {k:'q8',  t:'Has the person threatened children, family, pets, or immigration status?', w:3, pos:'Consider safe caregiving backups and legal advice. Tell a trusted adult and document threats.', neg:'If new threats arise, seek help immediately.'},
-  {k:'q9',  t:'Has stalking behavior occurred (following, tracking, constant messages)?', w:2, pos:'Save evidence safely (screenshots, dates). Consider changing routes and devices.', neg:'If it starts, document and seek guidance.'},
-  {k:'q10', t:'Has the frequency or severity of incidents increased recently?', w:2, pos:'Escalation raises risk. Shorten your timeline for leaving and alert trusted contacts.', neg:'Reassess weekly; escalation can be sudden.'},
-  {k:'q11', t:'Do you have a safe place to go for 24–72 hours if needed?', w:1, pos:'List two backup locations and travel options. Keep copies of IDs and essentials.', neg:'Identify at least one safe place—even a public location helps.'},
-  {k:'q12', t:'Do you have someone you can contact quickly who knows a code word?', w:1, pos:'Share a simple code and what it means (call police, pick up kids, etc.).', neg:'Choose one person and agree on a short code word today.'},
-  {k:'q13', t:'Would you like immediate local resources or legal information?', w:1, pos:'Check Resources for hotlines/advocates. They can help build a personalized plan.', neg:'Resources are there anytime—save the numbers now.'}
+/* ===================== CHECK-IN (13 questions + guidance + synopsis) ===================== */
+const QUESTIONS_EN = [
+  "Are you currently safe in your location?",
+  "Has anyone threatened you in the past 30 days?",
+  "Have you experienced physical harm in the past 30 days?",
+  "Does the person have access to your phone or accounts?",
+  "Has anyone prevented you from leaving or restricted your movement?",
+  "Are children or dependents at risk in this situation?",
+  "Do you feel isolated from friends, family, or support?",
+  "Do you want immediate local resources or shelter information?",
+  "Are there weapons in the home (e.g., firearms, knives) or easy access to them?",
+  "Has stalking, monitoring, or unwanted surveillance occurred?",
+  "Is substance use (yours or theirs) increasing tension or danger?",
+  "Has anyone made suicidal or homicidal threats related to the relationship?",
+  "Are you pregnant, recently separated, or experiencing a major life change?"
 ];
-const Q13_ES = [
-  {k:'q1',  t:'¿Estás seguro/a en tu ubicación actual ahora mismo?', w:2, pos:'Si puedes moverte a un lugar con más gente (o una habitación con llave), hazlo. Mantén llaves, teléfono y zapatos cerca.', neg:'Bien—mantén salidas visibles y el teléfono cargado a mano.'},
-  {k:'q2',  t:'¿Una pareja o familiar te ha amenazado en los últimos 30 días?', w:2, pos:'Anota fechas/horas en privado y cuéntaselo a alguien de confianza. Guarda notas fuera de este dispositivo.', neg:'Si aparecen amenazas, anota detalles y actualiza tu plan.'},
-  {k:'q3',  t:'En los últimos 30 días, ¿has sufrido daño físico (empujar, golpear, sujetar)?', w:3, pos:'Busca atención médica si es necesario y documenta lesiones de forma segura. Considera apoyo urgente.', neg:'Si cambia, aumenta medidas de seguridad y busca ayuda.'},
-  {k:'q4',  t:'¿La persona ha usado o amenazado con usar un arma?', w:3, pos:'Alta preocupación. Evita la confrontación, prioriza salidas y llama a emergencias si no estás seguro/a.', neg:'Si aparecen armas, trátalo como riesgo urgente.'},
-  {k:'q5',  t:'¿La persona controla más (movimientos, dinero, teléfono o contactos)?', w:2, pos:'El control suele escalar. Oculta información crítica, define una palabra clave y prepara una bolsa de emergencia.', neg:'Mantén independencia donde sea posible y revisa finanzas.'},
-  {k:'q6',  t:'¿Crees que la persona monitorea tu teléfono o cuentas?', w:2, pos:'Cambia contraseñas desde un dispositivo seguro. Desactiva compartir ubicación y revisa inicios de sesión.', neg:'Mantén bloqueo y revisa privacidad.'},
-  {k:'q7',  t:'¿La persona te ha forzado o coaccionado sexualmente?', w:3, pos:'Es agresión sexual. Considera atención médica confidencial y apoyo de defensoría.', neg:'Si ocurre, hay apoyo especializado.'},
-  {k:'q8',  t:'¿La persona ha amenazado a niños, familia, mascotas o estatus migratorio?', w:3, pos:'Considera cuidadores seguros y asesoría legal. Avísale a un adulto de confianza y documenta amenazas.', neg:'Si aparecen nuevas amenazas, busca ayuda de inmediato.'},
-  {k:'q9',  t:'¿Ha habido acecho (seguir, rastrear, mensajes constantes)?', w:2, pos:'Guarda evidencia de forma segura (capturas, fechas). Considera cambiar rutas y dispositivos.', neg:'Si empieza, documenta y busca orientación.'},
-  {k:'q10', t:'¿Han aumentado la frecuencia o la gravedad de los incidentes recientemente?', w:2, pos:'La escalada aumenta el riesgo. Acorta tu plazo para salir y avisa a contactos.', neg:'Reevalúa cada semana; la escalada puede ser repentina.'},
-  {k:'q11', t:'¿Tienes un lugar seguro para 24–72 horas si fuera necesario?', w:1, pos:'Anota dos lugares alternos y opciones de traslado. Guarda copias de identificaciones y esenciales.', neg:'Identifica al menos un lugar seguro—un lugar público también ayuda.'},
-  {k:'q12', t:'¿Tienes a alguien a quien contactar rápido que sepa una palabra clave?', w:1, pos:'Comparte un código breve y lo que significa (llamar a policía, recoger niños, etc.).', neg:'Elige a una persona y acuerden hoy una palabra clave.'},
-  {k:'q13', t:'¿Quieres recursos locales inmediatos o información legal?', w:1, pos:'Revisa Recursos para líneas de ayuda/abogadas/os. Pueden crear un plan personalizado.', neg:'Los recursos están disponibles siempre—guarda los números ahora.'}
+const QUESTIONS_ES = [
+  "¿Estás seguro/a en el lugar donde te encuentras?",
+  "¿Alguien te ha amenazado en los últimos 30 días?",
+  "¿Has sufrido daño físico en los últimos 30 días?",
+  "¿La persona tiene acceso a tu teléfono o cuentas?",
+  "¿Alguien te ha impedido salir o ha restringido tus movimientos?",
+  "¿Hay niños o dependientes en riesgo en esta situación?",
+  "¿Te sientes aislado/a de amigos, familia o apoyo?",
+  "¿Quieres recursos locales inmediatos o información de albergue?",
+  "¿Hay armas en el hogar (p. ej., armas de fuego, cuchillos) o fácil acceso a ellas?",
+  "¿Has sufrido acecho, monitoreo o vigilancia no deseada?",
+  "¿El consumo de sustancias (tuyo o de la otra persona) aumenta la tensión o el peligro?",
+  "¿Alguien ha hecho amenazas suicidas u homicidas relacionadas con la relación?",
+  "¿Estás embarazada, recientemente separado/a o con un gran cambio de vida?"
 ];
-function getQ(){ return core.lang==='es'? Q13_ES : Q13_EN; }
+function getQuestions(){ return core.lang==='es' ? QUESTIONS_ES : QUESTIONS_EN; }
 
-function qRow(q, i){
-  const qid = q.k;
+// weights per question for risk %
+const RISK_WEIGHTS = { q1:2,q2:2,q3:3,q4:1,q5:3,q6:2,q7:1,q8:1,q9:3,q10:2,q11:1,q12:2,q13:1 };
+const MAX_RISK = Object.values(RISK_WEIGHTS).reduce((a,b)=>a+b,0);
+
+function qRow(i, text){
+  const qid = 'q'+(i+1);
   const yesSel = core.answers[qid]==='yes' ? 'selected' : '';
   const noSel  = core.answers[qid]==='no'  ? 'selected' : '';
   const yesLab = T('Yes','Sí');
   const noLab  = T('No','No');
-  const helpId = `help_${qid}`;
   return `
     <div class="card p-3">
-      <div class="mb-2 text-sm">${i+1}. ${q.t}</div>
+      <div class="mb-2 text-sm">${i+1}. ${text}</div>
       <div class="flex gap-2">
         <button class="btn yn-btn ${yesSel}" data-q="${qid}" data-v="yes">${yesLab}</button>
         <button class="btn yn-btn ${noSel}"  data-q="${qid}" data-v="no">${noLab}</button>
       </div>
-      <div id="${helpId}" class="text-xs text-gray-600 mt-2"></div>
     </div>`;
 }
 function buildQuestions(){
   const box = $('questions'); if(!box) return;
   box.innerHTML = '';
-  getQ().forEach((q,i)=> box.insertAdjacentHTML('beforeend', qRow(q,i)));
-  // repopulate guidance if answers already exist
-  getQ().forEach(q=>{
-    const a = core.answers[q.k];
-    if(a) writeGuidance(q.k, a==='yes'? q.pos: q.neg);
-  });
-}
-function writeGuidance(qid, text){
-  const el = $('help_'+qid);
-  if(el){ el.textContent = text; }
+  getQuestions().forEach((q,i)=>{ box.insertAdjacentHTML('beforeend', qRow(i,q)); });
 }
 function computeRisk(){
-  let total=0, max=0;
-  const arr = getQ();
-  arr.forEach(q=>{
-    max += q.w;
-    // risk points: most "yes" indicate risk except q1,q11,q12,q13
-    // Treat risky when (q1=='no') OR (yes for q2..q10) ; (q11/q12/q13 yes reduce risk)
-    const a = core.answers[q.k];
-    if(q.k==='q1'){
-      if(a==='no') total += q.w; // not safe now
-    } else if(['q11','q12','q13'].includes(q.k)){
-      if(a==='no') total += Math.max(1, q.w-0); // lacking buffers
-    } else {
-      if(a==='yes') total += q.w;
-    }
-  });
-  const pct = Math.round((total/ (max+3)) * 100); // +3 softens to avoid pegging at 100 on sparse answers
-  core.risk = Math.max(0, Math.min(100, pct));
-  core.trust = 100 - core.risk;
+  let score = 0; const a = core.answers;
+  // q1 'no' is unsafe -> counts, others 'yes' count
+  if(a.q1==='no') score += RISK_WEIGHTS.q1;
+  ['q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13'].forEach(k=>{ if(a[k]==='yes') score += RISK_WEIGHTS[k]; });
+  const pct = Math.round((score/MAX_RISK)*100);
+  core.risk = pct; core.trust = Math.max(0, 100 - pct);
+  return {score};
 }
-function overallSynopsis(){
-  // Build 2–3 short paragraphs tailored to risk band
-  const r = core.risk;
-  const a = core.answers;
-  const Q = getQ().reduce((m,q)=>{ m[q.k]=q; return m; },{});
-  const P = (en, es)=> T(en, es);
 
-  const bits = [];
-
-  if(r >= 60){
-    bits.push(P(
-      "Your answers suggest a high and potentially escalating risk. Focus first on immediate safety: keep keys, phone, and shoes ready; identify the fastest exit; and move toward people when you can.",
-      "Tus respuestas sugieren un riesgo alto y potencialmente en aumento. Prioriza la seguridad inmediata: ten listas llaves, teléfono y zapatos; identifica la salida más rápida; y muévete hacia lugares con gente cuando sea posible."
-    ));
-    if(a.q4==='yes') bits.push(P(
-      "Because a weapon has been used or threatened, avoid confrontation and consider contacting emergency services. If you must leave, leave quickly without collecting items.",
-      "Como se ha usado o amenazado con un arma, evita la confrontación y considera contactar a emergencias. Si debes salir, hazlo rápido sin recoger objetos."
-    ));
-    bits.push(P(
-      "Document incidents privately and off-device when possible, and tell a trusted person using a simple code word. A confidential advocate can help you plan each step.",
-      "Documenta incidentes en privado y fuera del dispositivo cuando sea posible, y avisa a alguien de confianza usando una palabra clave. Una persona defensora puede ayudarte a planear cada paso."
-    ));
-  } else if (r >= 30){
-    bits.push(P(
-      "Your answers indicate a moderate level of concern. Strengthen buffers now: set a code word with one trusted person, prepare a small go-bag, and map two quick exits.",
-      "Tus respuestas indican un nivel de preocupación moderado. Refuerza protecciones: define una palabra clave con alguien de confianza, prepara una bolsa de emergencia y traza dos salidas rápidas."
-    ));
-    if(a.q6==='yes') bits.push(P(
-      "Because phone or account monitoring is a concern, change passwords from a safe device and review location sharing settings.",
-      "Dado que te preocupa la vigilancia del teléfono o cuentas, cambia contraseñas desde un dispositivo seguro y revisa los ajustes de ubicación."
-    ));
-    bits.push(P(
-      "Check Resources for hotlines or local advocates who can tailor a plan to you. Small steps taken early can prevent escalation.",
-      "Revisa Recursos para líneas de ayuda o servicios locales que puedan personalizar un plan para ti. Pasos pequeños a tiempo ayudan a evitar la escalada."
-    ));
-  } else {
-    bits.push(P(
-      "Your answers reflect low reported risk right now. Keep basic safety habits: charged phone, exits in view, and one person who knows a code word.",
-      "Tus respuestas reflejan un riesgo bajo en este momento. Mantén hábitos básicos: teléfono cargado, salidas a la vista y una persona que conozca una palabra clave."
-    ));
-    bits.push(P(
-      "Review your plan weekly and store key numbers in a safe place. If things change, you can update this check-in anytime.",
-      "Revisa tu plan semanalmente y guarda números clave en un lugar seguro. Si algo cambia, puedes actualizar esta autoevaluación en cualquier momento."
-    ));
-    bits.push(P(
-      "Use this time-out to think about resources nearby and what you would take if you needed to leave quickly.",
-      "Usa este ‘time-out’ para pensar en recursos cercanos y qué llevarías si necesitaras salir rápidamente."
-    ));
-  }
-
-  // Add short legal/clinical disclaimer
-  bits.push(P(
-    "Guidance here is general and not a guarantee of safety or a substitute for professional care. If you’re in immediate danger, call local emergency services.",
-    "Esta orientación es general y no garantiza seguridad ni reemplaza la atención profesional. Si estás en peligro inmediato, llama a emergencias locales."
-  ));
-  return bits.map(t=>`<div class="card p-3 text-sm">${t}</div>`).join('');
+// guidance per answer (2–3 sentences)
+function adviceFor(qk, val){
+  const en = {
+    q1: val==='no'
+      ? "If you don't feel safe where you are, move to a public place if possible and keep a phone accessible. Let a trusted person know your location and consider contacting a hotline for immediate planning."
+      : "If you feel safe right now, keep essentials ready and check exits and transport. Revisit your plan if anything changes suddenly.",
+    q2: val==='yes'
+      ? "Threats can escalate. Document dates and exact words in a private place and tell someone you trust. Consider saving messages or voicemails off the device if safe."
+      : "No recent threats reported. Stay observant and update your plan if patterns change.",
+    q3: val==='yes'
+      ? "Recent physical harm increases risk. Seek medical care if needed and consider photographing injuries with date notes stored safely off-device. A hotline or advocate can help with options."
+      : "No recent physical harm reported. Keep your go-bag and supports ready.",
+    q4: val==='yes'
+      ? "If they may access your phone, reduce sensitive content, use a strong passcode, and review account logins. Consider separate devices or web sessions for planning."
+      : "Good—keep device security up to date and avoid sharing passcodes.",
+    q5: val==='yes'
+      ? "Blocking your movement is a serious safety concern. Identify safe exits and times, and arrange a check-in with a trusted person if you plan to leave."
+      : "No movement restriction reported. Keep transportation options identified.",
+    q6: val==='yes'
+      ? "Children's safety comes first. Set a meeting point, identify alternate caregivers, and gather needed documents discreetly."
+      : "No dependents at risk reported. Reassess if children’s exposure changes.",
+    q7: val==='yes'
+      ? "Isolation increases danger. Re-establish one or two safe connections and agree on a code word for help."
+      : "Great—maintain at least one trusted contact and regular check-ins.",
+    q8: val==='yes'
+      ? "Shelter and local services can provide immediate safety and planning. 211 can help you find nearby options, and hotlines can coordinate discreetly."
+      : "If you don’t need resources now, keep a short list handy in case things shift.",
+    q9: val==='yes'
+      ? "Weapons raise lethality risk. Increase distance from weapons, plan exits that avoid storage locations, and consider temporary safe storage where lawful."
+      : "No weapons reported. Keep it that way if possible and stay aware of changes.",
+    q10: val==='yes'
+      ? "Monitoring or stalking is a serious risk factor. Vary routines, limit location sharing, and consider a device and account safety review."
+      : "No monitoring reported. Keep location and device settings locked down.",
+    q11: val==='yes'
+      ? "Substance use can lower control and raise volatility. Plan around known high-risk times and avoid confrontations during use."
+      : "No substance-related escalation noted. Keep patterns in mind.",
+    q12: val==='yes'
+      ? "Suicidal or homicidal threats require urgent attention. Consider contacting crisis services and creating a high-alert plan with trusted supports."
+      : "No such threats reported. If any appear, raise your alert level quickly.",
+    q13: val==='yes'
+      ? "Pregnancy, recent separation, or major change can increase danger. Strengthen your plan, identify safe places, and keep documents and essentials close."
+      : "No major change reported. Reassess if your situation shifts."
+  };
+  const es = {
+    q1: val==='no'
+      ? "Si no te sientes seguro/a donde estás, muévete a un lugar público si es posible y mantén el teléfono accesible. Informa a alguien de confianza tu ubicación y considera llamar a una línea de ayuda para planificar de inmediato."
+      : "Si te sientes seguro/a ahora, ten lo esencial listo y revisa salidas y transporte. Revisa tu plan si algo cambia de repente.",
+    q2: val==='yes'
+      ? "Las amenazas pueden escalar. Anota fechas y palabras exactas en un lugar privado y cuéntaselo a alguien de confianza. Considera guardar mensajes fuera del dispositivo si es seguro."
+      : "Sin amenazas recientes. Mantente atento/a y actualiza tu plan si cambian los patrones.",
+    q3: val==='yes'
+      ? "Daño físico reciente aumenta el riesgo. Busca atención médica si es necesario y considera fotografiar lesiones con fecha guardadas de forma segura fuera del dispositivo. Una línea de ayuda o un/a defensor/a puede orientar."
+      : "Sin daño físico reciente. Mantén lista tu bolsa de emergencia y apoyos.",
+    q4: val==='yes'
+      ? "Si pueden acceder a tu teléfono, reduce contenido sensible, usa un código fuerte y revisa inicios de sesión. Considera dispositivos o sesiones web separadas para planificar."
+      : "Bien—mantén la seguridad del dispositivo y evita compartir códigos.",
+    q5: val==='yes'
+      ? "Restringir tus movimientos es grave. Identifica salidas y horarios seguros y acuerda un registro con alguien de confianza si planeas irte."
+      : "Sin restricción de movimiento. Ten opciones de transporte identificadas.",
+    q6: val==='yes'
+      ? "La seguridad de los niños es prioritaria. Define un punto de encuentro, cuidadores alternos e identifica documentos necesarios de forma discreta."
+      : "Sin dependientes en riesgo. Reevalúa si cambia su exposición.",
+    q7: val==='yes'
+      ? "La aislación aumenta el peligro. Reconecta con una o dos personas seguras y acuerden una palabra clave para pedir ayuda."
+      : "Bien—mantén al menos un contacto de confianza y registros regulares.",
+    q8: val==='yes'
+      ? "Los albergues y servicios locales ofrecen seguridad inmediata y planificación. 211 puede ayudarte a encontrar opciones cercanas y las líneas de ayuda coordinan de forma discreta."
+      : "Si no necesitas recursos ahora, guarda una lista corta por si la situación cambia.",
+    q9: val==='yes'
+      ? "Las armas elevan el riesgo de letalidad. Mantén distancia, planea salidas que eviten esos lugares y considera guardado temporal seguro donde sea legal."
+      : "Sin armas. Mantén así y permanece atento/a a cambios.",
+    q10: val==='yes'
+      ? "El acecho o monitoreo es un factor serio. Varía rutinas, limita compartir ubicación y considera una revisión de dispositivos y cuentas."
+      : "Sin monitoreo. Mantén bloqueados ubicación y ajustes del dispositivo.",
+    q11: val==='yes'
+      ? "El consumo de sustancias puede aumentar la volatilidad. Planifica en horarios de mayor riesgo y evita confrontaciones durante el consumo."
+      : "Sin escalamiento por sustancias. Observa patrones.",
+    q12: val==='yes'
+      ? "Amenazas suicidas u homicidas requieren atención urgente. Considera contactar servicios de crisis y crear un plan de alta alerta con apoyos."
+      : "Sin esas amenazas. Si aparecen, aumenta tu nivel de alerta.",
+    q13: val==='yes'
+      ? "Embarazo, separación reciente o cambios grandes pueden aumentar el peligro. Fortalece tu plan, define lugares seguros y ten documentos y esenciales a mano."
+      : "Sin cambios mayores. Reevalúa si tu situación se modifica."
+  };
+  const bank = core.lang==='es' ? es : en;
+  return bank[qk];
 }
+
 function updateScoresAndFeedback(){
-  computeRisk();
+  const {score} = computeRisk();
   $('riskPct').textContent = core.risk + '%';
   $('trustPct').textContent = core.trust + '%';
-
   const fb = $('checkFeedback'); if(!fb) return;
-  fb.innerHTML = overallSynopsis();
+  fb.innerHTML = '';
+
+  // per-answer guidance
+  for(let i=1;i<=13;i++){
+    const qk = 'q'+i;
+    const val = core.answers[qk];
+    if(!val) continue;
+    const text = adviceFor(qk, val);
+    fb.insertAdjacentHTML('beforeend', `<div class="card p-3 text-sm">${text}</div>`);
+  }
+
+  // 2-paragraph synopsis
+  let para1='', para2='';
+  if(core.risk>=60){
+    para1 = T(
+      "Your answers suggest a high level of risk at this time. Prioritize immediate safety: consider public settings, quick exits, and contacting a hotline or local shelter for rapid planning. Keeping essentials ready (ID, keys, cash, meds, phone charger) can make movement safer and faster.",
+      "Tus respuestas sugieren un nivel de riesgo alto en este momento. Prioriza la seguridad inmediata: considera lugares públicos, salidas rápidas y contactar una línea de ayuda o albergue local para planificar con rapidez. Tener lo esencial listo (ID, llaves, dinero, medicinas, cargador) facilita moverte con más seguridad."
+    );
+    para2 = T(
+      "If any weapons, recent assaults, or threats are present, raise your alert level and avoid confrontations. Share a code word with a trusted contact, schedule check-ins, and review exits and transport. Professional support can help you build options that fit your situation.",
+      "Si hay armas, agresiones recientes o amenazas, eleva tu nivel de alerta y evita confrontaciones. Comparte una palabra clave con alguien de confianza, programa registros y revisa salidas y transporte. El apoyo profesional puede ayudarte a construir opciones adaptadas a tu situación."
+    );
+  } else if(core.risk>=30){
+    para1 = T(
+      "Your answers indicate a moderate level of risk. Strengthen your safety plan: identify safe places, keep a go-bag discreetly prepared, and confirm a trusted person for check-ins.",
+      "Tus respuestas indican un nivel de riesgo moderado. Refuerza tu plan de seguridad: identifica lugares seguros, prepara discretamente una bolsa de emergencia y confirma una persona de confianza para registros."
+    );
+    para2 = T(
+      "Reduce digital exposure (strong passcodes, minimal sensitive content) and vary routines. If risk rises, switch to your high-alert plan and contact local support services.",
+      "Reduce la exposición digital (códigos fuertes, contenido sensible mínimo) y varía tus rutinas. Si el riesgo aumenta, cambia a tu plan de alta alerta y contacta servicios locales de apoyo."
+    );
+  } else {
+    para1 = T(
+      "Your answers reflect a lower reported risk right now. Keep your plan current, maintain at least one trusted connection, and review exits and transport in case conditions change quickly.",
+      "Tus respuestas reflejan un riesgo reportado bajo por ahora. Mantén tu plan actualizado, conserva al menos una conexión de confianza y revisa salidas y transporte por si las condiciones cambian rápido."
+    );
+    para2 = T(
+      "Use this time to organize documents, strengthen device security, and decide in advance whom you would contact if you needed help on short notice.",
+      "Usa este tiempo para organizar documentos, reforzar la seguridad del dispositivo y decidir con antelación a quién contactarías si necesitaras ayuda con poco aviso."
+    );
+  }
+  fb.insertAdjacentHTML('beforeend', `<div class="card p-3 text-sm"><p class="mb-2">${para1}</p><p>${para2}</p></div>`);
 }
 
-// Answer handling (write guidance + recompute)
 document.addEventListener('click', (e)=>{
   const b = e.target.closest('.yn-btn'); if(!b) return;
   const qid = b.dataset.q; const val=b.dataset.v; if(!qid||!val) return;
   core.answers[qid] = val; saveLocal();
-
-  // button highlight swap
   document.querySelectorAll(`.yn-btn[data-q="${qid}"]`).forEach(x=>x.classList.remove('selected'));
-  b.classList.add('selected');
-
-  // per-question guidance
-  const qObj = getQ().find(q=>q.k===qid);
-  if(qObj){ writeGuidance(qid, val==='yes'? qObj.pos: qObj.neg); }
-
-  updateScoresAndFeedback();
+  b.classList.add('selected'); updateScoresAndFeedback();
 });
 
-// Demo fill
+// demo answers across 13 questions
 $('btnLoadDemo').onclick=()=>{
   core.answers = {
-    q1:'no', q2:'yes', q3:'yes', q4:'no', q5:'yes',
-    q6:'yes', q7:'no', q8:'no', q9:'yes', q10:'yes',
+    q1:'no',  q2:'yes', q3:'yes', q4:'yes', q5:'no',
+    q6:'no',  q7:'yes', q8:'yes', q9:'no', q10:'yes',
     q11:'no', q12:'no', q13:'yes'
   };
   saveLocal(); buildQuestions(); updateScoresAndFeedback();
 };
 $('btnSaveCheckin').onclick=()=>{ saveLocal(); toast(T('Check-In saved.','Autoevaluación guardada.')); };
 
-/* ===================== SAFETY PLAN (unchanged) ===================== */
+/* ===================== SAFETY PLAN (unchanged from your working build) ===================== */
 function renderPlans(){
   const list = $('plansList'); if(!list) return;
   list.innerHTML='';
@@ -639,11 +684,10 @@ let qpGuard=false;
 $('btnQuickGenerate').onclick=()=>{
   if(qpGuard) return; qpGuard=true; setTimeout(()=>qpGuard=false,600);
   const a=core.answers; const steps=[];
-  if(a.q6==='yes') steps.push(T('Change passwords from a safe device; review location sharing.','Cambia contraseñas desde un dispositivo seguro; revisa compartir ubicación.'));
-  if(a.q2==='yes' || a.q3==='yes' || a.q9==='yes') steps.push(T('Document incidents safely and tell a trusted person.','Documenta incidentes de forma segura y avisa a alguien de confianza.'));
-  if(a.q1==='no') steps.push(T('Move to a public place; call a hotline or trusted contact.','Muévete a un lugar público; llama a una línea de ayuda o contacto de confianza.'));
-  if(a.q11==='no') steps.push(T('Identify one safe place for 24–72 hours.','Identifica un lugar seguro para 24–72 horas.'));
-  if(a.q12==='no') steps.push(T('Choose one person and agree on a code word.','Elige a una persona y acuerden una palabra clave.'));
+  if(a.q4==='yes') steps.push(T('Minimize sensitive content on phone; enable screen lock.','Minimiza contenido sensible en el teléfono; activa el bloqueo de pantalla.'));
+  if(a.q2==='yes' || a.q3==='yes') steps.push(T('Document dates/times privately; tell a trusted person.','Documenta fechas/horas en privado; avisa a alguien de confianza.'));
+  if(a.q1==='no') steps.push(T('Move to public place; call a hotline or trusted person.','Muévete a un lugar público; llama a una línea de ayuda o a alguien de confianza.'));
+  if(a.q6==='yes') steps.push(T('Set meeting point and alternate caregiver for children.','Define punto de encuentro y cuidador alterno para los niños.'));
   if(steps.length===0) steps.push(T('Share location with a trusted person; review exits and transport.','Comparte ubicación con alguien de confianza; revisa salidas y transporte.'));
   core.plans.push({title:T('Quick Plan','Plan rápido'), steps}); saveLocal(); renderPlans(); toast(T('Quick plan created.','Plan rápido creado.'));
 };
@@ -730,54 +774,109 @@ $('btnExport').onclick=()=>{
     theme:core.theme,
     app:"TimeOut", version:"v1.3.5"
   };
-  const blob = new Blob/* ===================== PIN FIX ===================== */
-function tryUnlock(){
-  const v = $('pinInput').value.trim();
-  if(v === core.pin){
-    showRealApp();
-    closePinModal();
-  } else {
-    toast(T('Wrong PIN','PIN incorrecto'));
-    $('pinInput').value = '';   // clear input
-    $('pinInput').focus();      // refocus for retry
-  }
-}
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='timeout_export.json'; a.click(); URL.revokeObjectURL(a.href);
+};
 
-/* ===================== PLACEHOLDER: SUPPORT PANEL ===================== */
-function renderSupportPlaceholder(){
-  const ask = $('askModal');
-  if(!ask) return;
-  ask.innerHTML = `
+/* ===================== ASK SUPPORT (unchanged demo) ===================== */
+function ensureAskModal(){
+  const host = $('askModal');
+  if(host.dataset.ready==='1') return true;
+  host.dataset.ready='1';
+  host.innerHTML = `
     <div class="card p-4 w-[92vw] max-w-md mx-auto">
       <div class="flex items-center justify-between mb-2">
-        <div class="font-semibold">${T('Professional Support','Apoyo profesional')}</div>
+        <div class="font-semibold">${T('Ask Support','Chat de apoyo')}</div>
         <button id="askClose" class="btn btn-ghost">✕</button>
       </div>
-      <p class="text-sm text-gray-600 mb-2">
-        ${T(
-          'This feature is reserved for professional partners. When activated, a live clinic or support organization will appear here. Contact us if your clinic or service would like to provide help through TimeOut.',
-          'Esta función está reservada para socios profesionales. Cuando esté activada, aquí aparecerá una clínica u organización de apoyo en vivo. Contáctanos si tu clínica o servicio desea brindar ayuda a través de TimeOut.'
-        )}
-      </p>
-      <button id="askClose2" class="btn btn-primary">${T('OK','Entiendo')}</button>
-    </div>
-  `;
-  $('askClose').onclick = closeAsk;
-  $('askClose2').onclick = closeAsk;
+      <div class="text-xs text-gray-600 mb-2">${T('General guidance only; not therapy or emergency. If in danger, call emergency services.','Orientación general; no es terapia ni emergencia. Si hay peligro, llama a emergencias.')}</div>
+      <div id="askOut" class="space-y-2 max-h-[42vh] overflow-auto"></div>
+      <div class="mt-3 flex gap-2">
+        <input id="askInput" class="flex-1 border rounded-lg px-3 py-2" placeholder="${T('Say or type a question…','Di o escribe una pregunta…')}">
+        <button id="askMic" class="btn btn-ghost" title="${T('Speak','Hablar')}">🎤</button>
+        <button id="askSend" class="btn btn-primary">${T('Send','Enviar')}</button>
+      </div>
+      <div class="mt-3 text-xs text-gray-600">${T('Try saying:','Prueba decir:')}
+        <span class="kbd">${T('Where can I get help tonight?','¿Dónde puedo obtener ayuda esta noche?')}</span>
+        <span class="kbd">${T('What should I put in my go-bag?','¿Qué pongo en mi bolsa?')}</span>
+      </div>
+    </div>`;
+  function bubble(who,text){
+    const el=document.createElement('div'); el.className='card p-2'; el.style.background=who==='user'?'#e8f7ee':'#fff';
+    el.innerHTML=`<div class="text-xs text-gray-500">${who==='user'?T('You','Tú'):T('Support','Apoyo')}</div><div class="mt-1">${text}</div>`;
+    $('askOut').appendChild(el); $('askOut').scrollTop = $('askOut').scrollHeight;
+  }
+  function reply(q){
+    const a = core.answers, s=(q||'').toLowerCase();
+    if(/go-?bag|bolsa/.test(s)) return T('Pack ID, keys, cash, meds, a charger, and spare clothes. Hide it or leave it with someone you trust.','Empaca identificación, llaves, dinero, medicinas, cargador y ropa extra. Escóndela o déjala con alguien de confianza.');
+    if(/help|ayuda|hotline|línea/.test(s)) return T('If at risk, call emergency. See Resources for hotlines; 211 can connect you locally.','Si hay riesgo, llama a emergencias. En Recursos hay líneas de ayuda; 211 conecta con servicios locales.');
+    if(/safe|segur|leave|salir/.test(s)) return T('Leaving can be risky — plan exits, keep essentials ready, and tell someone you trust when you go.','Salir puede ser riesgoso — planea salidas, ten lo esencial listo y avisa a alguien de confianza cuando salgas.');
+    if(/phone|privac|privacy|tel[eé]fono/.test(s)) return a.q4==='yes'? T('Limit sensitive content, use a strong passcode, and consider quick-wipe options.','Limita contenido sensible, usa un código fuerte y considera opciones de borrado rápido.'): T('Use screen lock and review accounts/sign-ins.','Usa bloqueo de pantalla y revisa cuentas/accesos.');
+    if(/threat|amenaz/.test(s)) return a.q2==='yes'? T('Record dates/times privately and tell a trusted person. Consider documenting safely off-device.','Registra fechas/horas en privado y cuéntaselo a alguien de confianza. Considera documentar fuera del teléfono.'): T('Monitor and update your plan if things change.','Monitorea y actualiza tu plan si algo cambia.');
+    return T('Thanks for sharing. Small step: review your plan or add a trusted contact.','Gracias por compartir. Paso pequeño: revisa tu plan o agrega un contacto de confianza.');
+  }
+  let _micBusy = false;
+  document.addEventListener('click', (e)=>{
+    if (e.target && e.target.id === 'askMic') _micBusy = false;
+  });
+  function send(){ const i=$('askInput'); const q=i.value.trim(); if(!q) return; bubble('user',q); i.value=''; setTimeout(()=> bubble('bot', reply(q)), 300); }
+  $('askSend').onclick=send; $('askInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); send(); } });
+  $('askClose').onclick=closeAsk;
+  $('askMic').onclick=()=>{
+    if (_micBusy) return; _micBusy = true;
+    try{ const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) throw 0;
+      const rec=new SR(); rec.lang=(core.lang==='es'?'es-ES':'en-US'); rec.onresult=e=>{ const t=e.results[0][0].transcript; $('askInput').value=t; send(); }; rec.start();
+    }catch{ alert(T('Voice not supported on this device.','Voz no soportada en este dispositivo.')); }
+  };
+  return true;
 }
+function openAsk(){ ensureAskModal(); $('askModal').classList.remove('hidden-soft'); $('askInput')?.focus(); document.body.style.overflow='hidden'; }
+function closeAsk(){ $('askModal').classList.add('hidden-soft'); document.body.style.overflow='auto'; }
+$('askFab').onclick=openAsk; $('askChipCheck').onclick=openAsk; $('askChipPlan').onclick=openAsk;
 
-// Override openAsk to always show placeholder
-function openAsk(){
-  renderSupportPlaceholder();
-  $('askModal').classList.remove('hidden-soft');
-  document.body.style.overflow='hidden';
+/* ===================== BACK BUTTON (unchanged) ===================== */
+$('btnBack').onclick=()=>{
+  closeAsk();
+  setTab('home');
+  window.scrollTo(0,0);
+};
+
+/* ===================== INIT & APPLY ===================== */
+function applyAll(){
+  applyTheme();
+  applyLang();
+  buildQuestions();
+  updateScoresAndFeedback();
+  renderPlans();
+  renderResources();
+  applySafetyAckVisibility();
 }
-function closeAsk(){
-  $('askModal').classList.add('hidden-soft');
-  document.body.style.overflow='auto';
+function init(){
+  tickClock(); (function(){ $('hdrWeather').textContent = '⛅'; })();
+  seedResourcesIfEmpty();
+  if(!Array.isArray(core.plans) || core.plans.length===0){
+    core.plans=[{title:T('Grab & Go Bag','Bolsa de emergencia'), steps:[T('ID & documents','Identificación y documentos'),T('Keys & cash','Llaves y efectivo'),T('Medications','Medicamentos'),T('Change of clothes','Cambio de ropa'),T('Backup phone numbers','Números de teléfono de respaldo')]}];
+    saveLocal();
+  }
+  applyAll();
 }
-$('askFab').onclick = openAsk;
-$('askChipCheck').onclick = openAsk;
-$('askChipPlan').onclick = openAsk;</script>
+init();
+
+/* ===================== VISIBILITY AUTO-LOCK (dup safe) ===================== */
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) lockToDecoy(); });
+
+/* ===================== QUICK EXIT / PANIC (duplicate guards) ===================== */
+let qeGuard=false, pcGuard=false;
+document.getElementById('btnQuickExit').onclick=()=>{ if(qeGuard) return; qeGuard=true; setTimeout(()=>qeGuard=false,500); location.href='https://www.google.com/'; };
+document.getElementById('btnPanic').onclick=()=>{ if(pcGuard) return; pcGuard=true; setTimeout(()=>pcGuard=false,700);
+  localStorage.removeItem('timeout_profile_name');
+  localStorage.removeItem('timeout_answers');
+  localStorage.removeItem('timeout_resources');
+  localStorage.removeItem('timeout_plans');
+  localStorage.removeItem('timeout_theme');
+  core.name='Anonymous'; core.answers={}; core.resources=[]; core.plans=[]; core.theme='blue';
+  saveLocal(); applyTheme(); lockToDecoy();
+};
+</script>
 </body>
 </html>
